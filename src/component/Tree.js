@@ -8,8 +8,10 @@ function Tree(contents) {
 	this.root = new Node(contents);
 }
 
+var PADDING = 50;
+
 /**
- * Performs a few initialization operations
+ * Sets the x and y positions of the nodes if they are not already present
  * <ul>
  *     <li>Adds x and y positions to nodes if they do not
  *     already have any.</li>
@@ -20,7 +22,7 @@ Tree.prototype.initialize = function() {
 	if(currNode != null) {
 		traverse(currNode, function(node, level, index, parent) {
 			if(!node.hasOwnProperty('x'))
-				node.x = level * 110;
+				node.x = level * 150;
 			if(!node.hasOwnProperty('y'))
 				if(level === 0) {
 					node.y = 0;
@@ -28,7 +30,7 @@ Tree.prototype.initialize = function() {
 					if(parent.children.length === 1)
 						node.y = 0;
 					else
-						node.y = (index / (parent.children.length-1)) * 70;
+						node.y = index  * node.rect.height.baseVal.value + PADDING * (index / parent.children.length);
 				}
 		});
 	}
@@ -62,15 +64,18 @@ function traverse(node, func, level, index, parent) {
  * @param index The index of the node, undefined if this is the root.
  * @param parent The parent of the node, undefined if this is the root.
  */
-Tree.prototype.traverse = function(func, level, index, parent) {
-	traverse(this.root, func, level, index, parent);
+Tree.prototype.traverse = function(func) {
+	traverse(this.root, func);
 }
 
 /**
  * Internal node data structure, used by tree.
  */
 function Node(contents) {
-	this.contents = contents;
+	if(contents === undefined)
+		this.contents = "";
+	else
+		this.contents = contents;
 	this.children = [];
 }
 
@@ -79,7 +84,9 @@ function Node(contents) {
  * @param contents the contents of the child to add to the current node.
  */
 Node.prototype.addChild = function(contents) {
-	this.children.push(new Node(contents));
+	var newNode = new Node(contents);
+	this.children.push(newNode);
+	return newNode;
 }
 
 /**

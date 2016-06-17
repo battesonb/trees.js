@@ -100,3 +100,5 @@ Canvas.prototype.drawTree = function(tree) {
 }
 
 module.exports = Canvas;
+
+// Will most likely abandon canvas for webgl, or at least do it after webgl.
