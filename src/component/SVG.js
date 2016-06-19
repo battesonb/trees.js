@@ -48,7 +48,7 @@ function SVG(id, options) {
 
 /**
  * Sets the current anchor of the tree to the given value
- * @param anchor The options are 'parent' and 'none'. Default is 'none'.
+ * @param anchor The options are 'children' and 'none'. Default is 'none'.
  */
 SVG.prototype.setAnchor = function(anchor) {
 	this.anchor = anchor;
@@ -358,11 +358,41 @@ SVG.prototype.clear = function() {
 };
 
 /**
+ * Updates the colours of a selected node.
+ * @param svg A reference to the SVG data structure
+ * @param node The node within the SVG that is selected.
+ * @param options
+ * <ul>
+ *     <li>fill - fill colour of the selected node, default is #33DD33</li>
+ *     <li>stroke - stroke colour of the selected node, default is #11BB11</li>
+ * </ul>
+ */
+function updateSelectedNode(svg, node, options) {
+	if(svg.selectedNode) {
+		svg.selectedNode.rect.style.fill = svg.current.fill;
+		svg.selectedNode.rect.style.stroke = svg.current.stroke;
+	}
+	svg.selectedNode = node;
+	svg.current.fill = node.rect.style.fill;
+	svg.current.stroke = node.rect.style.stroke;
+	if(!options)
+		options = {};
+	if(options.fill)
+		svg.selectedNode.rect.style.fill = options.fill;
+	else
+		svg.selectedNode.rect.style.fill = '#33DD33';
+	if(options.stroke)
+		svg.selectedNode.rect.style.stroke = options.strokea;
+	else
+		svg.selectedNode.rect.style.stroke = '#11BB11';
+}
+
+/**
  * Clears the SVG and then draws a tree.
  * @param root the node of the tree to traverse.
  * @param options
  * <ul>
- *     <li>anchor - The anchor of the children when dragging a node. Options are 'none' and 'parent'. Default is 'none'</li>
+ *     <li>anchor - The anchor of the children when dragging a node. Options are 'none' and 'children'. Default is 'none'</li>
  *     <li>fill - The fill color of regular nodes</li>
  *     <li>stroke - The stroke color of regular node</li>
  *     <li>lineType - The type of line to connect nodes withm. Options are 'bezier' and 'line'. Default is 'line'.</li>
@@ -372,15 +402,38 @@ SVG.prototype.clear = function() {
  */
 SVG.prototype.drawTree = function(root, options) {
 	var self = this;
+	self.selectedNode = null;
 	if(!options)
 		options = {};
+
+	self.current = {};
+	self.defaults = {};
+
+	if(options.fill)
+		self.defaults.fill = options.fill;
+	else
+		self.defaults.fill = '#BBDDFF';
+
+	if(options.stroke)
+		self.defaults.stroke = options.stroke;
+	else
+		self.defaults.stroke = '#88AADD';
+
+	if(options.rootFill)
+		self.defaults.rootFill = options.rootFill;
+	else
+		self.defaults.rootFill = '#FF6666';
+
+	if(options.rootStroke)
+		self.defaults.rootStroke = options.rootStroke;
+	else
+		self.defaults.rootStroke = '#DD2222';
+
 
 	if(self.clearable)
 		self.clear();
 	var tree = new Tree(root);
 
-	var fill;
-	var stroke;
 	tree.traverse(function(node, level, index, parent) {
 		if(node.contents) {
 			var text = self.addText(0, 0, node.contents);
@@ -388,36 +441,16 @@ SVG.prototype.drawTree = function(root, options) {
 		}		
 
 		if(!parent) {
-			if (options.rootFill)
-				fill = options.rootFill;
-			else
-				fill = '#FF6666';
-
-			if (options.rootStroke)
-				stroke = options.rootStroke;
-			else
-				stroke = '#DD2222';
-
 			var rect = self.addRectangle(0, 0, 5, 5, 2, 2, {
-				fill: fill,
-				stroke: stroke,
+				fill: self.defaults.rootFill,
+				stroke: self.defaults.rootStroke,
 				child: node.text
 			});
 		}
 		else {
-			if (options.fill)
-				fill = options.fill;
-			else
-				fill = '#BBDDFF';
-
-			if (options.stroke)
-				stroke = options.stroke;
-			else
-				stroke = '#88AADD';
-
 			var rect = self.addRectangle(0, 0, 5, 5, 2, 2, {
-				fill: fill,
-				stroke: stroke,
+				fill: self.defaults.fill,
+				stroke: self.defaults.stroke,
 				child: node.text
 			});
 		}
@@ -460,12 +493,14 @@ SVG.prototype.drawTree = function(root, options) {
 	tree.dragging = {};
 	tree.traverse(function(node, level, index, parent) {
 		node.rect.addEventListener('mousedown', function(e) {
+			updateSelectedNode(self, node);
 			tree.dragging.node = node;
 			tree.dragging.parent = parent;
 			tree.dragging.anchorX = e.clientX - node.x;
 			tree.dragging.anchorY = e.clientY - node.y;
 		});
 		node.rect.addEventListener('touchstart', function(e) {
+			updateSelectedNode(self, node);
 			tree.dragging.node = node;
 			tree.dragging.parent = parent;
 			tree.dragging.anchorX = e.touches[0].clientX - node.x;
@@ -515,13 +550,13 @@ SVG.prototype.drawTree = function(root, options) {
  * Given an event's new position, update the current node.
  * @param self the SVG object.
  * @param tree the tree structure.
- * @param node the node to move.
+ * @param currNode the node to move.
  * @param nodeParent the node's parent.
  * @param ex event x position.
  * @param ey event y position.
  * @param options
  * <ul>
- *     <li>anchor - the object to anchor child nodes to. Options are 'tree', 'parent' and 'none'. Default is 'none'</li>
+ *     <li>anchor - the object to anchor child nodes to. Options are 'descendents', 'children' and 'none'. Default is 'none'</li>
  *     <li>lineType - The type of line to connect nodes with. Options are 'bezier' and 'line'. Default is the same as given by drawTree.</li>
  * <ul>
  */
@@ -552,7 +587,10 @@ function handleMove(self, tree, currNode, nodeParent, ex, ey, options) {
 				self.resetBezier(currNode.line, nodeParent.x + currNode.offset.parX, nodeParent.y + currNode.offset.parY, currNode.x + currNode.offset.x, currNode.y + currNode.offset.y);
 			for (var i = 0; i < currNode.children.length; i++) {
 				if (currNode.children[i].line) {
-					self.resetBezier(currNode.children[i].line, currNode.x + currNode.children[i].offset.parX, currNode.y + currNode.children[i].offset.parY, currNode.children[i].x + currNode.children[i].offset.x, currNode.children[i].y + currNode.children[i].offset.y);
+					if(options.anchor == 'descendents')
+						self.moveBezier(currNode.children[i].line, currNode.x + currNode.children[i].offset.parX, currNode.y + currNode.children[i].offset.parY, currNode.children[i].x + currNode.children[i].offset.x, currNode.children[i].y + currNode.children[i].offset.y);
+					else
+						self.resetBezier(currNode.children[i].line, currNode.x + currNode.children[i].offset.parX, currNode.y + currNode.children[i].offset.parY, currNode.children[i].x + currNode.children[i].offset.x, currNode.children[i].y + currNode.children[i].offset.y);
 				}
 			}
 		} else { // same as parent (should be line)
@@ -564,14 +602,18 @@ function handleMove(self, tree, currNode, nodeParent, ex, ey, options) {
 				}
 			}
 		}
-		if(options.anchor == 'parent') {
-			for(var i = 0; i < currNode.children.length; i++) {
-				handleMove(self, tree, currNode.children[i], currNode, currNode.children[i].x + currNode.x - origX + tree.dragging.anchorX, currNode.children[i].y + currNode.y - origY + tree.dragging.anchorY);
-			}
-		} else if(options.anchor == 'tree') {
+		if(options.anchor == 'children') {
 			for(var i = 0; i < currNode.children.length; i++) {
 				handleMove(self, tree, currNode.children[i], currNode, currNode.children[i].x + currNode.x - origX + tree.dragging.anchorX, currNode.children[i].y + currNode.y - origY + tree.dragging.anchorY, {
-					anchor: 'tree'
+					anchor: 'none',
+					lineType: options.lineType
+				});
+			}
+		} else if(options.anchor == 'descendents') {
+			for(var i = 0; i < currNode.children.length; i++) {
+				handleMove(self, tree, currNode.children[i], currNode, currNode.children[i].x + currNode.x - origX + tree.dragging.anchorX, currNode.children[i].y + currNode.y - origY + tree.dragging.anchorY, {
+					anchor: 'descendents',
+					lineType: options.lineType
 				});
 			}
 		}
