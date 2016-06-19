@@ -31,32 +31,33 @@ svg.drawTree(root, { lineType: 'bezier' });
 ```
 
 ## Options
+These are the options and their defaults.
+
 SVG Instantiation:
 ```
 var svg = new trees.SVG(id, options)
+
+//options:
+clear: false         // Clears the previous tree if true.
+height: '200px'      // Sets the height of the svg.
+width: '200px'       // Sets the width of the svg.
+
 ```
-options:
-| Variable | Description                       | Values         | Default |
-|----------|-----------------------------------|----------------|---------|
-| clear    | Clears the previous tree if true. | boolean        | false   |
-| height   | Sets the height of the svg.       | Number, String | '200px' |
-| width    | Sets the width of the svg.        | Number, String | '200px' |
 
 SVG Draw:
 ```
 svg.drawTree(root, options)
-```
-options:
-| Variable   | Description                                  | Values                            | Default    |
-|------------|----------------------------------------------|-----------------------------------|------------|
-| anchor     | Sets which nodes move with the current node. | 'children', 'descendents', 'none' | 'none'     |
-| fill       | The fill color of a regular node.            | String                            | '#BBDDFF'  |
-| lineStroke | The edge/line stroke colour.                 | String                            | stroke     |
-| lineType   | The type of edge/line.                       | 'bezier', 'line'                  | 'line'     |
-| rootFill   | The fill color of the root node.             | String                            | '#FF6666'  |
-| rootStroke | The stroke color of the root node.           | String                            | '#DD2222'  |
-| stroke     | The stroke color of a regular node.          | String                            | '#6688BB'  |
 
+//options:
+anchor: 'none'        // Sets which nodes move with the current node. Options are 'children', 'descendents', 'none'.
+fill: '#BBDDFF'       // The fill color of a regular node.
+lineStroke: stroke    // The edge/line stroke colour.
+lineType: 'line'      // The type of edge/line. Options are 'bezier', 'line'.
+rootFill: '#FF6666'   // The fill color of the root node.
+rootStroke: '#DD2222' // The stroke color of the root node.
+stroke: '#6688BB'     // The stroke color of a regular node.
+
+```
 
 ## Functions
 Set anchor:
@@ -65,11 +66,11 @@ svg.setAnchor(anchor)
 ```
 Set the selected node's action, where the signature of func is func(node):
 ```
-setSelectedAction(func)
+svg.setSelectedAction(func)
 ```
 
 ## Variables
-Currently selected node:
+Get the currently selected node:
 ```
 svg.selectedNode
 ```
