@@ -1,0 +1,8 @@
+node_modules
+.git
+.idea
+src
+test
+gulpfile.js
+README.md
+index.html
