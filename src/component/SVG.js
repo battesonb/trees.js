@@ -395,6 +395,7 @@ function updateSelectedNode(svg, node, options) {
  *     <li>anchor - The anchor of the children when dragging a node. Options are 'none' and 'children'. Default is 'none'</li>
  *     <li>fill - The fill color of regular nodes</li>
  *     <li>stroke - The stroke color of regular node</li>
+ *     <li>lineStroke - The stroke color of tree edges/lines. Default is the same as stroke colour.</li>
  *     <li>lineType - The type of line to connect nodes withm. Options are 'bezier' and 'line'. Default is 'line'.</li>
  *     <li>rootFill - The fill color of the root node</li>
  *     <li>rootStroke - The stroke color of the root node</li>
@@ -417,7 +418,7 @@ SVG.prototype.drawTree = function(root, options) {
 	if(options.stroke)
 		self.defaults.stroke = options.stroke;
 	else
-		self.defaults.stroke = '#88AADD';
+		self.defaults.stroke = '#6688BB';
 
 	if(options.rootFill)
 		self.defaults.rootFill = options.rootFill;
@@ -428,6 +429,11 @@ SVG.prototype.drawTree = function(root, options) {
 		self.defaults.rootStroke = options.rootStroke;
 	else
 		self.defaults.rootStroke = '#DD2222';
+
+	if(options.lineStroke)
+		self.defaults.lineStroke = options.lineStroke;
+	else
+		self.defaults.lineStroke = self.defaults.stroke;
 
 
 	if(self.clearable)
@@ -468,20 +474,20 @@ SVG.prototype.drawTree = function(root, options) {
 		if(parent) {
 			if(options.lineType == 'bezier') {
 				var bezier = self.addBezier(parent.x + offset.parX, parent.y + offset.parY, node.x + offset.x, node.y + offset.y, {
-					stroke: '#6688BB'
+					stroke: self.defaults.lineStroke
 				});
 				node.line = bezier;
 			} else {
 				options.lineType = 'line'
 				var line = self.addLine(parent.x + offset.parX, parent.y + offset.parY, node.x + offset.x, node.y + offset.y, {
-					stroke: '#6688BB'
+					stroke: self.defaults.lineStroke
 				});
 				node.line = line;
 			}
 
 			node.direction = self.addCircle(node.x + offset.x, node.y + offset.y, 2, {
-				fill: '#6688BB',
-				stroke: '#5577AA',
+				fill: self.defaults.lineStroke,
+				stroke: self.defaults.lineStroke,
 			});
 		}
 	});
