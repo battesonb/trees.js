@@ -1,3 +1,3 @@
 'use strict';
 
-window.trees = require('./core/init');
+window.trees = module.exports = require('./core/init');

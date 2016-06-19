@@ -13,8 +13,15 @@
 	<script src="dist/trees.bundle.js"></script>
 	<script>
 		window.onload = function() {
+			// Create the SVG.
 			var svg = new trees.SVG('mySVG', {width: 1920, height: 980});
 
+			// Set the selected action of any node on the SVG.
+			svg.setSelectedAction(function(node) {
+				console.log(node);
+			});
+
+			// Create some trees.
 			var root = {contents: "Hello", children: [
 				{ contents: "Whoa", children: [
 					{ contents: "Um", children: [] },
@@ -25,14 +32,6 @@
 					{ contents: "Um", children: [] }
 				] }
 			]};
-
-			svg.drawTree(root, {
-				anchor: 'none',
-				lineType: 'line',
-				rootFill: '#999',
-				rootStroke: '#555',
-				lineStroke: '#555'
-			});
 
 			var anotherRoot = {contents: "1", children: [
 				{ contents: "1.1", children: [
@@ -49,7 +48,7 @@
 				] }
 			]};
 
-			svg.drawTree(anotherRoot);
+			
 
 			var lastRoot = { contents: "Um", children: [
 				{ contents: "Fantastic", children: [] },
@@ -66,10 +65,20 @@
 				] }
 			] };
 
+			// Draw the trees.
+			svg.drawTree(root, {
+				anchor: 'none',
+				lineType: 'line',
+				rootFill: '#999',
+				rootStroke: '#555',
+				lineStroke: '#555'
+			});
+			svg.drawTree(anotherRoot);
 			svg.drawTree(lastRoot, {
 				lineType: 'bezier',
 			});
 
+			// Set the anchor for pressing different keys
 			window.onkeypress = function(e) {
 				if(e.keyCode == '97') // a is pressed
 					svg.setAnchor('descendents');

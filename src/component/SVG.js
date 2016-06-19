@@ -55,6 +55,14 @@ SVG.prototype.setAnchor = function(anchor) {
 }
 
 /**
+ * Sets the current anchor of the tree to the given value
+ * @param func The function to call when the pressing down on a node. First parameter of the function is the node.
+ */
+SVG.prototype.setSelectedAction = function(func) {
+	this.selectedAction = func;
+}
+
+/**
  * Adds a bezier curve to the SVG.
  * @param mx the starting x position.
  * @param my the starting y position.
@@ -178,7 +186,7 @@ SVG.prototype.moveCircle = function(circle, cx, cy) {
  * @param y2 Second y position.
  * @options
  * <ul>
- *     <li>stroke - stroke colour, default is #000000.</li>
+ *     <li>stroke - stroke color, default is #000000.</li>
  *     <li>strokeWidth - stroke size, default is 2px.</li>
  * <ul>
  * @returns {Element} The line
@@ -241,8 +249,8 @@ var PADDING = 5;
  * @param ry radius of the y-corner.
  * @param options
  * <ul>
- *     <li>fill - fill colour, default is #FFFFFF.</li>
- *     <li>stroke - stroke colour, default is #000000.</li>
+ *     <li>fill - fill color, default is #FFFFFF.</li>
+ *     <li>stroke - stroke color, default is #000000.</li>
  *     <li>strokeWidth - stroke size, default is 1px.</li>
  *     <li>opacity - opacity, default is 1.</li>
  * </ul>
@@ -314,7 +322,7 @@ SVG.prototype.moveRectangle = function(rect, x, y, options) {
  * @param text Text element
  * @param options
  * <ul>
- *     <li>fill - fill colour, default is #000000</li>
+ *     <li>fill - fill color, default is #000000</li>
  * </ul>
  * @returns {Element} The text
  */
@@ -358,13 +366,13 @@ SVG.prototype.clear = function() {
 };
 
 /**
- * Updates the colours of a selected node.
+ * Updates the colors of a selected node.
  * @param svg A reference to the SVG data structure
  * @param node The node within the SVG that is selected.
  * @param options
  * <ul>
- *     <li>fill - fill colour of the selected node, default is #33DD33</li>
- *     <li>stroke - stroke colour of the selected node, default is #11BB11</li>
+ *     <li>fill - fill color of the selected node, default is #33DD33</li>
+ *     <li>stroke - stroke color of the selected node, default is #11BB11</li>
  * </ul>
  */
 function updateSelectedNode(svg, node, options) {
@@ -393,12 +401,12 @@ function updateSelectedNode(svg, node, options) {
  * @param options
  * <ul>
  *     <li>anchor - The anchor of the children when dragging a node. Options are 'none' and 'children'. Default is 'none'</li>
- *     <li>fill - The fill color of regular nodes</li>
- *     <li>stroke - The stroke color of regular node</li>
- *     <li>lineStroke - The stroke color of tree edges/lines. Default is the same as stroke colour.</li>
+ *     <li>fill - The fill color of regular nodes. Default is #BBDDFF.</li>
+ *     <li>lineStroke - The stroke color of tree edges/lines. Default is the same as stroke color. Default is </li>
  *     <li>lineType - The type of line to connect nodes withm. Options are 'bezier' and 'line'. Default is 'line'.</li>
  *     <li>rootFill - The fill color of the root node</li>
  *     <li>rootStroke - The stroke color of the root node</li>
+ *     <li>stroke - The stroke color of regular node. Default is #6688BB.</li>
  * <ul>
  */
 SVG.prototype.drawTree = function(root, options) {
@@ -500,6 +508,8 @@ SVG.prototype.drawTree = function(root, options) {
 	tree.traverse(function(node, level, index, parent) {
 		node.rect.addEventListener('mousedown', function(e) {
 			updateSelectedNode(self, node);
+			if(self.selectedAction)
+				self.selectedAction(self.selectedNode);
 			tree.dragging.node = node;
 			tree.dragging.parent = parent;
 			tree.dragging.anchorX = e.clientX - node.x;
@@ -507,6 +517,8 @@ SVG.prototype.drawTree = function(root, options) {
 		});
 		node.rect.addEventListener('touchstart', function(e) {
 			updateSelectedNode(self, node);
+			if(self.selectedAction)
+				self.selectedAction(self.selectedNode);
 			tree.dragging.node = node;
 			tree.dragging.parent = parent;
 			tree.dragging.anchorX = e.touches[0].clientX - node.x;
