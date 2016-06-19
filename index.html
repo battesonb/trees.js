@@ -12,23 +12,53 @@
 	</style>
 	<script src="dist/trees.bundle.js"></script>
 	<script>
-		//his is a bit too complicated for a library, it should be easier to use. Do more in the core/init module.
 		window.onload = function() {
-			var svg = new trees.SVG('mySVG', {width: 1880, height: 960});
+			var svg = new trees.SVG('mySVG', {width: 1920, height: 980});
 
-			var tree = new trees.Tree("Root");	
-			var node = tree.root;
-			for(var i = 0; i < 10; i++) {
-				for(var j = 0; j < 10; j++) {
-					var newNode = node.addChild(Math.round(Math.pow(Math.random() * 150 + 1, 3)));
-				}
-				node = node.children[0];
+			var root = {contents: "Hello", children: [
+				{ contents: "Whoa", children: [
+					{ contents: "Um", children: [] },
+					{ contents: "Dude", children: [] },
+					{ contents: "Breadth-First", children: [] }
+				] },
+				{ contents: "Another", children: [
+					{ contents: "Um", children: [] }
+				] }
+			]};
+
+			svg.drawTree(root, {
+				anchor: 'none',
+				lineType: 'line',
+				rootFill: '#999999',
+				rootStroke: '#555555'
+			});
+
+			var anotherRoot = {contents: "Hello", children: [
+				{ contents: "Whoa", children: [
+					{ contents: "Um", children: [] },
+					{ contents: "Dude", children: [] },
+					{ contents: "Breadth-First", children: [] }
+				] },
+				{ contents: "Another", children: [
+					{ contents: "Um", children: [] }
+				] }
+			]};
+
+			svg.drawTree(anotherRoot, {
+				anchor: 'none',
+				lineType: 'line',
+			});
+
+			window.onkeypress = function(e) {
+				if(e.keyCode == "97") // a is pressed
+					svg.setAnchor("tree");
+				if(e.keyCode == "115") // s is pressed
+					svg.setAnchor("parent");
 			}
 
-			svg.drawTree(tree, {
-				lineType: 'line',
-				anchor: 'parent'
-			});
+			window.onkeyup = function(e) {
+				svg.setAnchor("none");
+			}
 		};
 	</script>
 </head>

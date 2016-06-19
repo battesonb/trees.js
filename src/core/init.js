@@ -1,6 +1,7 @@
+var SVG = require('../component/SVG');
+
 var trees = {
-	SVG: require('../component/SVG'),
-	Tree: require('../component/Tree')
+	SVG: SVG
 };
 
 module.exports = trees;

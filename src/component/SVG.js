@@ -1,43 +1,57 @@
+var Tree = require('./Tree');
+
 /**
  * Creates an abstract object representation of the svg on the dom.
  * @param id The id of the svg in the document.
  * @param options
  * <ul>
- *     <li>width - Sets the width of the svg. Default is 200px.</li>
+ *     <li>clear - Clears the previous tree if true.</li>
  *     <li>height - Sets the height of the svg. Default is 200px.</li>
+ *     <li>width - Sets the width of the svg. Default is 200px.</li>
  * </ul>
  * @constructor
  */
 function SVG(id, options) {
 	this.dom = document.getElementById(id);
-	if(options) {
-		if (options.width) {
-			this.dom.setAttribute('width', options.width + 'px');
-			this.width = options.width;
-		}
-		else {
-			this.dom.setAttribute('width', '200px');
-			this.width = 200;
-		}
-		if (options.height) {
-			this.dom.setAttribute('height', options.height + 'px');
-			this.height = options.height;
-		} else {
-			this.dom.setAttribute('height', '200px');
-			this.height = 200;
-		}
+	if(!options) {
+		options = {};
+	}
+
+	if(options.clear)
+		this.clearable = options.clear;
+	else
+		this.clearable = false;
+
+	if (options.height) {
+		this.dom.setAttribute('height', options.height + 'px');
+		this.height = options.height;
 	} else {
-		this.width = Number(this.dom.getAttribute('width'));
-		if(this.width == 0) {
-			this.width = 200;
-			this.dom.setAttribute('width', this.width + 'px');
-		}
 		this.height = Number(this.dom.getAttribute('height'));
 		if(this.height == 0) {
 			this.height = 200;
 			this.dom.setAttribute('height', this.height + 'px');
 		}
 	}
+
+	if (options.width) {
+		this.dom.setAttribute('width', options.width + 'px');
+		this.width = options.width;
+	}
+	else {
+		this.width = Number(this.dom.getAttribute('width'));
+		if(this.width == 0) {
+			this.width = 200;
+			this.dom.setAttribute('width', this.width + 'px');
+		}
+	}
+}
+
+/**
+ * Sets the current anchor of the tree to the given value
+ * @param anchor The options are 'parent' and 'none'. Default is 'none'.
+ */
+SVG.prototype.setAnchor = function(anchor) {
+	this.anchor = anchor;
 }
 
 /**
@@ -146,10 +160,10 @@ SVG.prototype.addCircle = function(cx, cy, r, options) {
 };
 
 /**
- *
- * @param circle
- * @param cx
- * @param cy
+ * Moves a circle given a reference to the circle in the SVG.
+ * @param circle Reference to the circle.
+ * @param cx Circle's x position.
+ * @param cy Circle's y position.
  */
 SVG.prototype.moveCircle = function(circle, cx, cy) {
 	circle.setAttribute("cx", cx);
@@ -157,13 +171,17 @@ SVG.prototype.moveCircle = function(circle, cx, cy) {
 }
 
 /**
- *
- * @param x1
- * @param y1
- * @param x2
- * @param y2
+ * Adds a line to the SVG.
+ * @param x1 First x position.
+ * @param y1 First y position.
+ * @param x2 Second x position.
+ * @param y2 Second y position.
  * @options
- * @returns {Element}
+ * <ul>
+ *     <li>stroke - stroke colour, default is #000000.</li>
+ *     <li>strokeWidth - stroke size, default is 2px.</li>
+ * <ul>
+ * @returns {Element} The line
  */
 SVG.prototype.addLine = function(x1, y1, x2, y2, options) {
 	var line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
@@ -177,17 +195,22 @@ SVG.prototype.addLine = function(x1, y1, x2, y2, options) {
 	else
 		line.style.stroke = "#000";
 
+	if(options.strokeWidth)
+		line.style.strokeWidth = options.strokeWidth;
+	else
+		line.style.strokeWidth = "2px";
+
 	this.dom.appendChild(line);
 	return line;
 }
 
 /**
- *
- * @param line
- * @param x1
- * @param y1
- * @param x2
- * @param y2
+ * Moves a line element given a reference to the line.
+ * @param line Reference to the line.
+ * @param x1 First x position.
+ * @param y1 First y position.
+ * @param x2 Second x position.
+ * @param y2 Second y position.
  */
 SVG.prototype.moveLine = function(line, x1, y1, x2, y2) {
 	if(x2) {
@@ -209,15 +232,21 @@ SVG.prototype.moveLine = function(line, x1, y1, x2, y2) {
 var PADDING = 5;
 
 /**
- *
- * @param x
- * @param y
- * @param width
- * @param height
- * @param rx
- * @param ry
+ * Adds a rectangle to the SVG.
+ * @param x x position.
+ * @param y y position.
+ * @param width width of the rectangle.
+ * @param height height of the rectangle.
+ * @param rx radius of the x-corner.
+ * @param ry radius of the y-corner.
  * @param options
- * @returns {Element}
+ * <ul>
+ *     <li>fill - fill colour, default is #FFFFFF.</li>
+ *     <li>stroke - stroke colour, default is #000000.</li>
+ *     <li>strokeWidth - stroke size, default is 1px.</li>
+ *     <li>opacity - opacity, default is 1.</li>
+ * </ul>
+ * @returns {Element} The rectangle
  */
 SVG.prototype.addRectangle = function(x, y, width, height, rx, ry, options) {
 	var rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
@@ -263,12 +292,10 @@ SVG.prototype.addRectangle = function(x, y, width, height, rx, ry, options) {
 };
 
 /**
- *
- * @param rect
- * @param x
- * @param y
- * @param width
- * @param height
+ * Moves a rectangle element given a reference to the rectangle.
+ * @param rect Reference to the rectangle.
+ * @param x x position.
+ * @param y y position.
  * @param options
  */
 SVG.prototype.moveRectangle = function(rect, x, y, options) {
@@ -278,29 +305,18 @@ SVG.prototype.moveRectangle = function(rect, x, y, options) {
 
 	rect.setAttribute("x", x);
 	rect.setAttribute("y", y);
-
-	/*
-	if(options.child) {
-		var bbox = options.child.getBBox();
-		rect.setAttribute("x", x);
-		rect.setAttribute("y", y);
-		rect.setAttribute("width", bbox.width + PADDING * 2);
-		rect.setAttribute("height", bbox.height + PADDING * 2);
-	} else {
-		rect.setAttribute("x", x);
-		rect.setAttribute("y", y);
-		rect.setAttribute("width", width);
-		rect.setAttribute("height", height);
-	}*/
 }
 
 /**
- * Adds txt
- * @param x
- * @param y
- * @param text
+ * Adds text to the SVG.
+ * @param x x position
+ * @param y y position
+ * @param text Text element
  * @param options
- * @returns {Element}
+ * <ul>
+ *     <li>fill - fill colour, default is #000000</li>
+ * </ul>
+ * @returns {Element} The text
  */
 SVG.prototype.addText = function(x, y, text, options) {
 	var textNode = document.createElementNS("http://www.w3.org/2000/svg", 'text');
@@ -315,7 +331,7 @@ SVG.prototype.addText = function(x, y, text, options) {
 	if(options.fill)
 		textNode.setAttribute("fill", options.fill);
 	else
-		textNode.setAttribute("fill", "black");
+		textNode.setAttribute("fill", "#000");
 
 	this.dom.appendChild(textNode);
 	textNode.setAttribute("y", y + PADDING + textNode.getBBox().height / 2);
@@ -324,10 +340,10 @@ SVG.prototype.addText = function(x, y, text, options) {
 };
 
 /**
- *
- * @param textNode
- * @param x
- * @param y
+ * Moves a text element given a reference to the text.
+ * @param textNode Reference to the text.
+ * @param x x position.
+ * @param y y position.
  */
 SVG.prototype.moveText = function(textNode, x, y) {
 	textNode.setAttribute("x", x + PADDING);
@@ -343,36 +359,68 @@ SVG.prototype.clear = function() {
 
 /**
  * Clears the SVG and then draws a tree.
- * @param tree The tree data structure to traverse.
+ * @param root the node of the tree to traverse.
  * @param options
  * <ul>
  *     <li>anchor - The anchor of the children when dragging a node. Options are 'none' and 'parent'. Default is 'none'</li>
+ *     <li>fill - The fill color of regular nodes</li>
+ *     <li>stroke - The stroke color of regular node</li>
  *     <li>lineType - The type of line to connect nodes withm. Options are 'bezier' and 'line'. Default is 'line'.</li>
+ *     <li>rootFill - The fill color of the root node</li>
+ *     <li>rootStroke - The stroke color of the root node</li>
  * <ul>
  */
-SVG.prototype.drawTree = function(tree, options) {
+SVG.prototype.drawTree = function(root, options) {
 	var self = this;
-	self.clear();
 	if(!options)
 		options = {};
+
+	if(self.clearable)
+		self.clear();
+	var tree = new Tree(root);
+
+	var fill;
+	var stroke;
 	tree.traverse(function(node, level, index, parent) {
 		if(node.contents) {
 			var text = self.addText(0, 0, node.contents);
 			node.text = text;
 		}		
 
-		if(!parent)
+		if(!parent) {
+			if (options.rootFill)
+				fill = options.rootFill;
+			else
+				fill = '#FF6666';
+
+			if (options.rootStroke)
+				stroke = options.rootStroke;
+			else
+				stroke = '#DD2222';
+
 			var rect = self.addRectangle(0, 0, 5, 5, 2, 2, {
-				fill: '#FF6666',
-				stroke: '#DD2222',
+				fill: fill,
+				stroke: stroke,
 				child: node.text
 			});
-		else
+		}
+		else {
+			if (options.fill)
+				fill = options.fill;
+			else
+				fill = '#BBDDFF';
+
+			if (options.stroke)
+				stroke = options.stroke;
+			else
+				stroke = '#88AADD';
+
 			var rect = self.addRectangle(0, 0, 5, 5, 2, 2, {
-				fill: '#BBDDFF',
-				stroke: '#88AADD',
+				fill: fill,
+				stroke: stroke,
 				child: node.text
 			});
+		}
 		node.rect = rect;
 	});
 
@@ -405,57 +453,61 @@ SVG.prototype.drawTree = function(tree, options) {
 		}
 	});
 
-	self.dragging = {};
+	if(!options.anchor)
+		options.anchor = 'none';
+	self.anchor = options.anchor;
+
+	tree.dragging = {};
 	tree.traverse(function(node, level, index, parent) {
-		node.rect.onmousedown = function(e) {
-			self.dragging.node = node;
-			self.dragging.parent = parent;
-			self.dragging.anchorX = e.clientX - node.x;
-			self.dragging.anchorY = e.clientY - node.y;
-		}
+		node.rect.addEventListener('mousedown', function(e) {
+			tree.dragging.node = node;
+			tree.dragging.parent = parent;
+			tree.dragging.anchorX = e.clientX - node.x;
+			tree.dragging.anchorY = e.clientY - node.y;
+		});
 		node.rect.addEventListener('touchstart', function(e) {
-			self.dragging.node = node;
-			self.dragging.parent = parent;
-			self.dragging.anchorX = e.touches[0].clientX - node.x;
-			self.dragging.anchorY = e.touches[0].clientY - node.y;
+			tree.dragging.node = node;
+			tree.dragging.parent = parent;
+			tree.dragging.anchorX = e.touches[0].clientX - node.x;
+			tree.dragging.anchorY = e.touches[0].clientY - node.y;
 		});
 	});
 
-	self.dom.onmousedown = function(e) {
+	self.dom.addEventListener('mousedown', function(e) {
 		if(e.target == self.dom) {
-			self.dragging.dom = true;
-			self.dragging.currX = e.clientX;
-			self.dragging.currY = e.clientY;
+			tree.dragging.dom = true;
+			tree.dragging.currX = e.clientX;
+			tree.dragging.currY = e.clientY;
 		}
-	}
+	});
 	self.dom.addEventListener('touchstart', function(e) {
 		if(e.target == self.dom) {
-			self.dragging.dom = true;
-			self.dragging.currX = e.touches[0].clientX;
-			self.dragging.currY = e.touches[0].clientY;
+			tree.dragging.dom = true;
+			tree.dragging.currX = e.touches[0].clientX;
+			tree.dragging.currY = e.touches[0].clientY;
 		}
 	});
 
-	self.dom.onmousemove = function(e) {
-		handleMove(self, tree, self.dragging.node, self.dragging.parent, e.clientX, e.clientY, {
+	self.dom.addEventListener('mousemove', function(e) {
+		handleMove(self, tree, tree.dragging.node, tree.dragging.parent, e.clientX, e.clientY, {
 			lineType: options.lineType,
-			anchor: options.anchor
+			anchor: self.anchor
 		});
-	};
+	});
 	self.dom.addEventListener('touchmove', function(e) {
-		handleMove(self, tree, self.dragging.node, self.dragging.parent, e.touches[0].clientX, e.touches[0].clientY, {
+		handleMove(self, tree, tree.dragging.node, tree.dragging.parent, e.touches[0].clientX, e.touches[0].clientY, {
 			lineType: options.lineType,
-			anchor: options.anchor
+			anchor: self.anchor
 		});
 	});
 
-	self.dom.onmouseup = function(e) {
-		self.dragging.node = undefined;
-		self.dragging.dom = false;
-	};
+	self.dom.addEventListener('mouseup', function(e) {
+		tree.dragging.node = undefined;
+		tree.dragging.dom = false;
+	});
 	self.dom.addEventListener('touchend', function(e) {
-		self.dragging.node = undefined;
-		self.dragging.dom = false;
+		tree.dragging.node = undefined;
+		tree.dragging.dom = false;
 	});
 }
 
@@ -469,7 +521,7 @@ SVG.prototype.drawTree = function(tree, options) {
  * @param ey event y position.
  * @param options
  * <ul>
- *     <li>anchor - The anchor of the children when dragging a node. Options are 'none' and 'parent'. Default is 'none'</li>
+ *     <li>anchor - the object to anchor child nodes to. Options are 'tree', 'parent' and 'none'. Default is 'none'</li>
  *     <li>lineType - The type of line to connect nodes with. Options are 'bezier' and 'line'. Default is the same as given by drawTree.</li>
  * <ul>
  */
@@ -479,8 +531,8 @@ function handleMove(self, tree, currNode, nodeParent, ex, ey, options) {
 	if(currNode) {
 		var origX = currNode.x;
 		var origY = currNode.y;
-		currNode.x = ex - self.dragging.anchorX;
-		currNode.y = ey - self.dragging.anchorY;
+		currNode.x = ex - tree.dragging.anchorX;
+		currNode.y = ey - tree.dragging.anchorY;
 		self.moveRectangle(currNode.rect, currNode.x, currNode.y);
 		self.moveText(currNode.text, currNode.x, currNode.y);
 		var offset = getOffset(currNode, nodeParent);
@@ -514,17 +566,21 @@ function handleMove(self, tree, currNode, nodeParent, ex, ey, options) {
 		}
 		if(options.anchor == 'parent') {
 			for(var i = 0; i < currNode.children.length; i++) {
-				handleMove(self, tree, currNode.children[i], currNode, currNode.children[i].x + currNode.x - origX + self.dragging.anchorX, currNode.children[i].y + currNode.y - origY + self.dragging.anchorY);
+				handleMove(self, tree, currNode.children[i], currNode, currNode.children[i].x + currNode.x - origX + tree.dragging.anchorX, currNode.children[i].y + currNode.y - origY + tree.dragging.anchorY);
+			}
+		} else if(options.anchor == 'tree') {
+			for(var i = 0; i < currNode.children.length; i++) {
+				handleMove(self, tree, currNode.children[i], currNode, currNode.children[i].x + currNode.x - origX + tree.dragging.anchorX, currNode.children[i].y + currNode.y - origY + tree.dragging.anchorY, {
+					anchor: 'tree'
+				});
 			}
 		}
-	} else if(self.dragging.dom) {
+	} else if(tree.dragging.dom) {
 		tree.traverse(function (node, level, index, parent) {
-			node.x += ex - self.dragging.currX;
-			node.y += ey - self.dragging.currY;
+			node.x += ex - tree.dragging.currX;
+			node.y += ey - tree.dragging.currY;
 			self.moveRectangle(node.rect, node.x, node.y);
 			self.moveText(node.text, node.x, node.y);
-			var offset = getOffset(node, parent);
-			node.offset = offset;
 			if (node.line) {
 				if (options.lineType == 'bezier')
 					self.moveBezier(node.line, parent.x + node.offset.parX, parent.y + node.offset.parY);
@@ -534,8 +590,8 @@ function handleMove(self, tree, currNode, nodeParent, ex, ey, options) {
 			if (node.direction)
 				self.moveCircle(node.direction, node.x + node.offset.x, node.y + node.offset.y);
 		});
-		self.dragging.currX = ex;
-		self.dragging.currY = ey;
+		tree.dragging.currX = ex;
+		tree.dragging.currY = ey;
 	}
 }
 

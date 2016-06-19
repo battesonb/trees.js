@@ -2,13 +2,13 @@
 
 /**
  * Abstract tree data structure.
- * @param contents the root node's default contents.
+ * @param node the root node.
  */
-function Tree(contents) {
-	this.root = new Node(contents);
+function Tree(node) {
+	this.root = node;
 }
 
-var PADDING = 50;
+var PADDING = 10;
 
 /**
  * Sets the x and y positions of the nodes if they are not already present
@@ -20,18 +20,11 @@ var PADDING = 50;
 Tree.prototype.initialize = function() {
 	var currNode = this.root;
 	if(currNode != null) {
-		traverse(currNode, function(node, level, index, parent) {
+		traverseBFS(currNode, function(node, level, index) {
 			if(!node.hasOwnProperty('x'))
-				node.x = level * 150;
+				node.x = level * 165;
 			if(!node.hasOwnProperty('y'))
-				if(level === 0) {
-					node.y = 0;
-				} else {
-					if(parent.children.length === 1)
-						node.y = 0;
-					else
-						node.y = index  * node.rect.height.baseVal.value + PADDING * (index / parent.children.length);
-				}
+				node.y = index * (node.rect.height.baseVal.value + PADDING);
 		});
 	}
 }
@@ -46,26 +39,72 @@ Tree.prototype.initialize = function() {
  * @param parent The parent of the node, undefined if this is the root.
  */
 function traverse(node, func, level, index, parent) {
-	if(node == undefined)
+	if(node == undefined || func == undefined)
 		return;
 	if(level == undefined) {
 		level = 0
 	}
+	if(index == undefined)
+		index = 0;
 	func(node, level, index, parent);
-	for(var i = 0; i < node.children.length; i++) {
-		traverse(node.children[i], func, level+1, i, node);
+	if(node.children) {
+		for (var i = 0; i < node.children.length; i++) {
+			traverse(node.children[i], func, level + 1, i, node);
+		}
+	}
+}
+
+/**
+ * Traverse a tree of nodes from a given node in level-order, applying a function to
+ * each node.
+ * @param node The node to traverse from.
+ * @param func The function to apply to each node.
+ * @param level The current level of the node, undefined if this is the root.
+ * @param index The index of the node, undefined if this is the root.
+ */
+function traverseBFS(node, func, level, index) {
+	if(node == undefined || func == undefined)
+		return;
+	if(level == undefined)
+		level = 0;
+	if(index == undefined)
+		index = 0;
+
+	var list = [];
+	var nextList = [];
+	list.push(node);
+	while(list.length > 0) {
+		var currNode = list.splice(0, 1)[0];
+		func(currNode, level, index);
+		index++;
+		if(currNode.children) {
+			for (var i = 0; i < currNode.children.length; i++) {
+				nextList.push(currNode.children[i]);
+			}
+		}
+		if(list.length == 0) {
+			list = nextList;
+			nextList = [];
+			level++;
+			index = 0;
+		}
 	}
 }
 
 /**
  * Wraps the traverse function for the Tree data structure.
  * @param func The function to apply to each node.
- * @param level The current level of the node, undefined if this is the root.
- * @param index The index of the node, undefined if this is the root.
- * @param parent The parent of the node, undefined if this is the root.
  */
 Tree.prototype.traverse = function(func) {
 	traverse(this.root, func);
+}
+
+/**
+ * Wraps the traverseBFS function for the Tree data structure.
+ * @param func The function to apply to each node.
+ */
+Tree.prototype.traverseBFS = function(func) {
+	traverseBFS(this.root, func);
 }
 
 /**
