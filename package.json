@@ -16,9 +16,11 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
+  "keywords": ["tree", "graph", "visual"],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "tonicExampleFilename": "tonicExample.js",
   "author": "battesonb (https://github.com/battesonb)",
   "homepage": "https://github.com/battesonb/trees.js",
   "license": "MIT"

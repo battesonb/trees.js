@@ -12,14 +12,14 @@ Once you have imported the .js file from the dist folder, a tree object will be 
 
 Once you have this, create an svg object by doing the following:
 ```
-var svg = new trees.SVG('mySVG', {width: 1920, height: 980});
+var svg = new trees.SVG('mySVG', { width: 1920, height: 980 });
 ```
 Where 'mySVG' is the id of the svg element on the dom.
 
 Now once you have a tree of the following form...
 
 ```
-var root = {contents: "Hello", children: [
+var root = { contents: "Hello", children: [
 				{ contents: "Whoa", children: [
 					{ contents: "Um", children: [] },
 					{ contents: "Dude", children: [] },
@@ -28,7 +28,7 @@ var root = {contents: "Hello", children: [
 				{ contents: "Another", children: [
 					{ contents: "Um", children: [] }
 				] }
-			]};
+			] };
 ```
 ... you can draw the tree to the svg by using the following function:
 

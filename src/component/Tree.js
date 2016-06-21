@@ -29,7 +29,7 @@ Tree.prototype.initialize = function() {
 			if(!node.hasOwnProperty('x'))
 				node.x = level * 165;
 			if(!node.hasOwnProperty('y'))
-				node.y = (index + lastMaxIndex) * (node.rect.height.baseVal.value + PADDING);
+				node.y = (index + lastMaxIndex) * (node._rect.height.baseVal.value + PADDING);
 		});
 		Tree.maxIndex+= lastMaxIndex;
 	}
@@ -62,7 +62,7 @@ function traverse(node, func, level, index, parent) {
 
 /**
  * Traverse a tree of nodes from a given node in level-order, applying a function to
- * each node.
+ * each node and setting a property 'parent' to its parent node.
  * @param node The node to traverse from.
  * @param func The function to apply to each node.
  * @param level The current level of the node, undefined if this is the root.
@@ -81,14 +81,16 @@ function traverseBFS(node, func, level, index) {
 	list.push(node);
 	while(list.length > 0) {
 		var currNode = list.splice(0, 1)[0];
-		func(currNode, level, index);
 		index++;
 		if(currNode.children) {
 			for (var i = 0; i < currNode.children.length; i++) {
-				nextList.push(currNode.children[i]);
+				var childNode = currNode.children[i];
+				childNode.parent = currNode;
+				nextList.push(childNode);
 			}
 		}
-		if(list.length == 0) {
+		func(currNode, level, index);
+		if(list.length === 0) {
 			list = nextList;
 			nextList = [];
 			level++;
