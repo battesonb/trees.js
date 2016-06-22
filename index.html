@@ -1,6 +1,6 @@
 <html>
 <head>
-	<meta name=viewport content="width=device-width, initial-scale=1">
+	<meta name=viewport content="width=device-width, initial-scale=1, user-scalable=no">
 	<style>
 		html, body {
 			width: 100%;
@@ -30,8 +30,20 @@
 		}
 	</style>
 	<script src="dist/trees.bundle.js"></script>
+	<script src="https://cdn.rawgit.com/hammerjs/touchemulator/master/touch-emulator.js"></script>
+	<script> TouchEmulator(); </script>
+	<script src="node_modules/hammerjs/hammer.min.js"></script>
 	<script>
 		window.onload = function() {
+			//HAMMERJS STUFF
+			var mc = new Hammer.Manager(document.getElementById('mySVG'));
+			var Pinch = new Hammer.Pinch();
+			mc.add(Pinch);
+			mc.on('pinch', function(e) {
+				console.log(e);
+			});
+			//-------------------
+
 			// Create the SVG.
 			var svg = new trees.SVG('mySVG', {width: 1920, height: 980});
 

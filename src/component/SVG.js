@@ -61,6 +61,41 @@ function SVG(id, options) {
 	this.dom.addEventListener('wheel', function(e) {
 		self.setScale(self.scale + e.deltaY / 2000, { ex: e.clientX, ey: e.clientY });
 	});
+
+	/* // TODO Implement pinching
+	this.pinching = {
+		status: false,
+		p1: {x: 0, y: 0},
+		p2: {x: 0, y: 0}
+	}
+
+	this.dom.addEventListener('touchstart', function(e) {
+		if(e.touches.length == 2) {
+			self.pinching.status = true;
+			self.pinching.p1.x = e.touches[0].clientX;
+			self.pinching.p1.y = e.touches[0].clientY;
+			self.pinching.p2.x = e.touches[1].clientX;
+			self.pinching.p2.y = e.touches[1].clientY;
+		}
+	});
+
+	this.dom.addEventListener('touchmove', function(e) {
+		console.log(e);
+		if(e.touches.length == 2 && self.pinching.status) {
+			var oldDistSqr = (self.pinching.p1.x - self.pinching.p2.x) * (self.pinching.p1.x - self.pinching.p2.x) + (self.pinching.p1.y - self.pinching.p2.y) * (self.pinching.p1.y - self.pinching.p2.y);
+			var distSqr = (e.touches[0].clientX - e.touches[1].clientX) * (e.touches[0].clientX - e.touches[1].clientX) + (e.touches[0].clientY - e.touches[1].clientY) * (e.touches[0].clientY - e.touches[1].clientY);
+			if(oldDistSqr != 0) {
+				self.setScale(self.scale * (distSqr / oldDistSqr), {
+					ex: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+					ey: (e.touches[0].clientY + e.touches[1].clientY) / 2
+				});
+			}
+		}
+	});
+
+	this.dom.addEventListener('touchend', function(e) {
+		self.pinching.status = false;
+	});*/
 }
 
 /**
@@ -87,7 +122,6 @@ SVG.prototype.setScale = function(scale, options) {
 		var viewBox = '';
 		if (options.ex) {
 			this.coords.x -= (options.ex / this.width) * (this.width * scale - oldWidth);
-			console.log(this.coords.x);
 		}
 
 		if (options.ey) {
