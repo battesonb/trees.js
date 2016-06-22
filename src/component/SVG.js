@@ -486,7 +486,7 @@ function updateSelectedNode(svg, node, options) {
 	else
 		svg.selectedNode._rect.style.fill = '#33DD33';
 	if(options.stroke)
-		svg.selectedNode._rect.style.stroke = options.strokea;
+		svg.selectedNode._rect.style.stroke = options.stroke;
 	else
 		svg.selectedNode._rect.style.stroke = '#11BB11';
 }
@@ -553,6 +553,8 @@ function removeCurrNode(svg, node) {
  *     <li>lineType - The type of line to connect nodes withm. Options are 'bezier' and 'line'. Default is 'line'.</li>
  *     <li>rootFill - The fill color of the root node</li>
  *     <li>rootStroke - The stroke color of the root node</li>
+ *     <li>selectedFill - The selected node's fill color. Default is #33DD33.</li>
+ *     <li>selectedStroke - The selected node's stroke color. Default is #11BB11.</li>
  *     <li>stroke - The stroke color of regular node. Default is #6688BB.</li>
  * <ul>
  */
@@ -656,7 +658,10 @@ SVG.prototype.drawTree = function(root, options) {
 	tree.dragging = {};
 	tree.traverse(function(node, level, index, parent) {
 		node._rect.addEventListener('mousedown', function(e) {
-			updateSelectedNode(self, node);
+			updateSelectedNode(self, node, {
+				fill: options.selectedFill,
+				stroke: options.selectedStroke
+			});
 			tree.dragging.node = node;
 			tree.dragging.parent = parent;
 			tree.dragging.anchorX = e.clientX * self.scale - node.x;
@@ -665,7 +670,10 @@ SVG.prototype.drawTree = function(root, options) {
 				self.selectedAction(self.selectedNode);
 		});
 		node._rect.addEventListener('touchstart', function(e) {
-			updateSelectedNode(self, node);
+			updateSelectedNode(self, node, {
+				fill: options.selectedFill,
+				stroke: options.selectedStroke
+			});
 			tree.dragging.node = node;
 			tree.dragging.parent = parent;
 			tree.dragging.anchorX = e.touches[0].clientX * self.scale - node.x;

@@ -55,13 +55,16 @@ SVG Draw:
 svg.drawTree(root, options)
 
 //options:
-anchor: 'none'        // Sets which nodes move with the current node. Options are 'children', 'descendents', 'none'.
-fill: '#BBDDFF'       // The fill color of a regular node.
-lineStroke: stroke    // The edge/line stroke colour.
-lineType: 'line'      // The type of edge/line. Options are 'bezier', 'line'.
-rootFill: '#FF6666'   // The fill color of the root node.
-rootStroke: '#DD2222' // The stroke color of the root node.
-stroke: '#6688BB'     // The stroke color of a regular node.
+anchor: 'none'            // Sets which nodes move with the current node. Options are 'children', 'descendents', 'none'.
+cornerRadius: 2           // Sets the corner radius of the nodes in the given tree.
+fill: '#BBDDFF'           // The fill color of a regular node.
+lineStroke: stroke        // The edge/line stroke colour.
+lineType: 'line'          // The type of edge/line. Options are 'bezier', 'line'.
+rootFill: '#FF6666'       // The fill color of the root node.
+rootStroke: '#DD2222'     // The stroke color of the root node.
+selectedFill: '#33DD33'   // The fill color of the selected node.
+selectedStroke: '#11BB11' // The stroke color of the selected node.
+stroke: '#6688BB'         // The stroke color of a regular node.
 
 ```
 
@@ -73,6 +76,11 @@ svg.setAnchor(anchor)
 Set the selected node's action, where the signature of func is func(node):
 ```
 svg.setSelectedAction(func)
+```
+Remove a node from the SVG, and the Tree data structure. The default of maintainChildren is true, if false, it will delete
+a node and all of its children.
+```
+svg.removeNode(node, maintainChildren); // Returns the node if deleted.
 ```
 
 ## Variables
