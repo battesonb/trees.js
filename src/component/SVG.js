@@ -13,6 +13,8 @@ var Tree = require('./Tree');
  * @constructor
  */
 function SVG(id, options) {
+	if(document === undefined)
+		var document = global.document;
 	this.dom = document.getElementById(id);
 	if(!options) {
 		options = {};
@@ -54,6 +56,11 @@ function SVG(id, options) {
 
 	this.coords = {x: 0, y: 0};
 	this.setScale(this.scale);
+
+	var self = this;
+	this.dom.addEventListener('wheel', function(e) {
+		self.setScale(self.scale + e.deltaY / 2000, { ex: e.clientX, ey: e.clientY });
+	});
 }
 
 /**
@@ -61,50 +68,35 @@ function SVG(id, options) {
  * @param scale The new scale.
  * @param options (optional)
  * <ul>
- *     <li>px - The x coordinate of the SVG.</li>
- *     <li>py - The y coordinate of the SVG.</li>
- *     <li>mx - Increments the x coordinate of the SVG.</li>
- *     <li>my - Increments the y coordinate of the SVG.</li>
+ *     <li>ex - The event x coordinate.</li>
+ *     <li>ey - The event y coordinate.</li>
  * </ul>
  */
 SVG.prototype.setScale = function(scale, options) {
+	var oldWidth = this.scale * this.width;
+	var oldHeight = this.scale * this.height;
+
 	this.scale = scale;
 	if(this.scale < 0.1)
 		this.scale = 0.1;
-	if(!options) {
-		options = {};
-	}
+	else {
+		if (!options) {
+			options = {};
+		}
 
-	var viewBox = '';
-	if(options.px) {
-		this.coords.x = options.px;
-	}
-	if(options.mx) {
-		this.coords.x = -(this.width - options.mx) + this.height/2;
-	}
+		var viewBox = '';
+		if (options.ex) {
+			this.coords.x -= (options.ex / this.width) * (this.width * scale - oldWidth);
+			console.log(this.coords.x);
+		}
 
-	if(options.py) {
-		this.coords.y = options.py;
+		if (options.ey) {
+			this.coords.y -= options.ey / this.height * (this.height * scale - oldHeight);
+		}
+
+		viewBox += this.coords.x + ' ' + this.coords.y + ' ' + this.width * this.scale + ' ' + this.height * this.scale;
+		this.dom.setAttribute('viewBox', viewBox);
 	}
-	if(options.my) {
-		this.coords.y = -(this.height - options.my) + this.height/2;
-	}
-
-	viewBox += this.coords.x + ' ' + this.coords.y + ' ' + this.width * this.scale + ' ' + this.height * this.scale;
-	this.dom.setAttribute('viewBox', viewBox);
-};
-
-SVG.prototype.setZoom = function(scale) {
-	var transMatrix = [1,0,0,1,0,0];
-	for (var i=0; i<transMatrix.length; i++) {
-		transMatrix[i] *= scale;
-	}
-	transMatrix[4] += (1-scale)*this.width/2;
-	transMatrix[5] += (1-scale)*this.height/2;
-
-	var newMatrix = "matrix(" +  transMatrix.join(' ') + ")";
-
-	this.dom.setAttribute("transform", "translate(1050, 1050)");
 };
 
 
@@ -652,15 +644,15 @@ SVG.prototype.drawTree = function(root, options) {
 	self.dom.addEventListener('mousedown', function(e) {
 		if(e.target == self.dom) {
 			tree.dragging.dom = true;
-			tree.dragging.currX = e.clientX;
-			tree.dragging.currY = e.clientY;
+			tree.dragging.currX = e.clientX * self.scale;
+			tree.dragging.currY = e.clientY * self.scale;
 		}
 	});
 	self.dom.addEventListener('touchstart', function(e) {
 		if(e.target == self.dom) {
 			tree.dragging.dom = true;
-			tree.dragging.currX = e.touches[0].clientX;
-			tree.dragging.currY = e.touches[0].clientY;
+			tree.dragging.currX = e.touches[0].clientX * self.scale;
+			tree.dragging.currY = e.touches[0].clientY * self.scale;
 		}
 	});
 
@@ -684,11 +676,6 @@ SVG.prototype.drawTree = function(root, options) {
 	self.dom.addEventListener('touchend', function(e) {
 		tree.dragging.node = undefined;
 		tree.dragging.dom = false;
-	});
-
-	self.dom.addEventListener('wheel', function(e) {
-		console.log(e);
-		self.setScale(self.scale + e.deltaY / 2000, { mx: e.clientX, my: e.clientY });
 	});
 };
 
@@ -764,8 +751,8 @@ function handleMove(self, tree, currNode, nodeParent, ex, ey, options) {
 		}
 	} else if(tree.dragging.dom) {
 		tree.traverse(function (node, level, index, parent) {
-			node.x += ex - tree.dragging.currX;
-			node.y += ey - tree.dragging.currY;
+			node.x += ex * self.scale - tree.dragging.currX;
+			node.y += ey * self.scale - tree.dragging.currY;
 			self.moveRectangle(node._rect, node.x, node.y);
 			self.moveText(node._text, node.x, node.y);
 			if (node._line) {
@@ -777,8 +764,8 @@ function handleMove(self, tree, currNode, nodeParent, ex, ey, options) {
 			if (node._direction)
 				self.moveCircle(node._direction, node.x + node._offset.x, node.y + node._offset.y);
 		});
-		tree.dragging.currX = ex;
-		tree.dragging.currY = ey;
+		tree.dragging.currX = ex * self.scale;
+		tree.dragging.currY = ey * self.scale;
 	}
 }
 
