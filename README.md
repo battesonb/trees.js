@@ -1,11 +1,18 @@
 # trees.js
-An attempt to make a somewhat optimised interactive tree diagramming library. This library uses SVG and the built in events system currently.
+A somewhat optimised interactive tree diagramming library. This library uses SVG and the built in events system at this stage.
 
 ## Installing
 To install the package, simply run the following command:
 ```
 npm install trees.js
 ```
+
+## Version
+### 1.1.0
+- More options added to drawTree function.
+- Scaling in desktop added.
+- removeNode function added.
+- Renamed SVG pointers that are attached to nodes.
 
 ## Using the library 
 Once you have imported the .js file from the dist folder, a tree object will be brought into the global space. It can also be accessed using a require.

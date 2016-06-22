@@ -35,14 +35,15 @@
 	<script src="node_modules/hammerjs/hammer.min.js"></script>
 	<script>
 		window.onload = function() {
-			//HAMMERJS STUFF
+			//--------------------------HAMMERJS STUFF-------------------------
+			// The following is for pinch debugging, you may comment it out or ignore it.
 			var mc = new Hammer.Manager(document.getElementById('mySVG'));
 			var Pinch = new Hammer.Pinch();
 			mc.add(Pinch);
 			mc.on('pinch', function(e) {
-				console.log(e);
+				// Do nothing, for now.
 			});
-			//-------------------
+			//-----------------------------------------------------------------
 
 			// Create the SVG.
 			var svg = new trees.SVG('mySVG', {width: 1920, height: 980});

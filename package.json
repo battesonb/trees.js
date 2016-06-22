@@ -1,6 +1,6 @@
 {
   "name": "trees.js",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A tree diagramming library. This library currently uses SVG and the built in events system.",
   "main": "dist/trees.bundle.js",
   "dependencies": {},
@@ -21,7 +21,10 @@
   "keywords": [
     "tree",
     "graph",
-    "visual"
+    "visual",
+    "svg",
+    "vector",
+    "library"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
