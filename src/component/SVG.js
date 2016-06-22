@@ -8,10 +8,13 @@ var Tree = require('./Tree');
  *     <li>clear - Clears the previous tree if true.</li>
  *     <li>height - Sets the height of the svg. Default is 200px.</li>
  *     <li>width - Sets the width of the svg. Default is 200px.</li>
+ *     <li>scale - Sets the scale of the svg. Default is 1.</li>
  * </ul>
  * @constructor
  */
 function SVG(id, options) {
+	if(document === undefined)
+		var document = global.document;
 	this.dom = document.getElementById(id);
 	if(!options) {
 		options = {};
@@ -44,7 +47,92 @@ function SVG(id, options) {
 			this.dom.setAttribute('width', this.width + 'px');
 		}
 	}
+
+	if (options.scale) {
+		this.scale = options.scale;
+	} else {
+		this.scale = 1;
+	}
+
+	this.coords = {x: 0, y: 0};
+	this.setScale(this.scale);
+
+	var self = this;
+	this.dom.addEventListener('wheel', function(e) {
+		self.setScale(self.scale + e.deltaY / 2000, { ex: e.clientX, ey: e.clientY });
+	});
+
+	/* // TODO Implement pinching
+	this.pinching = {
+		status: false,
+		p1: {x: 0, y: 0},
+		p2: {x: 0, y: 0}
+	}
+
+	this.dom.addEventListener('touchstart', function(e) {
+		if(e.touches.length == 2) {
+			self.pinching.status = true;
+			self.pinching.p1.x = e.touches[0].clientX;
+			self.pinching.p1.y = e.touches[0].clientY;
+			self.pinching.p2.x = e.touches[1].clientX;
+			self.pinching.p2.y = e.touches[1].clientY;
+		}
+	});
+
+	this.dom.addEventListener('touchmove', function(e) {
+		console.log(e);
+		if(e.touches.length == 2 && self.pinching.status) {
+			var oldDistSqr = (self.pinching.p1.x - self.pinching.p2.x) * (self.pinching.p1.x - self.pinching.p2.x) + (self.pinching.p1.y - self.pinching.p2.y) * (self.pinching.p1.y - self.pinching.p2.y);
+			var distSqr = (e.touches[0].clientX - e.touches[1].clientX) * (e.touches[0].clientX - e.touches[1].clientX) + (e.touches[0].clientY - e.touches[1].clientY) * (e.touches[0].clientY - e.touches[1].clientY);
+			if(oldDistSqr != 0) {
+				self.setScale(self.scale * (distSqr / oldDistSqr), {
+					ex: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+					ey: (e.touches[0].clientY + e.touches[1].clientY) / 2
+				});
+			}
+		}
+	});
+
+	this.dom.addEventListener('touchend', function(e) {
+		self.pinching.status = false;
+	});*/
 }
+
+/**
+ * Sets the current scale of the svg to the given value.
+ * @param scale The new scale.
+ * @param options (optional)
+ * <ul>
+ *     <li>ex - The event x coordinate.</li>
+ *     <li>ey - The event y coordinate.</li>
+ * </ul>
+ */
+SVG.prototype.setScale = function(scale, options) {
+	var oldWidth = this.scale * this.width;
+	var oldHeight = this.scale * this.height;
+
+	this.scale = scale;
+	if(this.scale < 0.1)
+		this.scale = 0.1;
+	else {
+		if (!options) {
+			options = {};
+		}
+
+		var viewBox = '';
+		if (options.ex) {
+			this.coords.x -= (options.ex / this.width) * (this.width * scale - oldWidth);
+		}
+
+		if (options.ey) {
+			this.coords.y -= options.ey / this.height * (this.height * scale - oldHeight);
+		}
+
+		viewBox += this.coords.x + ' ' + this.coords.y + ' ' + this.width * this.scale + ' ' + this.height * this.scale;
+		this.dom.setAttribute('viewBox', viewBox);
+	}
+};
+
 
 /**
  * Sets the current anchor of the tree to the given value
@@ -52,7 +140,7 @@ function SVG(id, options) {
  */
 SVG.prototype.setAnchor = function(anchor) {
 	this.anchor = anchor;
-}
+};
 
 /**
  * Sets the current anchor of the tree to the given value
@@ -60,7 +148,7 @@ SVG.prototype.setAnchor = function(anchor) {
  */
 SVG.prototype.setSelectedAction = function(func) {
 	this.selectedAction = func;
-}
+};
 
 /**
  * Adds a bezier curve to the SVG.
@@ -76,7 +164,7 @@ SVG.prototype.setSelectedAction = function(func) {
  * @returns {Element} bezier the bezier curve.
  */
 SVG.prototype.addBezier = function(mx, my, x, y, options) {
-	var bezier = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+	var bezier = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 	var c1x = (mx + x) / 2;
 	var c1y = my;
 	var c2x = (mx + x) / 2;
@@ -91,15 +179,15 @@ SVG.prototype.addBezier = function(mx, my, x, y, options) {
 	if(options.stroke)
 		bezier.style.stroke = options.stroke;
 	else
-		bezier.style.stroke = "#000";
+		bezier.style.stroke = '#000';
 	if(options.strokeWidth)
 		bezier.style.strokeWidth = options.strokeWidth;
 	else
-		bezier.style.strokeWidth = "2px";
+		bezier.style.strokeWidth = '2px';
 
 	this.dom.insertBefore(bezier, this.dom.firstChild);
 	return bezier;
-}
+};
 
 /**
  * Recalculates a bezier entirely, given the reference to a bezier.
@@ -116,7 +204,7 @@ SVG.prototype.resetBezier = function(bezier, mx, my, x, y) {
 	var c2y = y;
 	bezier.setAttribute('d', 'M' + 0 + ' ' + 0 + ' C' + (c1x - mx) + ' ' + (c1y - my) + ' ' + (c2x - mx) + ' ' + (c2y - my) + ' ' + (x - mx) + ' ' + (y - my));
 	bezier.setAttribute('transform', 'translate(' + mx + ',' + my + ')');
-}
+};
 
 /**
  * Moves a bezier curve without recalculation of curves.
@@ -126,7 +214,7 @@ SVG.prototype.resetBezier = function(bezier, mx, my, x, y) {
  */
 SVG.prototype.moveBezier = function(bezier, mx, my) {
 	bezier.setAttribute('transform', 'translate(' + mx + ',' + my + ')');
-}
+};
 
 /**
  * Adds a circle to the SVG.
@@ -142,10 +230,10 @@ SVG.prototype.moveBezier = function(bezier, mx, my) {
  * @returns {Element}
  */
 SVG.prototype.addCircle = function(cx, cy, r, options) {
-	var circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
-	circle.setAttribute("cx", cx);
-	circle.setAttribute("cy", cy);
-	circle.setAttribute("r", r);
+	var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+	circle.setAttribute('cx', cx);
+	circle.setAttribute('cy', cy);
+	circle.setAttribute('r', r);
 
 	if(!options) {
 		options = {};
@@ -153,15 +241,15 @@ SVG.prototype.addCircle = function(cx, cy, r, options) {
 	if(options.fill)
 		circle.style.fill = options.fill;
 	else
-		circle.style.fill = "#FFF";
+		circle.style.fill = '#FFF';
 	if(options.stroke)
 		circle.style.stroke = options.stroke;
 	else
-		circle.style.stroke = "#000";
+		circle.style.stroke = '#000';
 	if(options.strokeWidth)
 		circle.style.strokeWidth = options.strokeWidth;
 	else
-		circle.style.strokeWidth = "2px";
+		circle.style.strokeWidth = '2px';
 
 	this.dom.appendChild(circle);
 	return circle;
@@ -174,9 +262,9 @@ SVG.prototype.addCircle = function(cx, cy, r, options) {
  * @param cy Circle's y position.
  */
 SVG.prototype.moveCircle = function(circle, cx, cy) {
-	circle.setAttribute("cx", cx);
-	circle.setAttribute("cy", cy);
-}
+	circle.setAttribute('cx', cx);
+	circle.setAttribute('cy', cy);
+};
 
 /**
  * Adds a line to the SVG.
@@ -184,7 +272,7 @@ SVG.prototype.moveCircle = function(circle, cx, cy) {
  * @param y1 First y position.
  * @param x2 Second x position.
  * @param y2 Second y position.
- * @options
+ * @param options
  * <ul>
  *     <li>stroke - stroke color, default is #000000.</li>
  *     <li>strokeWidth - stroke size, default is 2px.</li>
@@ -192,25 +280,25 @@ SVG.prototype.moveCircle = function(circle, cx, cy) {
  * @returns {Element} The line
  */
 SVG.prototype.addLine = function(x1, y1, x2, y2, options) {
-	var line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
-	line.setAttribute("x1", x1);
-	line.setAttribute("y1", y1);
-	line.setAttribute("x2", x2);
-	line.setAttribute("y2", y2);
+	var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+	line.setAttribute('x1', x1);
+	line.setAttribute('y1', y1);
+	line.setAttribute('x2', x2);
+	line.setAttribute('y2', y2);
 
 	if(options.stroke)
 		line.style.stroke = options.stroke;
 	else
-		line.style.stroke = "#000";
+		line.style.stroke = '#000';
 
 	if(options.strokeWidth)
 		line.style.strokeWidth = options.strokeWidth;
 	else
-		line.style.strokeWidth = "2px";
+		line.style.strokeWidth = '2px';
 
 	this.dom.appendChild(line);
 	return line;
-}
+};
 
 /**
  * Moves a line element given a reference to the line.
@@ -222,20 +310,20 @@ SVG.prototype.addLine = function(x1, y1, x2, y2, options) {
  */
 SVG.prototype.moveLine = function(line, x1, y1, x2, y2) {
 	if(x2) {
-		line.setAttribute("x1", x1);
-		line.setAttribute("y1", y1);
-		line.setAttribute("x2", x2);
+		line.setAttribute('x1', x1);
+		line.setAttribute('y1', y1);
+		line.setAttribute('x2', x2);
 		if(y2)
-			line.setAttribute("y2", y2);
+			line.setAttribute('y2', y2);
 	} else {
 		var mx = x1 - parseFloat(line.getAttribute('x1'));
 		var my = y1 - parseFloat(line.getAttribute('y1'));
-		line.setAttribute("x1", x1);
-		line.setAttribute("y1", y1);
-		line.setAttribute("x2", parseFloat(line.getAttribute('x2')) + mx);
-		line.setAttribute("y2", parseFloat(line.getAttribute('y2')) + my);
+		line.setAttribute('x1', x1);
+		line.setAttribute('y1', y1);
+		line.setAttribute('x2', parseFloat(line.getAttribute('x2')) + mx);
+		line.setAttribute('y2', parseFloat(line.getAttribute('y2')) + my);
 	}
-}
+};
 
 var PADDING = 5;
 
@@ -257,11 +345,11 @@ var PADDING = 5;
  * @returns {Element} The rectangle
  */
 SVG.prototype.addRectangle = function(x, y, width, height, rx, ry, options) {
-	var rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+	var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
 	if(rx)
-		rect.setAttribute("rx", rx);
+		rect.setAttribute('rx', rx);
 	if(ry)
-		rect.setAttribute("ry", ry);
+		rect.setAttribute('ry', ry);
 
 
 	if(!options) {
@@ -270,30 +358,30 @@ SVG.prototype.addRectangle = function(x, y, width, height, rx, ry, options) {
 	if(options.fill)
 		rect.style.fill = options.fill;
 	else
-		rect.style.fill = "#FFF";
+		rect.style.fill = '#FFF';
 	if(options.stroke)
 		rect.style.stroke = options.stroke;
 	else
-		rect.style.stroke = "#000";
+		rect.style.stroke = '#000';
 	if(options.strokeWidth)
 		rect.style.strokeWidth = options.strokeWidth;
 	else
-		rect.style.strokeWidth = "1px";
+		rect.style.strokeWidth = '1px';
 	if(options.opacity)
-		rect.setAttribute("fill-opacity", options.opacity);
+		rect.setAttribute('fill-opacity', options.opacity);
 
 	if(options.child) {
 		var bbox = options.child.getBBox();
-		rect.setAttribute("x", x);
-		rect.setAttribute("y", y);
-		rect.setAttribute("width", bbox.width + PADDING * 2);
-		rect.setAttribute("height", bbox.height + PADDING * 2);
+		rect.setAttribute('x', x);
+		rect.setAttribute('y', y);
+		rect.setAttribute('width', bbox.width + PADDING * 2);
+		rect.setAttribute('height', bbox.height + PADDING * 2);
 		options.child.parentNode.insertBefore(rect, options.child);
 	} else {
-		rect.setAttribute("x", x);
-		rect.setAttribute("y", y);
-		rect.setAttribute("width", width);
-		rect.setAttribute("height", height);
+		rect.setAttribute('x', x);
+		rect.setAttribute('y', y);
+		rect.setAttribute('width', width);
+		rect.setAttribute('height', height);
 		this.dom.appendChild(rect);
 	}
 	return rect;
@@ -311,9 +399,9 @@ SVG.prototype.moveRectangle = function(rect, x, y, options) {
 		options = {};
 	}
 
-	rect.setAttribute("x", x);
-	rect.setAttribute("y", y);
-}
+	rect.setAttribute('x', x);
+	rect.setAttribute('y', y);
+};
 
 /**
  * Adds text to the SVG.
@@ -327,22 +415,22 @@ SVG.prototype.moveRectangle = function(rect, x, y, options) {
  * @returns {Element} The text
  */
 SVG.prototype.addText = function(x, y, text, options) {
-	var textNode = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+	var textNode = document.createElementNS('http://www.w3.org/2000/svg', 'text');
 	textNode.innerHTML = text;
-	textNode.setAttribute("alignment-baseline", "central");
-	textNode.setAttribute("pointer-events", "none");
-	textNode.setAttribute("x", x + PADDING);
+	textNode.setAttribute('alignment-baseline', 'central');
+	textNode.setAttribute('pointer-events', 'none');
+	textNode.setAttribute('x', x + PADDING);
 
 	if(!options) {
 		options = {};
 	}
 	if(options.fill)
-		textNode.setAttribute("fill", options.fill);
+		textNode.setAttribute('fill', options.fill);
 	else
-		textNode.setAttribute("fill", "#000");
+		textNode.setAttribute('fill', '#000');
 
 	this.dom.appendChild(textNode);
-	textNode.setAttribute("y", y + PADDING + textNode.getBBox().height / 2);
+	textNode.setAttribute('y', y + PADDING + textNode.getBBox().height / 2);
 
 	return textNode;
 };
@@ -354,16 +442,24 @@ SVG.prototype.addText = function(x, y, text, options) {
  * @param y y position.
  */
 SVG.prototype.moveText = function(textNode, x, y) {
-	textNode.setAttribute("x", x + PADDING);
-	textNode.setAttribute("y", y + PADDING + textNode.getBBox().height / 2);
-}
+	textNode.setAttribute('x', x + PADDING);
+	textNode.setAttribute('y', y + PADDING + textNode.getBBox().height / 2);
+};
 
 /**
  * Clears the SVG.
  */
 SVG.prototype.clear = function() {
-	this.dom.innerHTML = "";
+	this.dom.innerHTML = '';
 };
+
+/**
+ * Removes an SVG element given a reference to it.
+ * @param element The SVG element.
+ */
+SVG.prototype.removeElement = function(element) {
+	this.dom.removeChild(element);
+}
 
 /**
  * Updates the colors of a selected node.
@@ -377,22 +473,72 @@ SVG.prototype.clear = function() {
  */
 function updateSelectedNode(svg, node, options) {
 	if(svg.selectedNode) {
-		svg.selectedNode.rect.style.fill = svg.current.fill;
-		svg.selectedNode.rect.style.stroke = svg.current.stroke;
+		svg.selectedNode._rect.style.fill = svg.current.fill;
+		svg.selectedNode._rect.style.stroke = svg.current.stroke;
 	}
 	svg.selectedNode = node;
-	svg.current.fill = node.rect.style.fill;
-	svg.current.stroke = node.rect.style.stroke;
+	svg.current.fill = node._rect.style.fill;
+	svg.current.stroke = node._rect.style.stroke;
 	if(!options)
 		options = {};
 	if(options.fill)
-		svg.selectedNode.rect.style.fill = options.fill;
+		svg.selectedNode._rect.style.fill = options.fill;
 	else
-		svg.selectedNode.rect.style.fill = '#33DD33';
+		svg.selectedNode._rect.style.fill = '#33DD33';
 	if(options.stroke)
-		svg.selectedNode.rect.style.stroke = options.strokea;
+		svg.selectedNode._rect.style.stroke = options.stroke;
 	else
-		svg.selectedNode.rect.style.stroke = '#11BB11';
+		svg.selectedNode._rect.style.stroke = '#11BB11';
+}
+
+/**
+ * Removes a node, given a reference to the node, from the SVG and the data structure.
+ * @param node the node.
+ * @param maintainChildren if true, won't delete a node with children, otherwise it will delete a node and its children. Default is true.
+ * @returns the node if deleted, null otherwise.
+ */
+SVG.prototype.removeNode = function(node, maintainChildren) {
+	if(maintainChildren === undefined || maintainChildren) {
+		if(node.children.length == 0) {
+			return removeCurrNode(this, node);
+		}
+	} else {
+		var list = [node];
+		while (list.length > 0) {
+			var currNode = list.splice(0, 1)[0];
+			for (var i = 0; i < currNode.children.length; i++) {
+				list.push(currNode.children[i]);
+			}
+			removeCurrNode(this, currNode);
+		}
+		return node;
+	}
+};
+
+/**
+ * Removes the current node.
+ * @param svg The SVG data structure.
+ * @param node The node to remove.
+ * @returns The node if it was a success, null otherwise.
+ */
+function removeCurrNode(svg, node) {
+	if (node._line)
+		svg.removeElement(node._line);
+	if (node._direction)
+		svg.removeElement(node._direction);
+	svg.removeElement(node._rect);
+	svg.removeElement(node._text);
+
+	if (node.parent) {
+		var siblings = node.parent.children;
+		for (var i = 0; i < siblings.length; i++) {
+			if (siblings[i] == node) {
+				siblings.splice(i, 1);
+				return node;
+			}
+		}
+	}
+	return null;
 }
 
 /**
@@ -401,11 +547,14 @@ function updateSelectedNode(svg, node, options) {
  * @param options
  * <ul>
  *     <li>anchor - The anchor of the children when dragging a node. Options are 'none' and 'children'. Default is 'none'</li>
+ *     <li>cornerRadius - The corner radius of each node. Default is 2.</li>
  *     <li>fill - The fill color of regular nodes. Default is #BBDDFF.</li>
  *     <li>lineStroke - The stroke color of tree edges/lines. Default is the same as stroke color. Default is </li>
  *     <li>lineType - The type of line to connect nodes withm. Options are 'bezier' and 'line'. Default is 'line'.</li>
  *     <li>rootFill - The fill color of the root node</li>
  *     <li>rootStroke - The stroke color of the root node</li>
+ *     <li>selectedFill - The selected node's fill color. Default is #33DD33.</li>
+ *     <li>selectedStroke - The selected node's stroke color. Default is #11BB11.</li>
  *     <li>stroke - The stroke color of regular node. Default is #6688BB.</li>
  * <ul>
  */
@@ -443,6 +592,10 @@ SVG.prototype.drawTree = function(root, options) {
 	else
 		self.defaults.lineStroke = self.defaults.stroke;
 
+	if(options.cornerRadius)
+		self.defaults.cornerRadius = options.cornerRadius;
+	else
+		self.defaults.cornerRadius = 2;
 
 	if(self.clearable)
 		self.clear();
@@ -450,50 +603,48 @@ SVG.prototype.drawTree = function(root, options) {
 
 	tree.traverse(function(node, level, index, parent) {
 		if(node.contents) {
-			var text = self.addText(0, 0, node.contents);
-			node.text = text;
-		}		
+			node._text = self.addText(0, 0, node.contents);
+		}
 
+		var rect;
 		if(!parent) {
-			var rect = self.addRectangle(0, 0, 5, 5, 2, 2, {
+			rect = self.addRectangle(0, 0, 5, 5, self.defaults.cornerRadius, self.defaults.cornerRadius, {
 				fill: self.defaults.rootFill,
 				stroke: self.defaults.rootStroke,
-				child: node.text
+				child: node._text
 			});
 		}
 		else {
-			var rect = self.addRectangle(0, 0, 5, 5, 2, 2, {
+			rect = self.addRectangle(0, 0, 5, 5, self.defaults.cornerRadius, self.defaults.cornerRadius, {
 				fill: self.defaults.fill,
 				stroke: self.defaults.stroke,
-				child: node.text
+				child: node._text
 			});
 		}
-		node.rect = rect;
+		node._rect = rect;
 	});
 
 	tree.initialize();
 
 	tree.traverse(function(node, level, index, parent) {
-		self.moveText(node.text, node.x, node.y);
-		self.moveRectangle(node.rect, node.x, node.y);
+		self.moveText(node._text, node.x, node.y);
+		self.moveRectangle(node._rect, node.x, node.y);
 
 		var offset = getOffset(node, parent);
-		node.offset = offset;
+		node._offset = offset;
 		if(parent) {
 			if(options.lineType == 'bezier') {
-				var bezier = self.addBezier(parent.x + offset.parX, parent.y + offset.parY, node.x + offset.x, node.y + offset.y, {
+				node._line = self.addBezier(parent.x + offset.parX, parent.y + offset.parY, node.x + offset.x, node.y + offset.y, {
 					stroke: self.defaults.lineStroke
 				});
-				node.line = bezier;
 			} else {
 				options.lineType = 'line'
-				var line = self.addLine(parent.x + offset.parX, parent.y + offset.parY, node.x + offset.x, node.y + offset.y, {
+				node._line = self.addLine(parent.x + offset.parX, parent.y + offset.parY, node.x + offset.x, node.y + offset.y, {
 					stroke: self.defaults.lineStroke
 				});
-				node.line = line;
 			}
 
-			node.direction = self.addCircle(node.x + offset.x, node.y + offset.y, 2, {
+			node._direction = self.addCircle(node.x + offset.x, node.y + offset.y, 2, {
 				fill: self.defaults.lineStroke,
 				stroke: self.defaults.lineStroke,
 			});
@@ -506,38 +657,44 @@ SVG.prototype.drawTree = function(root, options) {
 
 	tree.dragging = {};
 	tree.traverse(function(node, level, index, parent) {
-		node.rect.addEventListener('mousedown', function(e) {
-			updateSelectedNode(self, node);
-			if(self.selectedAction)
-				self.selectedAction(self.selectedNode);
+		node._rect.addEventListener('mousedown', function(e) {
+			updateSelectedNode(self, node, {
+				fill: options.selectedFill,
+				stroke: options.selectedStroke
+			});
 			tree.dragging.node = node;
 			tree.dragging.parent = parent;
-			tree.dragging.anchorX = e.clientX - node.x;
-			tree.dragging.anchorY = e.clientY - node.y;
+			tree.dragging.anchorX = e.clientX * self.scale - node.x;
+			tree.dragging.anchorY = e.clientY * self.scale - node.y;
+			if (self.selectedAction)
+				self.selectedAction(self.selectedNode);
 		});
-		node.rect.addEventListener('touchstart', function(e) {
-			updateSelectedNode(self, node);
-			if(self.selectedAction)
-				self.selectedAction(self.selectedNode);
+		node._rect.addEventListener('touchstart', function(e) {
+			updateSelectedNode(self, node, {
+				fill: options.selectedFill,
+				stroke: options.selectedStroke
+			});
 			tree.dragging.node = node;
 			tree.dragging.parent = parent;
-			tree.dragging.anchorX = e.touches[0].clientX - node.x;
-			tree.dragging.anchorY = e.touches[0].clientY - node.y;
+			tree.dragging.anchorX = e.touches[0].clientX * self.scale - node.x;
+			tree.dragging.anchorY = e.touches[0].clientY * self.scale - node.y;
+			if(self.selectedAction)
+				self.selectedAction(self.selectedNode);
 		});
 	});
 
 	self.dom.addEventListener('mousedown', function(e) {
 		if(e.target == self.dom) {
 			tree.dragging.dom = true;
-			tree.dragging.currX = e.clientX;
-			tree.dragging.currY = e.clientY;
+			tree.dragging.currX = e.clientX * self.scale;
+			tree.dragging.currY = e.clientY * self.scale;
 		}
 	});
 	self.dom.addEventListener('touchstart', function(e) {
 		if(e.target == self.dom) {
 			tree.dragging.dom = true;
-			tree.dragging.currX = e.touches[0].clientX;
-			tree.dragging.currY = e.touches[0].clientY;
+			tree.dragging.currX = e.touches[0].clientX * self.scale;
+			tree.dragging.currY = e.touches[0].clientY * self.scale;
 		}
 	});
 
@@ -562,7 +719,7 @@ SVG.prototype.drawTree = function(root, options) {
 		tree.dragging.node = undefined;
 		tree.dragging.dom = false;
 	});
-}
+};
 
 /**
  * Given an event's new position, update the current node.
@@ -584,52 +741,51 @@ function handleMove(self, tree, currNode, nodeParent, ex, ey, options) {
 	if(currNode) {
 		var origX = currNode.x;
 		var origY = currNode.y;
-		currNode.x = ex - tree.dragging.anchorX;
-		currNode.y = ey - tree.dragging.anchorY;
-		self.moveRectangle(currNode.rect, currNode.x, currNode.y);
-		self.moveText(currNode.text, currNode.x, currNode.y);
-		var offset = getOffset(currNode, nodeParent);
-		currNode.offset = offset;
-		if(currNode.direction)
-			self.moveCircle(currNode.direction, currNode.x + currNode.offset.x, currNode.y + currNode.offset.y);
+		currNode.x = ex * self.scale - tree.dragging.anchorX;
+		currNode.y = ey * self.scale - tree.dragging.anchorY;
+		self.moveRectangle(currNode._rect, currNode.x, currNode.y);
+		self.moveText(currNode._text, currNode.x, currNode.y);
+		currNode._offset = getOffset(currNode, nodeParent);
+		if(currNode._direction)
+			self.moveCircle(currNode._direction, currNode.x + currNode._offset.x, currNode.y + currNode._offset.y);
 		if(currNode.children) {
 			for(var i = 0; i < currNode.children.length; i++) {
-				if(currNode.children[i].direction) {
-					currNode.children[i].offset = getOffset(currNode.children[i], currNode);
-					self.moveCircle(currNode.children[i].direction, currNode.children[i].x + currNode.children[i].offset.x, currNode.children[i].y + currNode.children[i].offset.y);
+				if(currNode.children[i]._direction) {
+					currNode.children[i]._offset = getOffset(currNode.children[i], currNode);
+					self.moveCircle(currNode.children[i]._direction, currNode.children[i].x + currNode.children[i]._offset.x, currNode.children[i].y + currNode.children[i]._offset.y);
 				}
 			}
 		}
 		if(options.lineType == 'bezier') {
-			if (currNode.line)
-				self.resetBezier(currNode.line, nodeParent.x + currNode.offset.parX, nodeParent.y + currNode.offset.parY, currNode.x + currNode.offset.x, currNode.y + currNode.offset.y);
+			if (currNode._line)
+				self.resetBezier(currNode._line, nodeParent.x + currNode._offset.parX, nodeParent.y + currNode._offset.parY, currNode.x + currNode._offset.x, currNode.y + currNode._offset.y);
 			for (var i = 0; i < currNode.children.length; i++) {
-				if (currNode.children[i].line) {
+				if (currNode.children[i]._line) {
 					if(options.anchor == 'descendents')
-						self.moveBezier(currNode.children[i].line, currNode.x + currNode.children[i].offset.parX, currNode.y + currNode.children[i].offset.parY, currNode.children[i].x + currNode.children[i].offset.x, currNode.children[i].y + currNode.children[i].offset.y);
+						self.moveBezier(currNode.children[i]._line, currNode.x + currNode.children[i]._offset.parX, currNode.y + currNode.children[i]._offset.parY, currNode.children[i].x + currNode.children[i]._offset.x, currNode.children[i].y + currNode.children[i]._offset.y);
 					else
-						self.resetBezier(currNode.children[i].line, currNode.x + currNode.children[i].offset.parX, currNode.y + currNode.children[i].offset.parY, currNode.children[i].x + currNode.children[i].offset.x, currNode.children[i].y + currNode.children[i].offset.y);
+						self.resetBezier(currNode.children[i]._line, currNode.x + currNode.children[i]._offset.parX, currNode.y + currNode.children[i]._offset.parY, currNode.children[i].x + currNode.children[i]._offset.x, currNode.children[i].y + currNode.children[i]._offset.y);
 				}
 			}
 		} else { // same as parent (should be line)
-			if (currNode.line)
-				self.moveLine(currNode.line, nodeParent.x + currNode.offset.parX, nodeParent.y + currNode.offset.parY, currNode.x + currNode.offset.x, currNode.y + currNode.offset.y);
+			if (currNode._line)
+				self.moveLine(currNode._line, nodeParent.x + currNode._offset.parX, nodeParent.y + currNode._offset.parY, currNode.x + currNode._offset.x, currNode.y + currNode._offset.y);
 			for (var i = 0; i < currNode.children.length; i++) {
-				if (currNode.children[i].line) {
-					self.moveLine(currNode.children[i].line, currNode.x + currNode.children[i].offset.parX, currNode.y + currNode.children[i].offset.parY, currNode.children[i].x + currNode.children[i].offset.x, currNode.children[i].y + currNode.children[i].offset.y);
+				if (currNode.children[i]._line) {
+					self.moveLine(currNode.children[i]._line, currNode.x + currNode.children[i]._offset.parX, currNode.y + currNode.children[i]._offset.parY, currNode.children[i].x + currNode.children[i]._offset.x, currNode.children[i].y + currNode.children[i]._offset.y);
 				}
 			}
 		}
 		if(options.anchor == 'children') {
 			for(var i = 0; i < currNode.children.length; i++) {
-				handleMove(self, tree, currNode.children[i], currNode, currNode.children[i].x + currNode.x - origX + tree.dragging.anchorX, currNode.children[i].y + currNode.y - origY + tree.dragging.anchorY, {
+				handleMove(self, tree, currNode.children[i], currNode, (currNode.children[i].x + currNode.x - origX + tree.dragging.anchorX) / self.scale, (currNode.children[i].y + currNode.y - origY + tree.dragging.anchorY) / self.scale, {
 					anchor: 'none',
 					lineType: options.lineType
 				});
 			}
 		} else if(options.anchor == 'descendents') {
 			for(var i = 0; i < currNode.children.length; i++) {
-				handleMove(self, tree, currNode.children[i], currNode, currNode.children[i].x + currNode.x - origX + tree.dragging.anchorX, currNode.children[i].y + currNode.y - origY + tree.dragging.anchorY, {
+				handleMove(self, tree, currNode.children[i], currNode, (currNode.children[i].x + currNode.x - origX + tree.dragging.anchorX) / self.scale, (currNode.children[i].y + currNode.y - origY + tree.dragging.anchorY) / self.scale, {
 					anchor: 'descendents',
 					lineType: options.lineType
 				});
@@ -637,21 +793,21 @@ function handleMove(self, tree, currNode, nodeParent, ex, ey, options) {
 		}
 	} else if(tree.dragging.dom) {
 		tree.traverse(function (node, level, index, parent) {
-			node.x += ex - tree.dragging.currX;
-			node.y += ey - tree.dragging.currY;
-			self.moveRectangle(node.rect, node.x, node.y);
-			self.moveText(node.text, node.x, node.y);
-			if (node.line) {
+			node.x += ex * self.scale - tree.dragging.currX;
+			node.y += ey * self.scale - tree.dragging.currY;
+			self.moveRectangle(node._rect, node.x, node.y);
+			self.moveText(node._text, node.x, node.y);
+			if (node._line) {
 				if (options.lineType == 'bezier')
-					self.moveBezier(node.line, parent.x + node.offset.parX, parent.y + node.offset.parY);
+					self.moveBezier(node._line, parent.x + node._offset.parX, parent.y + node._offset.parY);
 				else
-					self.moveLine(node.line, parent.x + node.offset.parX, parent.y + node.offset.parY);
+					self.moveLine(node._line, parent.x + node._offset.parX, parent.y + node._offset.parY);
 			}
-			if (node.direction)
-				self.moveCircle(node.direction, node.x + node.offset.x, node.y + node.offset.y);
+			if (node._direction)
+				self.moveCircle(node._direction, node.x + node._offset.x, node.y + node._offset.y);
 		});
-		tree.dragging.currX = ex;
-		tree.dragging.currY = ey;
+		tree.dragging.currX = ex * self.scale;
+		tree.dragging.currY = ey * self.scale;
 	}
 }
 
@@ -677,48 +833,48 @@ function getOffset(node, parent, options) {
 		options = {};
 	var offset = {};
 	if(options.layout == 'vertical') {
-		if(node.y > parent.y + parent.rect.height.baseVal.value) {
-			offset.parY = parent.rect.height.baseVal.value;
+		if(node.y > parent.y + parent._rect.height.baseVal.value) {
+			offset.parY = parent._rect.height.baseVal.value;
 			offset.y = 0;
-			offset.parX = parent.rect.width.baseVal.value / 2;
-			offset.x = node.rect.width.baseVal.value / 2;
-		} else if(node.y + node.rect.height.baseVal.value < parent.y) {
+			offset.parX = parent._rect.width.baseVal.value / 2;
+			offset.x = node._rect.width.baseVal.value / 2;
+		} else if(node.y + node._rect.height.baseVal.value < parent.y) {
 			offset.parY = 0;
-			offset.y = node.rect.height.baseVal.value;
-			offset.parX = parent.rect.width.baseVal.value / 2;
-			offset.x = node.rect.width.baseVal.value / 2;
-		} else if(node.x > parent.x + parent.rect.width.baseVal.value) {
-			offset.parY = parent.rect.height.baseVal.value / 2;
-			offset.y = node.rect.height.baseVal.value / 2;
-			offset.parX = parent.rect.width.baseVal.value;
+			offset.y = node._rect.height.baseVal.value;
+			offset.parX = parent._rect.width.baseVal.value / 2;
+			offset.x = node._rect.width.baseVal.value / 2;
+		} else if(node.x > parent.x + parent._rect.width.baseVal.value) {
+			offset.parY = parent._rect.height.baseVal.value / 2;
+			offset.y = node._rect.height.baseVal.value / 2;
+			offset.parX = parent._rect.width.baseVal.value;
 			offset.x = 0;
 		} else{ // node.x + node.width < parent.x
-			offset.parY = parent.rect.height.baseVal.value / 2;
-			offset.y = node.rect.height.baseVal.value / 2;
+			offset.parY = parent._rect.height.baseVal.value / 2;
+			offset.y = node._rect.height.baseVal.value / 2;
 			offset.parX = 0;
-			offset.x = node.rect.width.baseVal.value;
+			offset.x = node._rect.width.baseVal.value;
 		}
 	} else { // horizontal
-		if(node.x > parent.x + parent.rect.width.baseVal.value) {
-			offset.parX = parent.rect.width.baseVal.value;
+		if(node.x > parent.x + parent._rect.width.baseVal.value) {
+			offset.parX = parent._rect.width.baseVal.value;
 			offset.x = 0;
-			offset.parY = parent.rect.height.baseVal.value / 2;
-			offset.y = node.rect.height.baseVal.value / 2;
-		} else if(node.x + node.rect.width.baseVal.value < parent.x) {
+			offset.parY = parent._rect.height.baseVal.value / 2;
+			offset.y = node._rect.height.baseVal.value / 2;
+		} else if(node.x + node._rect.width.baseVal.value < parent.x) {
 			offset.parX = 0;
-			offset.x = node.rect.width.baseVal.value;
-			offset.parY = parent.rect.height.baseVal.value / 2;
-			offset.y = node.rect.height.baseVal.value / 2;
-		} else if(node.y > parent.y + parent.rect.height.baseVal.value) {
-			offset.parX = parent.rect.width.baseVal.value / 2;
-			offset.x = node.rect.width.baseVal.value / 2;
-			offset.parY = parent.rect.height.baseVal.value;
+			offset.x = node._rect.width.baseVal.value;
+			offset.parY = parent._rect.height.baseVal.value / 2;
+			offset.y = node._rect.height.baseVal.value / 2;
+		} else if(node.y > parent.y + parent._rect.height.baseVal.value) {
+			offset.parX = parent._rect.width.baseVal.value / 2;
+			offset.x = node._rect.width.baseVal.value / 2;
+			offset.parY = parent._rect.height.baseVal.value;
 			offset.y = 0;
 		} else{ // node.y + node.height < parent.y
-			offset.parX = parent.rect.width.baseVal.value / 2;
-			offset.x = node.rect.width.baseVal.value / 2;
+			offset.parX = parent._rect.width.baseVal.value / 2;
+			offset.x = node._rect.width.baseVal.value / 2;
 			offset.parY = 0;
-			offset.y = node.rect.height.baseVal.value;
+			offset.y = node._rect.height.baseVal.value;
 		}
 	}
 	return offset;

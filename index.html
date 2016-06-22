@@ -1,6 +1,6 @@
 <html>
 <head>
-	<meta name=viewport content="width=device-width, initial-scale=1">
+	<meta name=viewport content="width=device-width, initial-scale=1, user-scalable=no">
 	<style>
 		html, body {
 			width: 100%;
@@ -9,16 +9,49 @@
 			overflow: hidden;
 			display: block;
 		}
+		.circle {
+			font: 25px Helvetica, arial;
+			display: block;
+			position: absolute;
+			width: 40px;
+			height: 40px;
+			text-align: center;
+			right: 10px;
+			float: right;
+			border-radius: 40px;
+			line-height: 1.65em;
+			cursor: pointer;
+		}
+		.deselected {
+			background-color: #4477FF;
+		}
+		.selected {
+			background-color: #44FF44; 
+		}
 	</style>
 	<script src="dist/trees.bundle.js"></script>
+	<script src="https://cdn.rawgit.com/hammerjs/touchemulator/master/touch-emulator.js"></script>
+	<script> TouchEmulator(); </script>
+	<script src="node_modules/hammerjs/hammer.min.js"></script>
 	<script>
 		window.onload = function() {
+			//--------------------------HAMMERJS STUFF-------------------------
+			// The following is for pinch debugging, you may comment it out or ignore it.
+			var mc = new Hammer.Manager(document.getElementById('mySVG'));
+			var Pinch = new Hammer.Pinch();
+			mc.add(Pinch);
+			mc.on('pinch', function(e) {
+				// Do nothing, for now.
+			});
+			//-----------------------------------------------------------------
+
 			// Create the SVG.
 			var svg = new trees.SVG('mySVG', {width: 1920, height: 980});
 
 			// Set the selected action of any node on the SVG.
 			svg.setSelectedAction(function(node) {
-				console.log(node);
+				//console.log(node);
+				//svg.removeNode(node, false);
 			});
 
 			// Create some trees.
@@ -48,8 +81,6 @@
 				] }
 			]};
 
-			
-
 			var lastRoot = { contents: "Um", children: [
 				{ contents: "Fantastic", children: [] },
 				{ contents: "Awesome", children: [
@@ -68,17 +99,23 @@
 			// Draw the trees.
 			svg.drawTree(root, {
 				anchor: 'none',
+				fill: '#DDD',
 				lineType: 'line',
 				rootFill: '#999',
 				rootStroke: '#555',
+				selectedFill: '#FFF',
+				selectedStroke: '#BBB',
+				stroke: '#888',
 				lineStroke: '#555'
 			});
-			svg.drawTree(anotherRoot);
+			svg.drawTree(anotherRoot, {
+				cornerRadius: 10
+			});
 			svg.drawTree(lastRoot, {
 				lineType: 'bezier',
 			});
 
-			// Set the anchor for pressing different keys
+			// Set the anchor for pressing different keys.
 			window.onkeypress = function(e) {
 				if(e.keyCode == '97') // a is pressed
 					svg.setAnchor('descendents');
@@ -89,10 +126,46 @@
 			window.onkeyup = function(e) {
 				svg.setAnchor('');
 			}
+
+			// Set up touch and mouse events for buttons
+			var children = document.getElementById('children');
+			var descendents = document.getElementById('descendents');
+			var none = document.getElementById('none');
+
+			function setToSelected(e) {
+				svg.setAnchor(e.target.id);
+
+				if(children.id != e.target.id)
+					children.className = "circle deselected";
+				else
+					children.className = "circle selected";
+
+				if(descendents.id != e.target.id)
+					descendents.className = "circle deselected";
+				else
+					descendents.className = "circle selected";
+
+				if(none.id != e.target.id)
+					none.className = "circle deselected";
+				else
+					none.className = "circle selected";
+			}
+
+			children.addEventListener('touchstart', setToSelected);
+			children.addEventListener('mousedown', setToSelected);
+
+			descendents.addEventListener('touchstart', setToSelected);
+			descendents.addEventListener('mousedown', setToSelected);
+
+			none.addEventListener('touchstart', setToSelected);
+			none.addEventListener('mousedown', setToSelected);
 		};
 	</script>
 </head>
 <body>
+	<div class="circle deselected" style="bottom: 110px;" id="children">C</div>
+	<div class="circle deselected" style="bottom: 60px;" id="descendents">D</div>
+	<div class="circle selected" style="bottom: 10px;" id="none">N</div>
 	<svg id="mySVG">
 	</svg>
 </body>

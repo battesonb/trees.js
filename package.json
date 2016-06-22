@@ -1,12 +1,9 @@
 {
   "name": "trees.js",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A tree diagramming library. This library currently uses SVG and the built in events system.",
   "main": "dist/trees.bundle.js",
-  "dependencies": {
-    "browserify": "^13.0.1",
-    "gulp": "^3.9.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "browser-sync": "^2.12.8",
     "browserify": "^13.0.1",
@@ -15,13 +12,24 @@
     "gulp-mocha": "^2.2.0",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^1.5.3",
+    "hammerjs": "^2.0.8",
+    "jsdom": "^9.2.1",
     "sinon": "^1.17.4",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
+  "keywords": [
+    "tree",
+    "graph",
+    "visual",
+    "svg",
+    "vector",
+    "library"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "tonicExampleFilename": "tonicExample.js",
   "author": "battesonb (https://github.com/battesonb)",
   "homepage": "https://github.com/battesonb/trees.js",
   "license": "MIT"
