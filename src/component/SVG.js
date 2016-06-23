@@ -16,6 +16,10 @@ function SVG(id, options) {
 	if(document === undefined) {
 		var document = global.document;
 	}
+	if(window === undefined) {
+		var window = global;
+	}
+
 	this.dom = document.getElementById(id);
 	if(!options) {
 		options = {};
@@ -27,25 +31,21 @@ function SVG(id, options) {
 		this.clearable = false;
 
 	if (options.height) {
-		this.dom.setAttribute('height', options.height + 'px');
-		this.height = options.height;
+		this.dom.setAttribute('height', options.height);
 	} else {
 		this.height = Number(this.dom.getAttribute('height'));
 		if(this.height == 0) {
-			this.height = 200;
-			this.dom.setAttribute('height', this.height + 'px');
+			this.dom.setAttribute('height', 200);
 		}
 	}
 
 	if (options.width) {
-		this.dom.setAttribute('width', options.width + 'px');
-		this.width = options.width;
+		this.dom.setAttribute('width', options.width);
 	}
 	else {
 		this.width = Number(this.dom.getAttribute('width'));
 		if(this.width == 0) {
-			this.width = 200;
-			this.dom.setAttribute('width', this.width + 'px');
+			this.dom.setAttribute('width', 200);
 		}
 	}
 
@@ -56,11 +56,12 @@ function SVG(id, options) {
 	}
 
 	this.coords = {x: 0, y: 0};
+	this.prevScale = this.scale;
 	this.setScale(this.scale);
 
 	var self = this;
 	this.dom.addEventListener('wheel', function(e) {
-		self.setScale(self.scale + e.deltaY / 2000, { ex: e.clientX, ey: e.clientY });
+		self.setScale(self.scale + self.scale * e.deltaY / 1000, { ex: e.clientX, ey: e.clientY });
 	});
 
 	 // TODO Improve pinching. This is bad. I should feel bad.
@@ -81,12 +82,11 @@ function SVG(id, options) {
 	});
 
 	this.dom.addEventListener('touchmove', function(e) {
-		console.log(e);
 		if(e.touches.length == 2 && self.pinching.status) {
 			var oldDistSqr = (self.pinching.p1.x - self.pinching.p2.x) * (self.pinching.p1.x - self.pinching.p2.x) + (self.pinching.p1.y - self.pinching.p2.y) * (self.pinching.p1.y - self.pinching.p2.y);
 			var distSqr = (e.touches[0].clientX - e.touches[1].clientX) * (e.touches[0].clientX - e.touches[1].clientX) + (e.touches[0].clientY - e.touches[1].clientY) * (e.touches[0].clientY - e.touches[1].clientY);
 			if(oldDistSqr != 0) {
-				self.setScale(self.scale * Math.pow(oldDistSqr / distSqr, 0.1), {
+				self.setScale(self.prevScale * Math.pow(oldDistSqr / distSqr, 1/2), {
 					ex: (e.touches[0].clientX + e.touches[1].clientX) / 2,
 					ey: (e.touches[0].clientY + e.touches[1].clientY) / 2
 				});
@@ -96,6 +96,12 @@ function SVG(id, options) {
 
 	this.dom.addEventListener('touchend', function(e) {
 		self.pinching.status = false;
+		self.prevScale = self.scale;
+	});
+
+	window.addEventListener('resize', function(e) {
+		viewBox = '0 0 ' + self.dom.width.baseVal.value * self.scale + ' ' + self.dom.height.baseVal.value * self.scale;
+		self.dom.setAttribute('viewBox', viewBox);
 	});
 }
 
@@ -109,8 +115,8 @@ function SVG(id, options) {
  * </ul>
  */
 SVG.prototype.setScale = function(scale, options) {
-	var oldWidth = this.scale * this.width;
-	var oldHeight = this.scale * this.height;
+	var oldWidth = this.scale * this.dom.width.baseVal.value;
+	var oldHeight = this.scale * this.dom.height.baseVal.value;
 
 	this.scale = scale;
 	if(this.scale < 0.1)
@@ -125,14 +131,14 @@ SVG.prototype.setScale = function(scale, options) {
 
 		var viewBox = '';
 		if (options.ex) {
-			this.coords.x -= (options.ex / this.width) * (this.width * scale - oldWidth);
+			this.coords.x -= (options.ex / this.dom.width.baseVal.value) * (this.dom.width.baseVal.value * scale - oldWidth);
 		}
 
 		if (options.ey) {
-			this.coords.y -= options.ey / this.height * (this.height * scale - oldHeight);
+			this.coords.y -= options.ey / this.dom.height.baseVal.value * (this.dom.height.baseVal.value * scale - oldHeight);
 		}
 
-		viewBox += this.coords.x + ' ' + this.coords.y + ' ' + this.width * this.scale + ' ' + this.height * this.scale;
+		viewBox += this.coords.x + ' ' + this.coords.y + ' ' + this.dom.width.baseVal.value * this.scale + ' ' + this.dom.height.baseVal.value * this.scale;
 		this.dom.setAttribute('viewBox', viewBox);
 	}
 };
@@ -341,6 +347,7 @@ var PADDING = 5;
  * @param ry radius of the y-corner.
  * @param options
  * <ul>
+ *     <li>clickable - If true, the pointer will be display over this SVG element. default is false.</li>
  *     <li>fill - fill color, default is #FFFFFF.</li>
  *     <li>stroke - stroke color, default is #000000.</li>
  *     <li>strokeWidth - stroke size, default is 1px.</li>
@@ -359,6 +366,8 @@ SVG.prototype.addRectangle = function(x, y, width, height, rx, ry, options) {
 	if(!options) {
 		options = {};
 	}
+	if(options.clickable)
+		rect.style.cursor = 'pointer';
 	if(options.fill)
 		rect.style.fill = options.fill;
 	else
@@ -615,6 +624,7 @@ SVG.prototype.drawTree = function(root, options) {
 		var rect;
 		if(!parent) {
 			rect = self.addRectangle(0, 0, 5, 5, self.defaults.cornerRadius, self.defaults.cornerRadius, {
+				clickable: true,
 				fill: self.defaults.rootFill,
 				stroke: self.defaults.rootStroke,
 				child: node._text
@@ -622,6 +632,7 @@ SVG.prototype.drawTree = function(root, options) {
 		}
 		else {
 			rect = self.addRectangle(0, 0, 5, 5, self.defaults.cornerRadius, self.defaults.cornerRadius, {
+				clickable: true,
 				fill: self.defaults.fill,
 				stroke: self.defaults.stroke,
 				child: node._text

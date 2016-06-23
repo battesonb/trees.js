@@ -8,10 +8,12 @@ npm install trees.js
 ```
 
 ## Version
-### 1.1.1
+### 1.1.2
+- SVG width and height values now accept all units, not just pixels. (This includes percentage based width/height).
+- Window scaling issue fixed.
 - require now exports the trees object.
 - More options added to drawTree function.
-- Scaling in desktop added.
+- Scaling in desktop and mobile added.
 - removeNode function added.
 - Renamed SVG pointers that are attached to nodes.
 
