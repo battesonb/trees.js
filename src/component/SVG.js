@@ -86,7 +86,7 @@ function SVG(id, options) {
 			var oldDistSqr = (self.pinching.p1.x - self.pinching.p2.x) * (self.pinching.p1.x - self.pinching.p2.x) + (self.pinching.p1.y - self.pinching.p2.y) * (self.pinching.p1.y - self.pinching.p2.y);
 			var distSqr = (e.touches[0].clientX - e.touches[1].clientX) * (e.touches[0].clientX - e.touches[1].clientX) + (e.touches[0].clientY - e.touches[1].clientY) * (e.touches[0].clientY - e.touches[1].clientY);
 			if(oldDistSqr != 0) {
-				self.setScale(self.scale * Math.pow(distSqr / oldDistSqr, 0.1), {
+				self.setScale(self.scale * Math.pow(oldDistSqr / distSqr, 0.1), {
 					ex: (e.touches[0].clientX + e.touches[1].clientX) / 2,
 					ey: (e.touches[0].clientY + e.touches[1].clientY) / 2
 				});
