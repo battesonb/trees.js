@@ -63,7 +63,7 @@ function SVG(id, options) {
 		self.setScale(self.scale + e.deltaY / 2000, { ex: e.clientX, ey: e.clientY });
 	});
 
-	 // TODO Implement pinching
+	 // TODO Improve pinching. This is bad. I should feel bad.
 	this.pinching = {
 		status: false,
 		p1: {x: 0, y: 0},
@@ -691,6 +691,7 @@ SVG.prototype.drawTree = function(root, options) {
 		});
 	});
 
+	// TODO Make these singular global events on the SVG, and add trees to a list perhaps? Far too many unhandled event listeners when trees are removed.
 	self.dom.addEventListener('mousedown', function(e) {
 		if(e.target == self.dom) {
 			tree.dragging.dom = true;
