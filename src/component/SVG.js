@@ -16,6 +16,10 @@ function SVG(id, options) {
 	if(document === undefined) {
 		var document = global.document;
 	}
+	if(window === undefined) {
+		var window = global;
+	}
+
 	this.dom = document.getElementById(id);
 	if(!options) {
 		options = {};
@@ -27,25 +31,21 @@ function SVG(id, options) {
 		this.clearable = false;
 
 	if (options.height) {
-		this.dom.setAttribute('height', options.height + 'px');
-		this.height = options.height;
+		this.dom.setAttribute('height', options.height);
 	} else {
 		this.height = Number(this.dom.getAttribute('height'));
 		if(this.height == 0) {
-			this.height = 200;
-			this.dom.setAttribute('height', this.height + 'px');
+			this.dom.setAttribute('height', 200);
 		}
 	}
 
 	if (options.width) {
-		this.dom.setAttribute('width', options.width + 'px');
-		this.width = options.width;
+		this.dom.setAttribute('width', options.width);
 	}
 	else {
 		this.width = Number(this.dom.getAttribute('width'));
 		if(this.width == 0) {
-			this.width = 200;
-			this.dom.setAttribute('width', this.width + 'px');
+			this.dom.setAttribute('width', 200);
 		}
 	}
 
@@ -98,6 +98,11 @@ function SVG(id, options) {
 		self.pinching.status = false;
 		self.prevScale = self.scale;
 	});
+
+	window.addEventListener('resize', function(e) {
+		viewBox = '0 0 ' + self.dom.width.baseVal.value * self.scale + ' ' + self.dom.height.baseVal.value * self.scale;
+		self.dom.setAttribute('viewBox', viewBox);
+	});
 }
 
 /**
@@ -110,8 +115,8 @@ function SVG(id, options) {
  * </ul>
  */
 SVG.prototype.setScale = function(scale, options) {
-	var oldWidth = this.scale * this.width;
-	var oldHeight = this.scale * this.height;
+	var oldWidth = this.scale * this.dom.width.baseVal.value;
+	var oldHeight = this.scale * this.dom.height.baseVal.value;
 
 	this.scale = scale;
 	if(this.scale < 0.1)
@@ -126,14 +131,14 @@ SVG.prototype.setScale = function(scale, options) {
 
 		var viewBox = '';
 		if (options.ex) {
-			this.coords.x -= (options.ex / this.width) * (this.width * scale - oldWidth);
+			this.coords.x -= (options.ex / this.dom.width.baseVal.value) * (this.dom.width.baseVal.value * scale - oldWidth);
 		}
 
 		if (options.ey) {
-			this.coords.y -= options.ey / this.height * (this.height * scale - oldHeight);
+			this.coords.y -= options.ey / this.dom.height.baseVal.value * (this.dom.height.baseVal.value * scale - oldHeight);
 		}
 
-		viewBox += this.coords.x + ' ' + this.coords.y + ' ' + this.width * this.scale + ' ' + this.height * this.scale;
+		viewBox += this.coords.x + ' ' + this.coords.y + ' ' + this.dom.width.baseVal.value * this.scale + ' ' + this.dom.height.baseVal.value * this.scale;
 		this.dom.setAttribute('viewBox', viewBox);
 	}
 };
