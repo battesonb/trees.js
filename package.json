@@ -1,7 +1,7 @@
 {
   "name": "trees.js",
-  "version": "1.1.0",
-  "description": "A tree diagramming library. This library currently uses SVG and the built in events system.",
+  "version": "1.1.1",
+  "description": "A tree diagramming library. This library uses SVG and the built in events system.",
   "main": "dist/trees.bundle.js",
   "dependencies": {},
   "devDependencies": {

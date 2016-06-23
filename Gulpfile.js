@@ -15,7 +15,7 @@ gulp.task('unitTestWatch', unitTestWatchTask);
 var outDir = './dist';
 
 function buildTask() {
-	return browserify('./src/main.js')
+	return browserify('./src/main.js', { standalone: 'trees' })
 		.bundle()
 		.pipe(source('trees.bundle.js'))
 		.pipe(buffer())
