@@ -19,6 +19,7 @@ function SVG(id, options) {
 	if(window === undefined) {
 		var window = global;
 	}
+	Tree.maxIndex = 0;
 
 	this.dom = document.getElementById(id);
 	if(!options) {
@@ -100,9 +101,12 @@ function SVG(id, options) {
 	});
 
 	window.addEventListener('resize', function(e) {
-		viewBox = '0 0 ' + self.dom.width.baseVal.value * self.scale + ' ' + self.dom.height.baseVal.value * self.scale;
+		viewBox = '0 0 ' + self.dom.scrollWidth * self.scale + ' ' + self.dom.scrollHeight * self.scale;
 		self.dom.setAttribute('viewBox', viewBox);
 	});
+
+	viewBox = '0 0 ' + self.dom.scrollWidth * self.scale + ' ' + self.dom.scrollHeight * self.scale;
+	self.dom.setAttribute('viewBox', viewBox);
 }
 
 /**
@@ -115,8 +119,8 @@ function SVG(id, options) {
  * </ul>
  */
 SVG.prototype.setScale = function(scale, options) {
-	var oldWidth = this.scale * this.dom.width.baseVal.value;
-	var oldHeight = this.scale * this.dom.height.baseVal.value;
+	var oldWidth = this.scale * this.dom.scrollWidth;
+	var oldHeight = this.scale * this.dom.scrollHeight;
 
 	this.scale = scale;
 	if(this.scale < 0.1)
@@ -131,14 +135,14 @@ SVG.prototype.setScale = function(scale, options) {
 
 		var viewBox = '';
 		if (options.ex) {
-			this.coords.x -= (options.ex / this.dom.width.baseVal.value) * (this.dom.width.baseVal.value * scale - oldWidth);
+			this.coords.x -= (options.ex / this.dom.scrollWidth) * (this.dom.scrollWidth * scale - oldWidth);
 		}
 
 		if (options.ey) {
-			this.coords.y -= options.ey / this.dom.height.baseVal.value * (this.dom.height.baseVal.value * scale - oldHeight);
+			this.coords.y -= options.ey / this.dom.scrollHeight * (this.dom.scrollHeight * scale - oldHeight);
 		}
 
-		viewBox += this.coords.x + ' ' + this.coords.y + ' ' + this.dom.width.baseVal.value * this.scale + ' ' + this.dom.height.baseVal.value * this.scale;
+		viewBox += this.coords.x + ' ' + this.coords.y + ' ' + this.dom.scrollWidth * this.scale + ' ' + this.dom.scrollHeight * this.scale;
 		this.dom.setAttribute('viewBox', viewBox);
 	}
 };
@@ -463,6 +467,7 @@ SVG.prototype.moveText = function(textNode, x, y) {
  * Clears the SVG.
  */
 SVG.prototype.clear = function() {
+	Tree.maxIndex = 0;
 	this.dom.innerHTML = '';
 };
 
