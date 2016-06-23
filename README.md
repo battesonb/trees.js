@@ -8,7 +8,8 @@ npm install trees.js
 ```
 
 ## Version
-### 1.1.0
+### 1.1.1
+- require now exports the trees object.
 - More options added to drawTree function.
 - Scaling in desktop added.
 - removeNode function added.
