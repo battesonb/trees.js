@@ -56,6 +56,7 @@ function SVG(id, options) {
 	}
 
 	this.coords = {x: 0, y: 0};
+	this.prevScale = this.scale;
 	this.setScale(this.scale);
 
 	var self = this;
@@ -81,12 +82,11 @@ function SVG(id, options) {
 	});
 
 	this.dom.addEventListener('touchmove', function(e) {
-		console.log(e);
 		if(e.touches.length == 2 && self.pinching.status) {
 			var oldDistSqr = (self.pinching.p1.x - self.pinching.p2.x) * (self.pinching.p1.x - self.pinching.p2.x) + (self.pinching.p1.y - self.pinching.p2.y) * (self.pinching.p1.y - self.pinching.p2.y);
 			var distSqr = (e.touches[0].clientX - e.touches[1].clientX) * (e.touches[0].clientX - e.touches[1].clientX) + (e.touches[0].clientY - e.touches[1].clientY) * (e.touches[0].clientY - e.touches[1].clientY);
 			if(oldDistSqr != 0) {
-				self.setScale(self.scale * Math.pow(oldDistSqr / distSqr, 0.1), {
+				self.setScale(self.prevScale * Math.pow(oldDistSqr / distSqr, 1/2), {
 					ex: (e.touches[0].clientX + e.touches[1].clientX) / 2,
 					ey: (e.touches[0].clientY + e.touches[1].clientY) / 2
 				});
@@ -96,6 +96,7 @@ function SVG(id, options) {
 
 	this.dom.addEventListener('touchend', function(e) {
 		self.pinching.status = false;
+		self.prevScale = self.scale;
 	});
 }
 
