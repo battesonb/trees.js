@@ -61,7 +61,7 @@ function SVG(id, options) {
 
 	var self = this;
 	this.dom.addEventListener('wheel', function(e) {
-		self.setScale(self.scale + e.deltaY / 2000, { ex: e.clientX, ey: e.clientY });
+		self.setScale(self.scale + self.scale * e.deltaY / 1000, { ex: e.clientX, ey: e.clientY });
 	});
 
 	 // TODO Improve pinching. This is bad. I should feel bad.
@@ -347,6 +347,7 @@ var PADDING = 5;
  * @param ry radius of the y-corner.
  * @param options
  * <ul>
+ *     <li>clickable - If true, the pointer will be display over this SVG element. default is false.</li>
  *     <li>fill - fill color, default is #FFFFFF.</li>
  *     <li>stroke - stroke color, default is #000000.</li>
  *     <li>strokeWidth - stroke size, default is 1px.</li>
@@ -365,6 +366,8 @@ SVG.prototype.addRectangle = function(x, y, width, height, rx, ry, options) {
 	if(!options) {
 		options = {};
 	}
+	if(options.clickable)
+		rect.style.cursor = 'pointer';
 	if(options.fill)
 		rect.style.fill = options.fill;
 	else
@@ -621,6 +624,7 @@ SVG.prototype.drawTree = function(root, options) {
 		var rect;
 		if(!parent) {
 			rect = self.addRectangle(0, 0, 5, 5, self.defaults.cornerRadius, self.defaults.cornerRadius, {
+				clickable: true,
 				fill: self.defaults.rootFill,
 				stroke: self.defaults.rootStroke,
 				child: node._text
@@ -628,6 +632,7 @@ SVG.prototype.drawTree = function(root, options) {
 		}
 		else {
 			rect = self.addRectangle(0, 0, 5, 5, self.defaults.cornerRadius, self.defaults.cornerRadius, {
+				clickable: true,
 				fill: self.defaults.fill,
 				stroke: self.defaults.stroke,
 				child: node._text
