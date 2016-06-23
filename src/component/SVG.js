@@ -13,8 +13,9 @@ var Tree = require('./Tree');
  * @constructor
  */
 function SVG(id, options) {
-	if(document === undefined)
+	if(document === undefined) {
 		var document = global.document;
+	}
 	this.dom = document.getElementById(id);
 	if(!options) {
 		options = {};
@@ -62,7 +63,7 @@ function SVG(id, options) {
 		self.setScale(self.scale + e.deltaY / 2000, { ex: e.clientX, ey: e.clientY });
 	});
 
-	/* // TODO Implement pinching
+	 // TODO Implement pinching
 	this.pinching = {
 		status: false,
 		p1: {x: 0, y: 0},
@@ -85,7 +86,7 @@ function SVG(id, options) {
 			var oldDistSqr = (self.pinching.p1.x - self.pinching.p2.x) * (self.pinching.p1.x - self.pinching.p2.x) + (self.pinching.p1.y - self.pinching.p2.y) * (self.pinching.p1.y - self.pinching.p2.y);
 			var distSqr = (e.touches[0].clientX - e.touches[1].clientX) * (e.touches[0].clientX - e.touches[1].clientX) + (e.touches[0].clientY - e.touches[1].clientY) * (e.touches[0].clientY - e.touches[1].clientY);
 			if(oldDistSqr != 0) {
-				self.setScale(self.scale * (distSqr / oldDistSqr), {
+				self.setScale(self.scale * Math.pow(distSqr / oldDistSqr, 0.1), {
 					ex: (e.touches[0].clientX + e.touches[1].clientX) / 2,
 					ey: (e.touches[0].clientY + e.touches[1].clientY) / 2
 				});
@@ -95,7 +96,7 @@ function SVG(id, options) {
 
 	this.dom.addEventListener('touchend', function(e) {
 		self.pinching.status = false;
-	});*/
+	});
 }
 
 /**
@@ -114,6 +115,9 @@ SVG.prototype.setScale = function(scale, options) {
 	this.scale = scale;
 	if(this.scale < 0.1)
 		this.scale = 0.1;
+	else if(this.scale > 10) {
+		this.scale = 10;
+	}
 	else {
 		if (!options) {
 			options = {};
@@ -526,8 +530,10 @@ function removeCurrNode(svg, node) {
 		svg.removeElement(node._line);
 	if (node._direction)
 		svg.removeElement(node._direction);
-	svg.removeElement(node._rect);
-	svg.removeElement(node._text);
+	if (node._rect)
+		svg.removeElement(node._rect);
+	if (node._text)
+		svg.removeElement(node._text);
 
 	if (node.parent) {
 		var siblings = node.parent.children;
@@ -670,16 +676,18 @@ SVG.prototype.drawTree = function(root, options) {
 				self.selectedAction(self.selectedNode);
 		});
 		node._rect.addEventListener('touchstart', function(e) {
-			updateSelectedNode(self, node, {
-				fill: options.selectedFill,
-				stroke: options.selectedStroke
-			});
-			tree.dragging.node = node;
-			tree.dragging.parent = parent;
-			tree.dragging.anchorX = e.touches[0].clientX * self.scale - node.x;
-			tree.dragging.anchorY = e.touches[0].clientY * self.scale - node.y;
-			if(self.selectedAction)
-				self.selectedAction(self.selectedNode);
+			if(e.touches.length == 1) {
+				updateSelectedNode(self, node, {
+					fill: options.selectedFill,
+					stroke: options.selectedStroke
+				});
+				tree.dragging.node = node;
+				tree.dragging.parent = parent;
+				tree.dragging.anchorX = e.touches[0].clientX * self.scale - node.x;
+				tree.dragging.anchorY = e.touches[0].clientY * self.scale - node.y;
+				if (self.selectedAction)
+					self.selectedAction(self.selectedNode);
+			}
 		});
 	});
 
@@ -691,7 +699,7 @@ SVG.prototype.drawTree = function(root, options) {
 		}
 	});
 	self.dom.addEventListener('touchstart', function(e) {
-		if(e.target == self.dom) {
+		if(e.touches.length == 1 && e.target == self.dom) {
 			tree.dragging.dom = true;
 			tree.dragging.currX = e.touches[0].clientX * self.scale;
 			tree.dragging.currY = e.touches[0].clientY * self.scale;
@@ -705,10 +713,12 @@ SVG.prototype.drawTree = function(root, options) {
 		});
 	});
 	self.dom.addEventListener('touchmove', function(e) {
-		handleMove(self, tree, tree.dragging.node, tree.dragging.parent, e.touches[0].clientX, e.touches[0].clientY, {
-			lineType: options.lineType,
-			anchor: self.anchor
-		});
+		if(e.touches.length == 1) {
+			handleMove(self, tree, tree.dragging.node, tree.dragging.parent, e.touches[0].clientX, e.touches[0].clientY, {
+				lineType: options.lineType,
+				anchor: self.anchor
+			});
+		}
 	});
 
 	self.dom.addEventListener('mouseup', function(e) {

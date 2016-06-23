@@ -1,3 +1,7 @@
 'use strict';
 
-window.trees = module.exports = require('./core/init');
+var trees = {
+	SVG: require('./component/SVG')
+};
+
+window.trees = module.exports = trees;
