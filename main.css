@@ -12,9 +12,19 @@ a {
   cursor: pointer;
 }
 
+code {
+  display: block;
+  white-space: pre;
+  background-color: #EEE;
+  border-radius: 0.5em;
+  margin: 1em;
+  padding: 1em;
+}
+
 footer {
     padding-top: 2em;
     margin-top: 2em;
+    margin-bottom: 5em;
     border-top: 1px solid #BBB;
 }
 
