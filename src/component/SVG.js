@@ -77,7 +77,7 @@ function SVG(id, options) {
 	}
 
 	this.dom.addEventListener('touchstart', function(e) {
-		e.stopPropagation();
+		e.preventDefault();
 		if(e.touches.length == 2) {
 			self.pinching.status = true;
 			self.pinching.p1.x = e.touches[0].clientX;
@@ -88,7 +88,7 @@ function SVG(id, options) {
 	});
 
 	this.dom.addEventListener('touchmove', function(e) {
-		e.stopPropagation();
+		e.preventDefault();
 		if(e.touches.length == 2 && self.pinching.status) {
 			e.preventDefault();
 			var oldDistSqr = (self.pinching.p1.x - self.pinching.p2.x) * (self.pinching.p1.x - self.pinching.p2.x) + (self.pinching.p1.y - self.pinching.p2.y) * (self.pinching.p1.y - self.pinching.p2.y);
@@ -103,7 +103,7 @@ function SVG(id, options) {
 	});
 
 	this.dom.addEventListener('touchend', function(e) {
-		e.stopPropagation();
+		e.preventDefault();
 		self.pinching.status = false;
 		self.prevScale = self.scale;
 	});
@@ -749,7 +749,7 @@ SVG.prototype.drawTree = function(root, options) {
 	self.dom.addEventListener('mousedown', function(e) {
 		
 		if(e.target == self.dom) {
-			e.stopPropagation();
+			e.preventDefault();
 			tree.dragging.dom = true;
 			tree.dragging.currX = e.clientX * self.scale;
 			tree.dragging.currY = e.clientY * self.scale;
@@ -757,7 +757,7 @@ SVG.prototype.drawTree = function(root, options) {
 	});
 	self.dom.addEventListener('touchstart', function(e) {
 		if(e.touches.length == 1 && e.target == self.dom) {
-			e.stopPropagation();
+			e.preventDefault();
 			tree.dragging.dom = true;
 			tree.dragging.currX = e.touches[0].clientX * self.scale;
 			tree.dragging.currY = e.touches[0].clientY * self.scale;
@@ -765,14 +765,14 @@ SVG.prototype.drawTree = function(root, options) {
 	});
 
 	self.dom.addEventListener('mousemove', function(e) {
-		e.stopPropagation();
+		e.preventDefault();
 		handleMove(self, tree, tree.dragging.node, tree.dragging.parent, e.clientX, e.clientY, {
 			lineType: options.lineType,
 			anchor: self.anchor
 		});
 	});
 	self.dom.addEventListener('touchmove', function(e) {
-		e.stopPropagation();
+		e.preventDefault();
 		if(e.touches.length == 1) {
 			handleMove(self, tree, tree.dragging.node, tree.dragging.parent, e.touches[0].clientX, e.touches[0].clientY, {
 				lineType: options.lineType,
@@ -782,12 +782,12 @@ SVG.prototype.drawTree = function(root, options) {
 	});
 
 	self.dom.addEventListener('mouseup', function(e) {
-		e.stopPropagation();
+		e.preventDefault();
 		tree.dragging.node = undefined;
 		tree.dragging.dom = false;
 	});
 	self.dom.addEventListener('touchend', function(e) {
-		e.stopPropagation();
+		e.preventDefault();
 		tree.dragging.node = undefined;
 		tree.dragging.dom = false;
 	});
