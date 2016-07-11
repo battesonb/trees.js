@@ -120,32 +120,9 @@ function SVG(id, options) {
 }
 
 SVG.prototype.setPosition = function() {
-	this.x = this.dom.clientLeft;
-	this.y = this.dom.clientTop;
-	var par = this.dom.parentNode;
-	while(par != null) {
-		if(par.offsetLeft) {
-			this.x += par.offsetLeft;
-		} else if(par.clientLeft) {
-			this.x += par.clientLeft;
-		}
-
-		if(par.offsetTop) {
-			this.y += par.offsetTop;
-		} else if(par.clientTop) {
-			this.y += par.clientTop;
-		}
-
-		if(par.scrollLeft) {
-			this.x -= par.scrollLeft;
-		}
-
-		if(par.scrollTop) {
-			this.y -= par.scrollTop;
-		}
-
-		par = par.parentElement;
-	}
+	var rect = this.dom.getBoundingClientRect();
+	this.x = rect.left;
+	this.y = rect.top;
 }
 
 /**
