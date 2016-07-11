@@ -3,6 +3,18 @@
     <head>
         <link rel="stylesheet" type="text/css" href="./main.css" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript" src="./trees.bundle.js"></script>
+        <script>
+            var svg = new trees.SVG('mySVG', {
+                width: '200px',
+                height: '200px'
+            });
+
+            svg.drawTree({
+                contents: 'hey',
+                children: []
+            });
+        </script>
     </head>
     <body>
         <div class="header">
@@ -22,10 +34,11 @@
             <p>
                 Words
             </p>
+            <svg id="mySVG">
+            </svg>
             <footer>
                 <a href="https://github.com/battesonb/trees.js">Trees.js</a> is owned by <a href="https://github.com/battesonb">battesonb</a>
             </footer>
         </div>
-        
     </body>
 </html>
