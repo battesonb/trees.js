@@ -66,6 +66,7 @@ function SVG(id, options) {
 	var self = this;
 	this.dom.addEventListener('wheel', function(e) {
 		e.preventDefault();
+		self.setPosition();
 		self.setScale(self.scale + self.scale * e.deltaY / 1000, { ex: e.clientX, ey: e.clientY });
 	});
 
