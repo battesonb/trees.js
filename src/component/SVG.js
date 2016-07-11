@@ -39,6 +39,9 @@ function SVG(id, options) {
 			this.dom.setAttribute('height', 200);
 		}
 	}
+	
+	this.setPosition();
+
 
 	if (options.width) {
 		this.dom.setAttribute('width', options.width);
@@ -62,6 +65,8 @@ function SVG(id, options) {
 
 	var self = this;
 	this.dom.addEventListener('wheel', function(e) {
+		e.preventDefault();
+		self.setPosition();
 		self.setScale(self.scale + self.scale * e.deltaY / 1000, { ex: e.clientX, ey: e.clientY });
 	});
 
@@ -73,6 +78,7 @@ function SVG(id, options) {
 	}
 
 	this.dom.addEventListener('touchstart', function(e) {
+		e.preventDefault();
 		if(e.touches.length == 2) {
 			self.pinching.status = true;
 			self.pinching.p1.x = e.touches[0].clientX;
@@ -83,7 +89,9 @@ function SVG(id, options) {
 	});
 
 	this.dom.addEventListener('touchmove', function(e) {
+		e.preventDefault();
 		if(e.touches.length == 2 && self.pinching.status) {
+			e.preventDefault();
 			var oldDistSqr = (self.pinching.p1.x - self.pinching.p2.x) * (self.pinching.p1.x - self.pinching.p2.x) + (self.pinching.p1.y - self.pinching.p2.y) * (self.pinching.p1.y - self.pinching.p2.y);
 			var distSqr = (e.touches[0].clientX - e.touches[1].clientX) * (e.touches[0].clientX - e.touches[1].clientX) + (e.touches[0].clientY - e.touches[1].clientY) * (e.touches[0].clientY - e.touches[1].clientY);
 			if(oldDistSqr != 0) {
@@ -96,6 +104,7 @@ function SVG(id, options) {
 	});
 
 	this.dom.addEventListener('touchend', function(e) {
+		e.preventDefault();
 		self.pinching.status = false;
 		self.prevScale = self.scale;
 	});
@@ -103,10 +112,40 @@ function SVG(id, options) {
 	window.addEventListener('resize', function(e) {
 		viewBox = '0 0 ' + self.dom.scrollWidth * self.scale + ' ' + self.dom.scrollHeight * self.scale;
 		self.dom.setAttribute('viewBox', viewBox);
+		self.setPosition();
 	});
 
 	viewBox = '0 0 ' + self.dom.scrollWidth * self.scale + ' ' + self.dom.scrollHeight * self.scale;
 	self.dom.setAttribute('viewBox', viewBox);
+}
+
+SVG.prototype.setPosition = function() {
+	this.x = this.dom.clientLeft;
+	this.y = this.dom.clientTop;
+	var par = this.dom.parentNode;
+	while(par != null) {
+		if(par.offsetLeft) {
+			this.x += par.offsetLeft;
+		} else if(par.clientLeft) {
+			this.x += par.clientLeft;
+		}
+
+		if(par.offsetTop) {
+			this.y += par.offsetTop;
+		} else if(par.clientTop) {
+			this.y += par.clientTop;
+		}
+
+		if(par.scrollLeft) {
+			this.x -= par.scrollLeft;
+		}
+
+		if(par.scrollTop) {
+			this.y -= par.scrollTop;
+		}
+
+		par = par.parentElement;
+	}
 }
 
 /**
@@ -135,11 +174,11 @@ SVG.prototype.setScale = function(scale, options) {
 
 		var viewBox = '';
 		if (options.ex) {
-			this.coords.x -= (options.ex / this.dom.scrollWidth) * (this.dom.scrollWidth * scale - oldWidth);
+			this.coords.x -= ((options.ex - this.x) / this.dom.scrollWidth) * (this.dom.scrollWidth * scale - oldWidth);
 		}
 
 		if (options.ey) {
-			this.coords.y -= options.ey / this.dom.scrollHeight * (this.dom.scrollHeight * scale - oldHeight);
+			this.coords.y -= ((options.ey - this.y) / this.dom.scrollHeight) * (this.dom.scrollHeight * scale - oldHeight);
 		}
 
 		viewBox += this.coords.x + ' ' + this.coords.y + ' ' + this.dom.scrollWidth * this.scale + ' ' + this.dom.scrollHeight * this.scale;
@@ -709,7 +748,9 @@ SVG.prototype.drawTree = function(root, options) {
 
 	// TODO Make these singular global events on the SVG, and add trees to a list perhaps? Far too many unhandled event listeners when trees are removed.
 	self.dom.addEventListener('mousedown', function(e) {
+		
 		if(e.target == self.dom) {
+			e.preventDefault();
 			tree.dragging.dom = true;
 			tree.dragging.currX = e.clientX * self.scale;
 			tree.dragging.currY = e.clientY * self.scale;
@@ -717,6 +758,7 @@ SVG.prototype.drawTree = function(root, options) {
 	});
 	self.dom.addEventListener('touchstart', function(e) {
 		if(e.touches.length == 1 && e.target == self.dom) {
+			e.preventDefault();
 			tree.dragging.dom = true;
 			tree.dragging.currX = e.touches[0].clientX * self.scale;
 			tree.dragging.currY = e.touches[0].clientY * self.scale;
@@ -724,12 +766,14 @@ SVG.prototype.drawTree = function(root, options) {
 	});
 
 	self.dom.addEventListener('mousemove', function(e) {
+		e.preventDefault();
 		handleMove(self, tree, tree.dragging.node, tree.dragging.parent, e.clientX, e.clientY, {
 			lineType: options.lineType,
 			anchor: self.anchor
 		});
 	});
 	self.dom.addEventListener('touchmove', function(e) {
+		e.preventDefault();
 		if(e.touches.length == 1) {
 			handleMove(self, tree, tree.dragging.node, tree.dragging.parent, e.touches[0].clientX, e.touches[0].clientY, {
 				lineType: options.lineType,
@@ -739,10 +783,12 @@ SVG.prototype.drawTree = function(root, options) {
 	});
 
 	self.dom.addEventListener('mouseup', function(e) {
+		e.preventDefault();
 		tree.dragging.node = undefined;
 		tree.dragging.dom = false;
 	});
 	self.dom.addEventListener('touchend', function(e) {
+		e.preventDefault();
 		tree.dragging.node = undefined;
 		tree.dragging.dom = false;
 	});

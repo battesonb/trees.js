@@ -6,13 +6,12 @@
 			width: 100%;
 			height: 100%;
 			margin: 0px;
-			overflow: hidden;
 			display: block;
 		}
 		.circle {
 			font: 25px Helvetica, arial;
 			display: block;
-			position: absolute;
+			position: fixed;
 			width: 40px;
 			height: 40px;
 			text-align: center;
@@ -46,7 +45,7 @@
 			//-----------------------------------------------------------------
 
 			// Create the SVG.
-			var svg = new trees.SVG('mySVG', {width: '100%', height: 980});
+			var svg = new trees.SVG('mySVG', {width: '100%', height: 960});
 
 			// Set the selected action of any node on the SVG.
 			svg.setSelectedAction(function(node) {

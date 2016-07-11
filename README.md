@@ -8,7 +8,9 @@ npm install trees.js
 ```
 
 ## Version
-### 1.1.3
+### 1.1.4
+- Fixed zooming for an offset element.
+- Zooming no longer allows document scrolling.
 - SVG width and height values now accept all units, not just pixels. (This includes percentage based width/height).
 - Window scaling issue fixed.
 - require now exports the trees object.
