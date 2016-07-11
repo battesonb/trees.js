@@ -39,8 +39,9 @@ function SVG(id, options) {
 			this.dom.setAttribute('height', 200);
 		}
 	}
-
+	
 	this.setPosition();
+
 
 	if (options.width) {
 		this.dom.setAttribute('width', options.width);
@@ -64,6 +65,7 @@ function SVG(id, options) {
 
 	var self = this;
 	this.dom.addEventListener('wheel', function(e) {
+		e.preventDefault();
 		self.setScale(self.scale + self.scale * e.deltaY / 1000, { ex: e.clientX, ey: e.clientY });
 	});
 
@@ -75,6 +77,7 @@ function SVG(id, options) {
 	}
 
 	this.dom.addEventListener('touchstart', function(e) {
+		e.stopPropagation();
 		if(e.touches.length == 2) {
 			self.pinching.status = true;
 			self.pinching.p1.x = e.touches[0].clientX;
@@ -85,7 +88,9 @@ function SVG(id, options) {
 	});
 
 	this.dom.addEventListener('touchmove', function(e) {
+		e.stopPropagation();
 		if(e.touches.length == 2 && self.pinching.status) {
+			e.preventDefault();
 			var oldDistSqr = (self.pinching.p1.x - self.pinching.p2.x) * (self.pinching.p1.x - self.pinching.p2.x) + (self.pinching.p1.y - self.pinching.p2.y) * (self.pinching.p1.y - self.pinching.p2.y);
 			var distSqr = (e.touches[0].clientX - e.touches[1].clientX) * (e.touches[0].clientX - e.touches[1].clientX) + (e.touches[0].clientY - e.touches[1].clientY) * (e.touches[0].clientY - e.touches[1].clientY);
 			if(oldDistSqr != 0) {
@@ -98,6 +103,7 @@ function SVG(id, options) {
 	});
 
 	this.dom.addEventListener('touchend', function(e) {
+		e.stopPropagation();
 		self.pinching.status = false;
 		self.prevScale = self.scale;
 	});
@@ -129,9 +135,16 @@ SVG.prototype.setPosition = function() {
 			this.y += par.clientTop;
 		}
 
+		if(par.scrollLeft) {
+			this.x -= par.scrollLeft;
+		}
+
+		if(par.scrollTop) {
+			this.y -= par.scrollTop;
+		}
+
 		par = par.parentElement;
 	}
-		console.log(this);
 }
 
 /**
@@ -734,7 +747,9 @@ SVG.prototype.drawTree = function(root, options) {
 
 	// TODO Make these singular global events on the SVG, and add trees to a list perhaps? Far too many unhandled event listeners when trees are removed.
 	self.dom.addEventListener('mousedown', function(e) {
+		
 		if(e.target == self.dom) {
+			e.stopPropagation();
 			tree.dragging.dom = true;
 			tree.dragging.currX = e.clientX * self.scale;
 			tree.dragging.currY = e.clientY * self.scale;
@@ -742,6 +757,7 @@ SVG.prototype.drawTree = function(root, options) {
 	});
 	self.dom.addEventListener('touchstart', function(e) {
 		if(e.touches.length == 1 && e.target == self.dom) {
+			e.stopPropagation();
 			tree.dragging.dom = true;
 			tree.dragging.currX = e.touches[0].clientX * self.scale;
 			tree.dragging.currY = e.touches[0].clientY * self.scale;
@@ -749,12 +765,14 @@ SVG.prototype.drawTree = function(root, options) {
 	});
 
 	self.dom.addEventListener('mousemove', function(e) {
+		e.stopPropagation();
 		handleMove(self, tree, tree.dragging.node, tree.dragging.parent, e.clientX, e.clientY, {
 			lineType: options.lineType,
 			anchor: self.anchor
 		});
 	});
 	self.dom.addEventListener('touchmove', function(e) {
+		e.stopPropagation();
 		if(e.touches.length == 1) {
 			handleMove(self, tree, tree.dragging.node, tree.dragging.parent, e.touches[0].clientX, e.touches[0].clientY, {
 				lineType: options.lineType,
@@ -764,10 +782,12 @@ SVG.prototype.drawTree = function(root, options) {
 	});
 
 	self.dom.addEventListener('mouseup', function(e) {
+		e.stopPropagation();
 		tree.dragging.node = undefined;
 		tree.dragging.dom = false;
 	});
 	self.dom.addEventListener('touchend', function(e) {
+		e.stopPropagation();
 		tree.dragging.node = undefined;
 		tree.dragging.dom = false;
 	});

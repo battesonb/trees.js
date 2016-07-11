@@ -6,7 +6,7 @@
 			width: 100%;
 			height: 100%;
 			margin: 0px;
-			overflow: hidden;
+						overflow: none;
 			display: block;
 		}
 		.circle {
@@ -46,7 +46,7 @@
 			//-----------------------------------------------------------------
 
 			// Create the SVG.
-			var svg = new trees.SVG('mySVG', {width: '100%', height: 980});
+			var svg = new trees.SVG('mySVG', {width: '100%', height: 900});
 
 			// Set the selected action of any node on the SVG.
 			svg.setSelectedAction(function(node) {
@@ -166,9 +166,10 @@
 	<div class="circle deselected" style="bottom: 110px;" id="children">C</div>
 	<div class="circle deselected" style="bottom: 60px;" id="descendents">D</div>
 	<div class="circle selected" style="bottom: 10px;" id="none">N</div>
-	<div style="width: 50%; margin: auto">
+	<div style="width: 75%; margin: auto">
 	<svg id="mySVG">
 	</svg>
 	</div>
+	sdfg
 </body>
 </html>
