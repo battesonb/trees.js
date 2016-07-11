@@ -1,0 +1,270 @@
+body {
+  padding: 0;
+  margin: 0;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+h1 {
+  font-size: 4em;
+}
+
+a {
+  cursor: pointer;
+}
+
+footer {
+    padding-top: 2em;
+    margin-top: 2em;
+    border-top: 1px solid #BBB;
+}
+
+/* Header */
+.header {
+  display: block;
+  text-align: center;
+  padding-bottom: 2vw;
+  background-image: linear-gradient(135deg, #3c77b3, #7e9dae);
+  margin-bottom: 2em;
+}
+
+.header > * {
+  margin: 0;
+  padding: 0.2em;
+  color: #FFF;
+}
+
+.header-pad {
+  padding-top: 4vw;
+}
+
+.header a {
+  display: inline-block;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid #FFF;
+  color: #FFF;
+  border-radius: 0.3em;
+  padding: 0.6em 0.8em;
+  margin: 0.6em;
+  font-size: 1.1em;
+}
+
+.header a:active {
+  outline: none;
+  border-color: #aee7ff;
+  color: #aee7ff;
+}
+
+.header a:focus {
+  outline: none;
+  border-color: #aee7ff;
+  color: #aee7ff;
+}
+
+/* Container */
+.container {
+  margin: auto;
+}
+
+@media screen and (min-width: 980px) /* Desktop */ {
+  .container {
+    width: 45%;
+  }
+}
+
+@media screen and (max-width: 979px) /* Tablet */ {
+  .header a {
+      display: block;
+      width: 30%;
+      margin-left: auto;
+      margin-right: auto;
+  }
+
+  .container {
+    width: 75%;
+  }
+}
+
+@media screen and (max-width: 500px) /* Mobile */ {
+  .header a {
+      display: block;
+      width: 40%;
+      margin-left: auto;
+      margin-right: auto;
+  }
+
+  .container {
+    width: 90%;
+  }
+}
+
+.container a {
+    color: #3c77b3;
+    text-decoration: none;
+}
+
+.container a:visited {
+    color: #3c77b3;
+}
+
+.container h1, .container h2, .container h3, .container h4 , .container h5, .container h6 {
+    color: #3c77b3;
+}
+
+/* Messages */
+.error {
+  color: #FF0000;
+}
+
+.success {
+  color: #00BB33;
+}
+
+/* Forms */
+input, textarea {
+  display: inline-block;
+  border-radius: 5px;
+  margin-left: 0.35em;
+  padding: 0.25em;
+  border: 3px solid transparent;
+  border-bottom: 3px solid #CCC;
+}
+
+input {
+  font-size: 0.95em;
+}
+
+textarea {
+  font-size: 1.1em;
+}
+
+input:required:invalid.dirty {
+  border-bottom: 3px solid #e84b31;
+}
+
+input:required:valid.dirty {
+  border-bottom: 3px solid #48E855;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-bottom: 3px solid #00B7FF;
+}
+
+button, input[type="button"] {
+  border-radius: 5px;
+  font-size: 1em;
+  padding: 0.25em 0.7em;
+  background-color: #FFF;
+  border: 2px solid #CCC;
+}
+
+button:active, input[type="button"]:active {
+  outline: none;
+  border-color: #aee7ff;
+  color: #aee7ff;
+}
+
+button:focus, input[type="button"]:focus {
+  outline: none;
+  border-color: #aee7ff;
+  color: #aee7ff;
+}
+
+label {
+  display: inline-block;
+  padding-top: 0.3em;
+}
+
+label[for] {
+  color: #e84b31;
+}
+
+/* Helpers */
+.nav {
+  float: right;
+}
+
+.row {
+  display: block;
+  margin-top: 0.6em;
+}
+
+.padded {
+  padding-left: 0.7em;
+  padding-right: 0.7em;
+}
+
+.space {
+  padding-top: 0.7em;
+}
+
+.fill {
+  width: 97%;
+}
+
+.right {
+  text-align: right;
+}
+
+/* Alignment */
+.l1 {
+   display: inline-block;
+   width: 8.3%;
+  vertical-align: top;
+ }
+.l2 {
+  display: inline-block;
+  width: 16.6%;
+  vertical-align: top;
+}
+.l3 {
+  display: inline-block;
+  width: 25%;
+  vertical-align: top;
+}
+.l4 {
+  display: inline-block;
+  width: 33.3%;
+  vertical-align: top;
+}
+.l5 {
+  display: inline-block;
+  width: 41.6%;
+  vertical-align: top;
+}
+.l6 {
+  display: inline-block;
+  width: 50%;
+  vertical-align: top;
+}
+.l7 {
+  display: inline-block;
+  width: 58.3%;
+  vertical-align: top;
+}
+.l8 {
+  display: inline-block;
+  width: 66.6%;
+  vertical-align: top;
+}
+.l9 {
+  display: inline-block;
+  width: 75%;
+  vertical-align: top;
+}
+.l10 {
+  display: inline-block;
+  width: 83.3%;
+  vertical-align: top;
+}
+.l11 {
+  display: inline-block;
+  width: 91.6%;
+  vertical-align: top;
+}
+.l12 {
+  display: inline-block;
+  width: 100%;
+  vertical-align: top;
+}
