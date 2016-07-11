@@ -3,18 +3,6 @@
     <head>
         <link rel="stylesheet" type="text/css" href="./main.css" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script type="text/javascript" src="./trees.bundle.js"></script>
-        <script>
-            var svg = new trees.SVG('mySVG', {
-                width: '200px',
-                height: '200px'
-            });
-
-            svg.drawTree({
-                contents: 'hey',
-                children: []
-            });
-        </script>
     </head>
     <body>
         <div class="header">
@@ -34,11 +22,46 @@
             <p>
                 Words
             </p>
-            <svg id="mySVG">
+            <svg id="mySVG" style="border: 1px solid #555">
             </svg>
+            <div class="right" style="color: #999; font-size: 0.75em">v1.1.3</div>
             <footer>
                 <a href="https://github.com/battesonb/trees.js">Trees.js</a> is owned by <a href="https://github.com/battesonb">battesonb</a>
             </footer>
         </div>
+
+        <script type="text/javascript" src="./trees.bundle.js"></script>
+        <script>
+            var svg = new trees.SVG('mySVG', {
+                width: '100%',
+                height: '30vh'
+            });
+
+            svg.drawTree({
+                contents: 'A',
+                children: [{
+                    contents: 'library',
+                    children: [{
+                        contents: 'for',
+                        children: []
+                    }, {
+                        contents: 'displaying',
+                        children: []
+                    }, {
+                        contents: 'tree',
+                        children: [{
+                            contents: 'type',
+                            children: [{
+                                contents: 'data',
+                                children: []
+                            }, {
+                                contents: 'structures.',
+                                children: []
+                            }]
+                        }]
+                    }]
+                }]
+            });
+        </script>
     </body>
 </html>
