@@ -40,6 +40,8 @@ function SVG(id, options) {
 		}
 	}
 
+	this.setPosition();
+
 	if (options.width) {
 		this.dom.setAttribute('width', options.width);
 	}
@@ -103,10 +105,33 @@ function SVG(id, options) {
 	window.addEventListener('resize', function(e) {
 		viewBox = '0 0 ' + self.dom.scrollWidth * self.scale + ' ' + self.dom.scrollHeight * self.scale;
 		self.dom.setAttribute('viewBox', viewBox);
+		self.setPosition();
 	});
 
 	viewBox = '0 0 ' + self.dom.scrollWidth * self.scale + ' ' + self.dom.scrollHeight * self.scale;
 	self.dom.setAttribute('viewBox', viewBox);
+}
+
+SVG.prototype.setPosition = function() {
+	this.x = this.dom.clientLeft;
+	this.y = this.dom.clientTop;
+	var par = this.dom.parentNode;
+	while(par != null) {
+		if(par.offsetLeft) {
+			this.x += par.offsetLeft;
+		} else if(par.clientLeft) {
+			this.x += par.clientLeft;
+		}
+
+		if(par.offsetTop) {
+			this.y += par.offsetTop;
+		} else if(par.clientTop) {
+			this.y += par.clientTop;
+		}
+
+		par = par.parentElement;
+	}
+		console.log(this);
 }
 
 /**
@@ -135,11 +160,11 @@ SVG.prototype.setScale = function(scale, options) {
 
 		var viewBox = '';
 		if (options.ex) {
-			this.coords.x -= (options.ex / this.dom.scrollWidth) * (this.dom.scrollWidth * scale - oldWidth);
+			this.coords.x -= ((options.ex - this.x) / this.dom.scrollWidth) * (this.dom.scrollWidth * scale - oldWidth);
 		}
 
 		if (options.ey) {
-			this.coords.y -= options.ey / this.dom.scrollHeight * (this.dom.scrollHeight * scale - oldHeight);
+			this.coords.y -= ((options.ey - this.y) / this.dom.scrollHeight) * (this.dom.scrollHeight * scale - oldHeight);
 		}
 
 		viewBox += this.coords.x + ' ' + this.coords.y + ' ' + this.dom.scrollWidth * this.scale + ' ' + this.dom.scrollHeight * this.scale;
