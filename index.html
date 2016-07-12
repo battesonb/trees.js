@@ -48,25 +48,44 @@
                 height: '14em'
             });
 
+            var xOffset = (svg.dom.clientWidth - 338) / 2;
+            var yOffset = (svg.dom.clientHeight - 142) / 2;
+
             svg.drawTree({
                 contents: 'A',
+                x: 5 + xOffset,
+                y: 5 + yOffset,
                 children: [{
                     contents: 'library',
+                    x: 40 + xOffset,
+                    y: 5 + yOffset,
                     children: [{
                         contents: 'for',
+                        x: 110 + xOffset,
+                        y: 5 + yOffset,
                         children: []
                     }, {
                         contents: 'displaying',
+                        x: 110 + xOffset,
+                        y: 40 + yOffset,
                         children: []
                     }, {
                         contents: 'tree',
+                        x: 110 + xOffset,
+                        y: 75 + yOffset,
                         children: [{
                             contents: 'type',
+                            x: 192 + xOffset,
+                            y:75 + yOffset,
                             children: [{
                                 contents: 'data',
+                            	x: 250 + xOffset,
+                            	y: 75 + yOffset,
                                 children: []
                             }, {
                                 contents: 'structures.',
+                                x: 250 + xOffset,
+                            	y: 115 + yOffset,
                                 children: []
                             }]
                         }]
