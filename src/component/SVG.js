@@ -66,8 +66,9 @@ function SVG(id, options) {
 	var self = this;
 	this.dom.addEventListener('wheel', function(e) {
 		e.preventDefault();
+		var change = e.deltaY > 0 ? 1 : -1;
 		self.setPosition();
-		self.setScale(self.scale + self.scale * e.deltaY / 1000, { ex: e.clientX, ey: e.clientY });
+		self.setScale(self.scale + self.scale * change / 10, { ex: e.clientX, ey: e.clientY });
 	});
 
 	 // TODO Improve pinching. This is bad. I should feel bad.
@@ -110,12 +111,12 @@ function SVG(id, options) {
 	});
 
 	window.addEventListener('resize', function(e) {
-		viewBox = '0 0 ' + self.dom.scrollWidth * self.scale + ' ' + self.dom.scrollHeight * self.scale;
+		viewBox = '0 0 ' + self.getWidth() * self.scale + ' ' + self.getHeight() * self.scale;
 		self.dom.setAttribute('viewBox', viewBox);
 		self.setPosition();
 	});
 
-	viewBox = '0 0 ' + self.dom.scrollWidth * self.scale + ' ' + self.dom.scrollHeight * self.scale;
+	viewBox = '0 0 ' + this.getWidth() * self.scale + ' ' + this.getHeight() * self.scale;
 	self.dom.setAttribute('viewBox', viewBox);
 }
 
@@ -135,8 +136,10 @@ SVG.prototype.setPosition = function() {
  * </ul>
  */
 SVG.prototype.setScale = function(scale, options) {
-	var oldWidth = this.scale * this.dom.scrollWidth;
-	var oldHeight = this.scale * this.dom.scrollHeight;
+	var width = this.getWidth();
+	var height = this.getHeight();
+	var oldWidth = this.scale * width;
+	var oldHeight = this.scale * height;
 
 	this.scale = scale;
 	if(this.scale < 0.1)
@@ -151,17 +154,49 @@ SVG.prototype.setScale = function(scale, options) {
 
 		var viewBox = '';
 		if (options.ex) {
-			this.coords.x -= ((options.ex - this.x) / this.dom.scrollWidth) * (this.dom.scrollWidth * scale - oldWidth);
+			this.coords.x -= ((options.ex - this.x) / width) * (width * scale - oldWidth);
 		}
 
 		if (options.ey) {
-			this.coords.y -= ((options.ey - this.y) / this.dom.scrollHeight) * (this.dom.scrollHeight * scale - oldHeight);
+			this.coords.y -= ((options.ey - this.y) / height) * (height * scale - oldHeight);
 		}
 
-		viewBox += this.coords.x + ' ' + this.coords.y + ' ' + this.dom.scrollWidth * this.scale + ' ' + this.dom.scrollHeight * this.scale;
+		viewBox += this.coords.x + ' ' + this.coords.y + ' ' + width * this.scale + ' ' + height * this.scale;
 		this.dom.setAttribute('viewBox', viewBox);
 	}
 };
+
+/**
+ * A width getter, because Firefox handles SVG differently.
+ * @return The SVG's width.
+ */
+SVG.prototype.getWidth = function() {
+	if(this.dom.scrollWidth > 0) {
+		return this.dom.scrollWidth;
+	}
+	var type = this.dom.width.baseVal.unitType;
+	if(type == 2) {
+		return this.dom.parentNode.scrollWidth * this.dom.width.baseVal.value;
+	} else {
+		return this.dom.width.baseVal.value;
+	}
+}
+
+/**
+ * A height getter, because Firefox handles SVG differently.
+ * @return The SVG's width.
+ */
+SVG.prototype.getHeight = function() {
+	if(this.dom.scrollHeight > 0) {
+		return this.dom.scrollHeight;
+	}
+	var type = this.dom.height.baseVal.unitType;
+	if(type == 2) {
+		return this.dom.parentNode.scrollHeight * this.dom.height.baseVal.value;
+	} else {
+		return this.dom.height.baseVal.value;
+	}
+}
 
 
 /**
