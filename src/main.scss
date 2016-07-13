@@ -16,12 +16,14 @@ a {
 }
 
 code {
+  color: #333;
+  font-size: 1.1em;
   display: block;
-  white-space: pre;
   background-color: #EEE;
   border-radius: 0.5em;
   margin: 1em;
   padding: 1em;
+  white-space: pre;
 }
 
 blockquote {
@@ -80,18 +82,16 @@ footer {
 	  margin-left: auto;
 	  margin-right: auto;
   }
-}
-
-.header a:active {
-  outline: none;
-  border-color: $secondary-color;
-  color: $secondary-color;
-}
-
-.header a:focus {
-  outline: none;
-  border-color: $secondary-color;
-  color: $secondary-color;
+  &:active {
+    outline: none;
+    border-color: $secondary-color;
+    color: $secondary-color;
+  }
+  &:focus {
+    outline: none;
+    border-color: $secondary-color;
+    color: $secondary-color;
+  }
 }
 
 // Container
@@ -101,7 +101,7 @@ footer {
     width: 45%;
   }
 	@include device-type(tablet) {
-    width: 75%;
+    width: 80%;
   }
   @include device-type(mobile) {
     width: 90%;
@@ -147,18 +147,16 @@ input, textarea {
 
 input {
   font-size: 0.95em;
+  &:required:invalid.dirty {
+    border-bottom: 3px solid $error;
+  }
+  &:required:valid.dirty {
+    border-bottom: 3px solid $success;
+  }
 }
 
 textarea {
   font-size: 1.1em;
-}
-
-input:required:invalid.dirty {
-  border-bottom: 3px solid $error;
-}
-
-input:required:valid.dirty {
-  border-bottom: 3px solid $success;
 }
 
 input:focus, textarea:focus {
@@ -172,18 +170,16 @@ button, input[type="button"] {
   padding: 0.25em 0.7em;
   background-color: #FFF;
   border: 2px solid #CCC;
-}
-
-button:active, input[type="button"]:active {
-  outline: none;
-  border-color: $secondary-color;
-  color: $secondary-color;
-}
-
-button:focus, input[type="button"]:focus {
-  outline: none;
-  border-color: $secondary-color;
-  color: $secondary-color;
+  &:active {
+    outline: none;
+    border-color: $secondary-color;
+    color: $secondary-color;
+  }
+  &:focus {
+    outline: none;
+    border-color: $secondary-color;
+    color: $secondary-color;
+  }
 }
 
 label {
