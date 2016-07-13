@@ -1,0 +1,232 @@
+@import 'variables';
+@import 'mixins';
+
+body {
+  padding: 0;
+  margin: 0;
+  font-family: $font-stack;
+}
+
+h1 {
+  font-size: 4em;
+}
+
+a {
+  cursor: pointer;
+}
+
+code {
+  display: block;
+  white-space: pre;
+  background-color: #EEE;
+  border-radius: 0.5em;
+  margin: 1em;
+  padding: 1em;
+}
+
+blockquote {
+  border-left: 0.4em solid $secondary-color;
+  padding-left: 1em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  margin-left: 1.5em;
+}
+
+footer {
+    padding-top: 2em;
+    margin-top: 2em;
+    margin-bottom: 5em;
+    border-top: 1px solid #BBB;
+}
+
+// Header
+.header {
+  display: block;
+  text-align: center;
+  padding-bottom: 2vw;
+  background-image: linear-gradient(135deg, $primary-color, $primary-shade);
+  margin-bottom: 2em;
+}
+
+.header > * {
+  margin: 0;
+  padding: 0.2em;
+  color: #FFF;
+}
+
+.header-pad {
+  padding-top: 4vw;
+}
+
+.header a {
+  display: inline-block;
+  text-decoration: none;
+  background: rgba(#FFF, 0.2);
+  border: 1px solid #FFF;
+  color: #FFF;
+  border-radius: 0.3em;
+  padding: 0.6em 0.8em;
+  margin: 0.6em;
+  font-size: 1.1em;
+  @include device-type(tablet) {
+    display: block;
+    width: 30%;
+	  margin-left: auto;
+	  margin-right: auto;
+  }
+  @include device-type(mobile) {
+    display: block;
+    width: 40%;
+	  margin-left: auto;
+	  margin-right: auto;
+  }
+}
+
+.header a:active {
+  outline: none;
+  border-color: $secondary-color;
+  color: $secondary-color;
+}
+
+.header a:focus {
+  outline: none;
+  border-color: $secondary-color;
+  color: $secondary-color;
+}
+
+// Container
+.container {
+  margin: auto;
+  @include device-type(desktop) {
+    width: 45%;
+  }
+	@include device-type(tablet) {
+    width: 75%;
+  }
+  @include device-type(mobile) {
+    width: 90%;
+  }
+}
+
+.container a {
+    color: $primary-color;
+    text-decoration: none;
+}
+
+.container a:visited {
+    color: $primary-color;
+}
+
+// Headings
+@for $i from 1 through 6 {
+  .container {
+    h#{$i} {
+      color: $primary-color;
+    }
+  }
+}
+
+// Messages
+.error {
+  color: $error;
+}
+
+.success {
+  color: $success;
+}
+
+// Forms
+input, textarea {
+  display: inline-block;
+  border-radius: 5px;
+  margin-left: 0.35em;
+  padding: 0.25em;
+  border: 3px solid transparent;
+  border-bottom: 3px solid #CCC;
+}
+
+input {
+  font-size: 0.95em;
+}
+
+textarea {
+  font-size: 1.1em;
+}
+
+input:required:invalid.dirty {
+  border-bottom: 3px solid $error;
+}
+
+input:required:valid.dirty {
+  border-bottom: 3px solid $success;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-bottom: 3px solid $information;
+}
+
+button, input[type="button"] {
+  border-radius: 5px;
+  font-size: 1em;
+  padding: 0.25em 0.7em;
+  background-color: #FFF;
+  border: 2px solid #CCC;
+}
+
+button:active, input[type="button"]:active {
+  outline: none;
+  border-color: $secondary-color;
+  color: $secondary-color;
+}
+
+button:focus, input[type="button"]:focus {
+  outline: none;
+  border-color: $secondary-color;
+  color: $secondary-color;
+}
+
+label {
+  display: inline-block;
+  padding-top: 0.3em;
+}
+
+label[for] {
+  color: $error;
+}
+
+// Helpers 
+.nav {
+  float: right;
+}
+
+.row {
+  display: block;
+  margin-top: 0.6em;
+}
+
+.padded {
+  padding-left: 0.7em;
+  padding-right: 0.7em;
+}
+
+.space {
+  padding-top: 0.7em;
+}
+
+.fill {
+  width: 97%;
+}
+
+.right {
+  text-align: right;
+}
+
+// Alignment
+@for $i from 1 through 12 {
+  .c#{$i} {
+    display: inline-block;
+    vertical-align: top;
+    width: percentage($number: $i / 12);
+  }
+}
