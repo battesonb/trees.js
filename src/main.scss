@@ -1,4 +1,5 @@
 @import 'variables';
+@import 'functions';
 @import 'mixins';
 
 body {
@@ -223,6 +224,6 @@ label[for] {
   .c#{$i} {
     display: inline-block;
     vertical-align: top;
-    width: percentage($number: $i / 12);
+    width: truncate(percentage($number: $i / 12), 3);
   }
 }

@@ -1,0 +1,23 @@
+
+/// Power function, only works for integer-valued exponents.
+@function pow($number, $exponent) {
+    $total: 1;
+    @if $exponent < 0 {
+        @for $i from 1 through $exponent {
+            $total: $total / $number;
+        }
+    }
+    @else {
+        @for $i from 1 through $exponent {
+            $total: $total * $number;
+        }
+    }
+    
+    @return $total;
+}
+
+// Truncates a number to a given number of decimal places.
+@function truncate($number, $places) {
+    $offset: pow(10, $places);
+    @return floor($number * $offset) / $offset;
+}
