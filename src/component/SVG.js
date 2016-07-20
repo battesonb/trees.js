@@ -40,7 +40,7 @@ function SVG(id, options) {
 			this.dom.setAttribute('height', 200);
 		}
 	}
-	
+
 	this.setPosition();
 
 	if (options.width) {
@@ -185,23 +185,35 @@ function SVG(id, options) {
 		}
 	});
 
-	window.addEventListener('resize', function(e) {
-		viewBox = '0 0 ' + self.getWidth() * self.scale + ' ' + self.getHeight() * self.scale;
+	// A strange way to handle global event listeners. At least we can now remove them.
+	function windowResize(e) {
+		var viewBox = self.coords.x + ' ' + self.coords.y + ' ' + self.getWidth() * self.scale + ' ' + self.getHeight() * self.scale;
 		self.dom.setAttribute('viewBox', viewBox);
-		self.setPosition();
-	});
+	}
 
-	viewBox = '0 0 ' + this.getWidth() * self.scale + ' ' + this.getHeight() * self.scale;
+	window.addEventListener('resize', windowResize);
+
+	this.__proto__.removeEventListeners = function() {
+		window.removeEventListener('resize', windowResize);
+	};
+	// End of strange way.
+
+	console.log(this);
+
+	var viewBox = '0 0 ' + this.getWidth() * self.scale + ' ' + this.getHeight() * self.scale;
 	self.dom.setAttribute('viewBox', viewBox);
 }
 
+/**
+ * Sets the position of the svg.
+ */
 SVG.prototype.setPosition = function() {
 	var rect = this.dom.getBoundingClientRect();
 	this.x = rect.left;
 	this.y = rect.top;
 };
 
-/**
+	/**
  * Sets the fill and stroke color of a node. Defaults to the tree's default values.
  * @param {Object} node The node to color.
  * @param options
