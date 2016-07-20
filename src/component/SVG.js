@@ -111,11 +111,13 @@ function SVG(id, options) {
 			}
 		} else if(e.touches.length == 1) {
 			if(self.dragging.dom) {
-				self.move(0, 0);
+				self.move(e.touches[0].clientX * self.scale - self.dragging.currX, e.touches[0].clientY * self.scale - self.dragging.currY);
+				self.dragging.currX = e.touches[0].clientX * self.scale;
+				self.dragging.currY = e.touches[0].clientY * self.scale;
 			} else if(self.dragging.node && self.dragging.tree) {
 				for (var i = 0; i < self.trees.length; i++) {
 					if (self.trees[i] == self.dragging.tree) {
-						handleMove(self, self.dragging.tree, self.dragging.node, self.dragging.parent, e.clientX, e.clientY, {
+						handleMove(self, self.dragging.tree, self.dragging.node, self.dragging.parent, e.touches[0].clientX, e.touches[0].clientY, {
 							lineType: options.lineType,
 							anchor: self.anchor
 						});
@@ -147,6 +149,7 @@ function SVG(id, options) {
 
 	this.dom.addEventListener('mousemove', function(e) {
 		e.preventDefault();
+		self.mousedown = undefined;
 		if(self.dragging.dom) {
 			self.move(e.clientX * self.scale - self.dragging.currX, e.clientY * self.scale - self.dragging.currY);
 			self.dragging.currX = e.clientX * self.scale;
@@ -166,9 +169,11 @@ function SVG(id, options) {
 
 	this.dom.addEventListener('mouseup', function(e) {
 		e.preventDefault();
-		if(self.mousedown && e.target == self.dom) {
-			self.mousedown = undefined;
-			updateSelectedNode(self, null);
+		if(self.mousedown) { // If we have 'clicked'
+			if(e.target == self.dom) {
+				self.mousedown = undefined;
+				updateSelectedNode(self, null);
+			}
 		}
 		self.dragging.node = undefined;
 		self.dragging.tree = undefined;
@@ -714,45 +719,45 @@ SVG.prototype.drawTree = function(root, options) {
 		options = {};
 
 	self.current = {};
-	self.defaults = {};
+	var tree = new Tree(root);
+	tree.defaults = {};
 
 	if(options.fill)
-		self.defaults.fill = options.fill;
+		tree.defaults.fill = options.fill;
 	else
-		self.defaults.fill = '#BBDDFF';
+		tree.defaults.fill = '#BBDDFF';
 
 	if(options.stroke)
-		self.defaults.stroke = options.stroke;
+		tree.defaults.stroke = options.stroke;
 	else
-		self.defaults.stroke = '#6688BB';
+		tree.defaults.stroke = '#6688BB';
 
 	if(options.rootFill)
-		self.defaults.rootFill = options.rootFill;
+		tree.defaults.rootFill = options.rootFill;
 	else
-		self.defaults.rootFill = '#FF6666';
+		tree.defaults.rootFill = '#FF6666';
 
 	if(options.rootStroke)
-		self.defaults.rootStroke = options.rootStroke;
+		tree.defaults.rootStroke = options.rootStroke;
 	else
-		self.defaults.rootStroke = '#DD2222';
+		tree.defaults.rootStroke = '#DD2222';
 
 	if(options.lineStroke)
-		self.defaults.lineStroke = options.lineStroke;
+		tree.defaults.lineStroke = options.lineStroke;
 	else
-		self.defaults.lineStroke = self.defaults.stroke;
+		tree.defaults.lineStroke = tree.defaults.stroke;
 
 	if(!options.lineType) {
 		options.lineType = 'line';
 	}
 
 	if(options.cornerRadius)
-		self.defaults.cornerRadius = options.cornerRadius;
+		tree.defaults.cornerRadius = options.cornerRadius;
 	else
-		self.defaults.cornerRadius = 2;
+		tree.defaults.cornerRadius = 2;
 
 	if(self.clearable)
 		self.clear();
-	var tree = new Tree(root);
 
 	tree.lineType = options.lineType;
 
@@ -763,18 +768,18 @@ SVG.prototype.drawTree = function(root, options) {
 
 		var rect;
 		if(!parent) {
-			rect = self.addRectangle(0, 0, 5, 5, self.defaults.cornerRadius, self.defaults.cornerRadius, {
+			rect = self.addRectangle(0, 0, 5, 5, tree.defaults.cornerRadius, tree.defaults.cornerRadius, {
 				clickable: true,
-				fill: self.defaults.rootFill,
-				stroke: self.defaults.rootStroke,
+				fill: tree.defaults.rootFill,
+				stroke: tree.defaults.rootStroke,
 				child: node._text
 			});
 		}
 		else {
-			rect = self.addRectangle(0, 0, 5, 5, self.defaults.cornerRadius, self.defaults.cornerRadius, {
+			rect = self.addRectangle(0, 0, 5, 5, tree.defaults.cornerRadius, tree.defaults.cornerRadius, {
 				clickable: true,
-				fill: self.defaults.fill,
-				stroke: self.defaults.stroke,
+				fill: tree.defaults.fill,
+				stroke: tree.defaults.stroke,
 				child: node._text
 			});
 		}
@@ -792,18 +797,18 @@ SVG.prototype.drawTree = function(root, options) {
 		if(parent) {
 			if(options.lineType == 'bezier') {
 				node._line = self.addBezier(parent.x + offset.parX, parent.y + offset.parY, node.x + offset.x, node.y + offset.y, {
-					stroke: self.defaults.lineStroke
+					stroke: tree.defaults.lineStroke
 				});
 			} else {
 				options.lineType = 'line'
 				node._line = self.addLine(parent.x + offset.parX, parent.y + offset.parY, node.x + offset.x, node.y + offset.y, {
-					stroke: self.defaults.lineStroke
+					stroke: tree.defaults.lineStroke
 				});
 			}
 
 			node._direction = self.addCircle(node.x + offset.x, node.y + offset.y, 2, {
-				fill: self.defaults.lineStroke,
-				stroke: self.defaults.lineStroke,
+				fill: tree.defaults.lineStroke,
+				stroke: tree.defaults.lineStroke,
 			});
 		}
 	});
