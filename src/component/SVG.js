@@ -197,9 +197,7 @@ function SVG(id, options) {
 		window.removeEventListener('resize', windowResize);
 	};
 	// End of strange way.
-
-	console.log(this);
-
+	
 	var viewBox = '0 0 ' + this.getWidth() * self.scale + ' ' + this.getHeight() * self.scale;
 	self.dom.setAttribute('viewBox', viewBox);
 }
