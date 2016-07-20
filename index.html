@@ -121,6 +121,49 @@
 			svg.drawTree(lastRoot, {
 				lineType: 'bezier',
 			});
+			var root = {contents: "Hello", children: [
+				{ contents: "Whoa", children: [
+					{ contents: "Um", children: [] },
+					{ contents: "Dude", children: [] },
+					{ contents: "Breadth-First", children: [] }
+				] },
+				{ contents: "Another", children: [
+					{ contents: "Um", children: [] }
+				] }
+			]};
+
+			var anotherRoot = {contents: "1", children: [
+				{ contents: "1.1", children: [
+					{ contents: "1.1.1", children: [] },
+					{ contents: "1.1.2", children: [] },
+					{ contents: "1.1.3", children: [] }
+				] },
+				{ contents: "1.2", children: [
+					{ contents: "1.2.1", children: [] }
+				] },
+				{ contents: "1.3", children: [
+					{ contents: "1.3.1", children: [] },
+					{ contents: "1.3.2", children: [] }
+				] }
+			]};
+
+			var lastRoot = { contents: "Um", children: [
+				{ contents: "Fantastic", children: [] },
+				{ contents: "Awesome", children: [
+					{ contents: "Wow", children: [] },
+					{ contents: "Awesome", children: [
+						{ contents: "Testing", children: [] },
+						{ contents: "The", children: [] },
+						{ contents: "Anchors", children: [] },
+					] },
+				] },
+				{ contents: "Such", children: [
+					{ contents: "Bezier", children: [] }
+				] }
+			] }
+			svg.drawTree(root);
+			svg.drawTree(anotherRoot);
+			svg.drawTree(lastRoot);
 
 			// Set the anchor for pressing different keys.
 			window.onkeypress = function(e) {

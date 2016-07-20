@@ -21,17 +21,17 @@ Tree.prototype.initialize = function() {
 	var currNode = this.root;
 	if(!Tree.maxIndex)
 		Tree.maxIndex = 0;
-	var lastMaxIndex = Tree.maxIndex;
+	var max = 0;
 	if(currNode != null) {
 		traverseBFS(currNode, function(node, level, index) {
-			if(index + 1 > Tree.maxIndex)
-				Tree.maxIndex = index + 1;
+			if(index + 1 > max)
+				max = index + 1;
 			if(!node.hasOwnProperty('x'))
 				node.x = level * 165;
 			if(!node.hasOwnProperty('y'))
-				node.y = (index + lastMaxIndex) * (node._rect.height.baseVal.value + PADDING);
+				node.y = (index + Tree.maxIndex) * (node._rect.height.baseVal.value + PADDING);
 		});
-		Tree.maxIndex+= lastMaxIndex;
+		Tree.maxIndex+= max;
 	}
 }
 
