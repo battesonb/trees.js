@@ -2,7 +2,7 @@ var Tree = require('./Tree');
 
 /**
  * Creates an abstract object representation of the svg on the dom.
- * @param id The id of the svg in the document.
+ * @param {String} id The id of the svg in the document.
  * @param options
  * <ul>
  *     <li>clear - Clears the previous tree if true.</li>
@@ -128,8 +128,8 @@ SVG.prototype.setPosition = function() {
 
 /**
  * Sets the current scale of the svg to the given value.
- * @param scale The new scale.
- * @param options (optional)
+ * @param {Number} scale The new scale.
+ * @param options
  * <ul>
  *     <li>ex - The event x coordinate.</li>
  *     <li>ey - The event y coordinate.</li>
@@ -168,7 +168,7 @@ SVG.prototype.setScale = function(scale, options) {
 
 /**
  * A width getter, because Firefox handles SVG differently.
- * @return The SVG's width.
+ * @return {Number} The SVG's width.
  */
 SVG.prototype.getWidth = function() {
 	if(this.dom.scrollWidth > 0) {
@@ -184,7 +184,7 @@ SVG.prototype.getWidth = function() {
 
 /**
  * A height getter, because Firefox handles SVG differently.
- * @return The SVG's width.
+ * @return {Number} The SVG's width.
  */
 SVG.prototype.getHeight = function() {
 	if(this.dom.scrollHeight > 0) {
@@ -201,7 +201,7 @@ SVG.prototype.getHeight = function() {
 
 /**
  * Sets the current anchor of the tree to the given value
- * @param anchor The options are 'children' and 'none'. Default is 'none'.
+ * @param {String} anchor The options are 'children' and 'none'. Default is 'none'.
  */
 SVG.prototype.setAnchor = function(anchor) {
 	this.anchor = anchor;
@@ -209,7 +209,7 @@ SVG.prototype.setAnchor = function(anchor) {
 
 /**
  * Sets the current anchor of the tree to the given value
- * @param func The function to call when the pressing down on a node. First parameter of the function is the node.
+ * @param {function} func The function to call when the pressing down on a node. First parameter of the function is the node.
  */
 SVG.prototype.setSelectedAction = function(func) {
 	this.selectedAction = func;
@@ -217,10 +217,10 @@ SVG.prototype.setSelectedAction = function(func) {
 
 /**
  * Adds a bezier curve to the SVG.
- * @param mx the starting x position.
- * @param my the starting y position.
- * @param x the ending x position.
- * @param y the ending y position.
+ * @param {Number} mx the starting x position.
+ * @param {Number} my the starting y position.
+ * @param {Number} x the ending x position.
+ * @param {Number} y the ending y position.
  * @param options
  * <ul>
  *     <li>stroke - stroke color, default #000000</li>
@@ -256,11 +256,11 @@ SVG.prototype.addBezier = function(mx, my, x, y, options) {
 
 /**
  * Recalculates a bezier entirely, given the reference to a bezier.
- * @param bezier Reference to the bezier curve.
- * @param mx the starting x position.
- * @param my the starting y position.
- * @param x the ending x position.
- * @param y the ending y position.
+ * @param {Element} bezier Reference to the bezier curve.
+ * @param {Number} mx the starting x position.
+ * @param {Number} my the starting y position.
+ * @param {Number} x the ending x position.
+ * @param {Number} y the ending y position.
  */
 SVG.prototype.resetBezier = function(bezier, mx, my, x, y) {
 	var c1x = (mx + x) / 2;
@@ -273,9 +273,9 @@ SVG.prototype.resetBezier = function(bezier, mx, my, x, y) {
 
 /**
  * Moves a bezier curve without recalculation of curves.
- * @param bezier Reference to the bezier curve.
- * @param mx the starting x position.
- * @param my the starting y position.
+ * @param {Element} bezier Reference to the bezier curve.
+ * @param {Number} mx the starting x position.
+ * @param {Number} my the starting y position.
  */
 SVG.prototype.moveBezier = function(bezier, mx, my) {
 	bezier.setAttribute('transform', 'translate(' + mx + ',' + my + ')');
@@ -283,9 +283,9 @@ SVG.prototype.moveBezier = function(bezier, mx, my) {
 
 /**
  * Adds a circle to the SVG.
- * @param cx the x position.
- * @param cy the y position.
- * @param r the radius.
+ * @param {Number} cx the x position.
+ * @param {Number} cy the y position.
+ * @param {Number} r the radius.
  * @param options
  * <ul>
  *     <li>fill - fill color, default #FFFFFF.</li>
@@ -322,9 +322,9 @@ SVG.prototype.addCircle = function(cx, cy, r, options) {
 
 /**
  * Moves a circle given a reference to the circle in the SVG.
- * @param circle Reference to the circle.
- * @param cx Circle's x position.
- * @param cy Circle's y position.
+ * @param {Element} circle Reference to the circle.
+ * @param {Number} cx Circle's x position.
+ * @param {Number} cy Circle's y position.
  */
 SVG.prototype.moveCircle = function(circle, cx, cy) {
 	circle.setAttribute('cx', cx);
@@ -333,10 +333,10 @@ SVG.prototype.moveCircle = function(circle, cx, cy) {
 
 /**
  * Adds a line to the SVG.
- * @param x1 First x position.
- * @param y1 First y position.
- * @param x2 Second x position.
- * @param y2 Second y position.
+ * @param {Number} x1 First x position.
+ * @param {Number} y1 First y position.
+ * @param {Number} x2 Second x position.
+ * @param {Number} y2 Second y position.
  * @param options
  * <ul>
  *     <li>stroke - stroke color, default is #000000.</li>
@@ -367,11 +367,11 @@ SVG.prototype.addLine = function(x1, y1, x2, y2, options) {
 
 /**
  * Moves a line element given a reference to the line.
- * @param line Reference to the line.
- * @param x1 First x position.
- * @param y1 First y position.
- * @param x2 Second x position.
- * @param y2 Second y position.
+ * @param {Element} line Reference to the line.
+ * @param {Number} x1 First x position.
+ * @param {Number} y1 First y position.
+ * @param {Number} x2 Second x position.
+ * @param {Number} y2 Second y position.
  */
 SVG.prototype.moveLine = function(line, x1, y1, x2, y2) {
 	if(x2) {
@@ -394,12 +394,12 @@ var PADDING = 5;
 
 /**
  * Adds a rectangle to the SVG.
- * @param x x position.
- * @param y y position.
- * @param width width of the rectangle.
- * @param height height of the rectangle.
- * @param rx radius of the x-corner.
- * @param ry radius of the y-corner.
+ * @param {Number} x x position.
+ * @param {Number} y y position.
+ * @param {Number} width width of the rectangle.
+ * @param {Number} height height of the rectangle.
+ * @param {Number} rx radius of the x-corner.
+ * @param {Number} ry radius of the y-corner.
  * @param options
  * <ul>
  *     <li>clickable - If true, the pointer will be display over this SVG element. default is false.</li>
@@ -457,9 +457,9 @@ SVG.prototype.addRectangle = function(x, y, width, height, rx, ry, options) {
 
 /**
  * Moves a rectangle element given a reference to the rectangle.
- * @param rect Reference to the rectangle.
- * @param x x position.
- * @param y y position.
+ * @param {Element} rect Reference to the rectangle.
+ * @param {Number} x x position.
+ * @param {Number} y y position.
  * @param options
  */
 SVG.prototype.moveRectangle = function(rect, x, y, options) {
@@ -473,9 +473,9 @@ SVG.prototype.moveRectangle = function(rect, x, y, options) {
 
 /**
  * Adds text to the SVG.
- * @param x x position
- * @param y y position
- * @param text Text element
+ * @param {Number} x x position.
+ * @param {Number} y y position.
+ * @param {String} text The text to be contained by the text element.
  * @param options
  * <ul>
  *     <li>fill - fill color, default is #000000</li>
@@ -505,9 +505,9 @@ SVG.prototype.addText = function(x, y, text, options) {
 
 /**
  * Moves a text element given a reference to the text.
- * @param textNode Reference to the text.
- * @param x x position.
- * @param y y position.
+ * @param {Element} textNode Reference to the text.
+ * @param {Number} x x position.
+ * @param {Number} y y position.
  */
 SVG.prototype.moveText = function(textNode, x, y) {
 	textNode.setAttribute('x', x + PADDING);
@@ -524,7 +524,7 @@ SVG.prototype.clear = function() {
 
 /**
  * Removes an SVG element given a reference to it.
- * @param element The SVG element.
+ * @param {Element} element The SVG element.
  */
 SVG.prototype.removeElement = function(element) {
 	this.dom.removeChild(element);
@@ -532,8 +532,8 @@ SVG.prototype.removeElement = function(element) {
 
 /**
  * Updates the colors of a selected node.
- * @param svg A reference to the SVG data structure
- * @param node The node within the SVG that is selected.
+ * @param {Object} svg A reference to the SVG data structure
+ * @param {Object} node The node within the SVG that is selected.
  * @param options
  * <ul>
  *     <li>fill - fill color of the selected node, default is #33DD33</li>
@@ -562,9 +562,9 @@ function updateSelectedNode(svg, node, options) {
 
 /**
  * Removes a node, given a reference to the node, from the SVG and the data structure.
- * @param node the node.
- * @param maintainChildren if true, won't delete a node with children, otherwise it will delete a node and its children. Default is true.
- * @returns the node if deleted, null otherwise.
+ * @param {Object} node the node.
+ * @param {boolean} maintainChildren if true, won't delete a node with children, otherwise it will delete a node and its children. Default is true.
+ * @returns {Object} the node if deleted, null otherwise.
  */
 SVG.prototype.removeNode = function(node, maintainChildren) {
 	if(maintainChildren === undefined || maintainChildren) {
@@ -586,9 +586,9 @@ SVG.prototype.removeNode = function(node, maintainChildren) {
 
 /**
  * Removes the current node.
- * @param svg The SVG data structure.
- * @param node The node to remove.
- * @returns The node if it was a success, null otherwise.
+ * @param {Object} svg The SVG data structure.
+ * @param {Object} node The node to remove.
+ * @returns {Object} The node if it was a success, null otherwise.
  */
 function removeCurrNode(svg, node) {
 	if (node._line)
@@ -614,7 +614,7 @@ function removeCurrNode(svg, node) {
 
 /**
  * Clears the SVG and then draws a tree.
- * @param root the node of the tree to traverse.
+ * @param {Object} root the node of the tree to traverse.
  * @param options
  * <ul>
  *     <li>anchor - The anchor of the children when dragging a node. Options are 'none' and 'children'. Default is 'none'</li>
@@ -807,12 +807,12 @@ SVG.prototype.drawTree = function(root, options) {
 
 /**
  * Given an event's new position, update the current node.
- * @param self the SVG object.
- * @param tree the tree structure.
- * @param currNode the node to move.
- * @param nodeParent the node's parent.
- * @param ex event x position.
- * @param ey event y position.
+ * @param {Object} self the SVG object.
+ * @param {Object} tree the tree structure.
+ * @param {Object} currNode the node to move.
+ * @param {Object} nodeParent the node's parent.
+ * @param {Number} ex event x position.
+ * @param {Number} ey event y position.
  * @param options
  * <ul>
  *     <li>anchor - the object to anchor child nodes to. Options are 'descendents', 'children' and 'none'. Default is 'none'</li>
@@ -898,12 +898,13 @@ function handleMove(self, tree, currNode, nodeParent, ex, ey, options) {
 /**
  * Gets the offset required for the first and second control point for a bezier curve
  * given two nodes.
- * @param node the current node.
- * @param parent the current node's parent.
+ * @param {Object} node the current node.
+ * @param {Object} parent the current node's parent.
  * @param options
  * <ul>
  *     <li>layout - The orientation of the lines/edges, options are 'horizontal' and 'vertical'. Default is 'horizontal'.</li>
  * <ul>
+ * @returns {Object} The offset of the node.
  */
 function getOffset(node, parent, options) {
 	if(!parent)
