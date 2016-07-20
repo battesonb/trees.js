@@ -8,7 +8,9 @@ npm install trees.js
 ```
 
 ## Version
-### 1.1.4
+### 1.1.5
+- Reduced number of event listeners.
+- Added new setColor function.
 - Fixed zooming for an offset element.
 - Zooming no longer allows document scrolling.
 - SVG width and height values now accept all units, not just pixels. (This includes percentage based width/height).
@@ -93,6 +95,13 @@ Remove a node from the SVG, and the Tree data structure. The default of maintain
 a node and all of its children.
 ```
 svg.removeNode(node, maintainChildren); // Returns the node if deleted.
+```
+Set color of a given node:
+```
+svg.setColor(node, options);
+// options
+//   - fill: fill color as a string, default is tree default.
+//   - stroke: stroke color as a string, default is tree default.
 ```
 
 ## Variables
