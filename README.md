@@ -8,7 +8,8 @@ npm install trees.js
 ```
 
 ## Version
-### 1.1.6
+### 1.1.7
+- Added removeEventListeners (Only removes global listeners for now, such as on window)
 - Added setDeselected
 - Reduced number of event listeners.
 - Added new setColor function.
@@ -104,9 +105,10 @@ svg.removeNode(node, maintainChildren); // Returns the node if deleted.
 Set color of a given node:
 ```
 svg.setColor(node, options);
-// options
-//   - fill: fill color as a string, default is tree default.
-//   - stroke: stroke color as a string, default is tree default.
+
+//options
+fill: tree default   // fill color as a string.
+stroke: tree default // stroke color as a string.
 ```
 
 ## Variables
