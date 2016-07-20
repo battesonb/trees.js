@@ -90,7 +90,6 @@ function SVG(id, options) {
 				self.pinching.p2.y = e.touches[1].clientY;
 			} else if (e.touches.length == 1) {
 				e.preventDefault();
-				self.inputdown = true;
 				self.dragging.dom = true;
 				self.dragging.currX = e.touches[0].clientX * self.scale;
 				self.dragging.currY = e.touches[0].clientY * self.scale;
@@ -100,7 +99,6 @@ function SVG(id, options) {
 
 	this.dom.addEventListener('touchmove', function(e) {
 		e.preventDefault();
-		self.inputdown = false;
 		if(e.touches.length == 2 && self.pinching.status) {
 			e.preventDefault();
 			var oldDistSqr = (self.pinching.p1.x - self.pinching.p2.x) * (self.pinching.p1.x - self.pinching.p2.x) + (self.pinching.p1.y - self.pinching.p2.y) * (self.pinching.p1.y - self.pinching.p2.y);
@@ -136,18 +134,17 @@ function SVG(id, options) {
 		self.prevScale = self.scale;
 		self.dragging.node = undefined;
 		self.dragging.dom = false;
-		if(self.inputdown) { // If we have 'clicked'
-			if(e.target == self.dom) {
-				self.inputdown = undefined;
-				updateSelectedNode(self, null);
+		if(e.target == self.dom) {
+			if(self.deselectedAction && self.selectedNode) {
+				self.deselectedAction();
 			}
+			updateSelectedNode(self, null);
 		}
 	});
 
 	this.dom.addEventListener('mousedown', function(e) {
 		if(e.target == self.dom) {
 			e.preventDefault();
-			self.inputdown = true;
 			self.dragging.dom = true;
 			self.dragging.currX = e.clientX * self.scale;
 			self.dragging.currY = e.clientY * self.scale;
@@ -156,7 +153,6 @@ function SVG(id, options) {
 
 	this.dom.addEventListener('mousemove', function(e) {
 		e.preventDefault();
-		self.inputdown = undefined;
 		if(self.dragging.dom) {
 			self.move(e.clientX * self.scale - self.dragging.currX, e.clientY * self.scale - self.dragging.currY);
 			self.dragging.currX = e.clientX * self.scale;
@@ -176,14 +172,17 @@ function SVG(id, options) {
 
 	this.dom.addEventListener('mouseup', function(e) {
 		e.preventDefault();
-		if(self.inputdown) { // If we have 'clicked'
-			if(e.target == self.dom) {
-				self.inputdown = undefined;
-				updateSelectedNode(self, null);
-			}
-		}
 		self.dragging.node = undefined;
 		self.dragging.dom = false;
+	});
+
+	this.dom.addEventListener('click', function(e) {
+		if(e.target == self.dom) {
+			if(self.deselectedAction && self.selectedNode) {
+				self.deselectedAction();
+			}
+			updateSelectedNode(self, null);
+		}
 	});
 
 	window.addEventListener('resize', function(e) {
@@ -323,11 +322,19 @@ SVG.prototype.setAnchor = function(anchor) {
 };
 
 /**
- * Sets the current anchor of the tree to the given value
+ * Sets the action to be performed when a node is selected
  * @param {function} func The function to call when the pressing down on a node. First parameter of the function is the node.
  */
 SVG.prototype.setSelectedAction = function(func) {
 	this.selectedAction = func;
+};
+
+/**
+ * Sets the action to be performed when a node is deselected
+ * @param {function} func The function to call when the deselecting a node. It has no parameters.
+ */
+SVG.prototype.setDeselectedAction = function(func) {
+	this.deselectedAction = func;
 };
 
 /**
@@ -854,6 +861,7 @@ SVG.prototype.drawTree = function(root, options) {
 
 	tree.traverse(function(node, level, index, parent) {
 		node._rect.addEventListener('mousedown', function(e) {
+			e.preventDefault();
 			if (self.selectedAction)
 				self.selectedAction(node);
 			updateSelectedNode(self, node, {
@@ -866,6 +874,7 @@ SVG.prototype.drawTree = function(root, options) {
 			self.dragging.anchorY = e.clientY * self.scale - node.y;
 		});
 		node._rect.addEventListener('touchstart', function(e) {
+			e.preventDefault();
 			if(e.touches.length == 1) {
 				if (self.selectedAction)
 					self.selectedAction(node);

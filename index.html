@@ -56,6 +56,10 @@
 				});
 			});
 
+			svg.setDeselectedAction(function() {
+				console.log('deselected');
+			});
+
 			// Create some trees.
 			var root = {contents: "Hello", children: [
 				{ contents: "Whoa", children: [
