@@ -50,8 +50,10 @@
 
 			// Set the selected action of any node on the SVG.
 			svg.setSelectedAction(function(node) {
-				//console.log(node);
-				//svg.removeNode(node, false);
+				svg.setColor(node, {
+					fill: '#EEE',
+					stroke: '#000'
+				});
 			});
 
 			// Create some trees.
@@ -99,13 +101,13 @@
 			// Draw the trees.
 			svg.drawTree(root, {
 				anchor: 'none',
-				fill: '#DDD',
+				fill: '#777',
 				lineType: 'line',
 				rootFill: '#999',
 				rootStroke: '#555',
 				selectedFill: '#FFF',
 				selectedStroke: '#BBB',
-				stroke: '#888',
+				stroke: '#555',
 				lineStroke: '#555'
 			});
 			svg.drawTree(anotherRoot, {

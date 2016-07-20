@@ -90,6 +90,7 @@ function SVG(id, options) {
 				self.pinching.p2.y = e.touches[1].clientY;
 			} else if (e.touches.length == 1) {
 				e.preventDefault();
+				self.inputdown = true;
 				self.dragging.dom = true;
 				self.dragging.currX = e.touches[0].clientX * self.scale;
 				self.dragging.currY = e.touches[0].clientY * self.scale;
@@ -99,6 +100,7 @@ function SVG(id, options) {
 
 	this.dom.addEventListener('touchmove', function(e) {
 		e.preventDefault();
+		self.inputdown = false;
 		if(e.touches.length == 2 && self.pinching.status) {
 			e.preventDefault();
 			var oldDistSqr = (self.pinching.p1.x - self.pinching.p2.x) * (self.pinching.p1.x - self.pinching.p2.x) + (self.pinching.p1.y - self.pinching.p2.y) * (self.pinching.p1.y - self.pinching.p2.y);
@@ -114,10 +116,10 @@ function SVG(id, options) {
 				self.move(e.touches[0].clientX * self.scale - self.dragging.currX, e.touches[0].clientY * self.scale - self.dragging.currY);
 				self.dragging.currX = e.touches[0].clientX * self.scale;
 				self.dragging.currY = e.touches[0].clientY * self.scale;
-			} else if(self.dragging.node && self.dragging.tree) {
+			} else if(self.dragging.node) {
 				for (var i = 0; i < self.trees.length; i++) {
-					if (self.trees[i] == self.dragging.tree) {
-						handleMove(self, self.dragging.tree, self.dragging.node, self.dragging.parent, e.touches[0].clientX, e.touches[0].clientY, {
+					if (self.trees[i] === self.dragging.node._tree) {
+						handleMove(self, self.dragging.node._tree, self.dragging.node, self.dragging.parent, e.touches[0].clientX, e.touches[0].clientY, {
 							lineType: options.lineType,
 							anchor: self.anchor
 						});
@@ -133,14 +135,19 @@ function SVG(id, options) {
 		self.pinching.status = false;
 		self.prevScale = self.scale;
 		self.dragging.node = undefined;
-		self.dragging.tree = undefined;
 		self.dragging.dom = false;
+		if(self.inputdown) { // If we have 'clicked'
+			if(e.target == self.dom) {
+				self.inputdown = undefined;
+				updateSelectedNode(self, null);
+			}
+		}
 	});
 
 	this.dom.addEventListener('mousedown', function(e) {
 		if(e.target == self.dom) {
 			e.preventDefault();
-			self.mousedown = true;
+			self.inputdown = true;
 			self.dragging.dom = true;
 			self.dragging.currX = e.clientX * self.scale;
 			self.dragging.currY = e.clientY * self.scale;
@@ -149,15 +156,15 @@ function SVG(id, options) {
 
 	this.dom.addEventListener('mousemove', function(e) {
 		e.preventDefault();
-		self.mousedown = undefined;
+		self.inputdown = undefined;
 		if(self.dragging.dom) {
 			self.move(e.clientX * self.scale - self.dragging.currX, e.clientY * self.scale - self.dragging.currY);
 			self.dragging.currX = e.clientX * self.scale;
 			self.dragging.currY = e.clientY * self.scale;
-		} else if(self.dragging.node && self.dragging.tree) {
+		} else if(self.dragging.node) {
 			for (var i = 0; i < self.trees.length; i++) {
-				if (self.trees[i] == self.dragging.tree) {
-					handleMove(self, self.dragging.tree, self.dragging.node, self.dragging.parent, e.clientX, e.clientY, {
+				if (self.trees[i] === self.dragging.node._tree) {
+					handleMove(self, self.dragging.node._tree, self.dragging.node, self.dragging.parent, e.clientX, e.clientY, {
 						lineType: options.lineType,
 						anchor: self.anchor
 					});
@@ -169,14 +176,13 @@ function SVG(id, options) {
 
 	this.dom.addEventListener('mouseup', function(e) {
 		e.preventDefault();
-		if(self.mousedown) { // If we have 'clicked'
+		if(self.inputdown) { // If we have 'clicked'
 			if(e.target == self.dom) {
-				self.mousedown = undefined;
+				self.inputdown = undefined;
 				updateSelectedNode(self, null);
 			}
 		}
 		self.dragging.node = undefined;
-		self.dragging.tree = undefined;
 		self.dragging.dom = false;
 	});
 
@@ -194,6 +200,34 @@ SVG.prototype.setPosition = function() {
 	var rect = this.dom.getBoundingClientRect();
 	this.x = rect.left;
 	this.y = rect.top;
+};
+
+/**
+ * Sets the fill and stroke color of a node. Defaults to the tree's default values.
+ * @param {Object} node The node to color.
+ * @param options
+ * <ul>
+ *     <li>fill - The fill color</li>
+ *     <li>stroke - The stroke color</li>
+ * </ul>
+ */
+SVG.prototype.setColor = function(node, options) {
+	if(!options) {
+		options = {};
+	}
+	if(node._tree.root === node) {
+		if (!options.fill)
+			options.fill = node._tree.defaults.rootFill;
+		if (!options.stroke)
+			options.stroke = node._tree.defaults.rootStroke;
+	} else {
+		if (!options.fill)
+			options.fill = node._tree.defaults.fill;
+		if (!options.stroke)
+			options.stroke = node._tree.defaults.stroke;
+	}
+	node._rect.style.stroke = options.stroke;
+	node._rect.style.fill = options.fill;
 }
 
 /**
@@ -762,6 +796,7 @@ SVG.prototype.drawTree = function(root, options) {
 	tree.lineType = options.lineType;
 
 	tree.traverse(function(node, level, index, parent) {
+		node._tree = tree;
 		if(node.contents) {
 			node._text = self.addText(0, 0, node.contents);
 		}
@@ -819,31 +854,29 @@ SVG.prototype.drawTree = function(root, options) {
 
 	tree.traverse(function(node, level, index, parent) {
 		node._rect.addEventListener('mousedown', function(e) {
+			if (self.selectedAction)
+				self.selectedAction(node);
 			updateSelectedNode(self, node, {
 				fill: options.selectedFill,
 				stroke: options.selectedStroke
 			});
 			self.dragging.node = node;
 			self.dragging.parent = parent;
-			self.dragging.tree = tree;
 			self.dragging.anchorX = e.clientX * self.scale - node.x;
 			self.dragging.anchorY = e.clientY * self.scale - node.y;
-			if (self.selectedAction)
-				self.selectedAction(self.selectedNode);
 		});
 		node._rect.addEventListener('touchstart', function(e) {
 			if(e.touches.length == 1) {
+				if (self.selectedAction)
+					self.selectedAction(node);
 				updateSelectedNode(self, node, {
 					fill: options.selectedFill,
 					stroke: options.selectedStroke
 				});
 				self.dragging.node = node;
 				self.dragging.parent = parent;
-				self.dragging.tree = tree;
 				self.dragging.anchorX = e.touches[0].clientX * self.scale - node.x;
 				self.dragging.anchorY = e.touches[0].clientY * self.scale - node.y;
-				if (self.selectedAction)
-					self.selectedAction(self.selectedNode);
 			}
 		});
 	});
