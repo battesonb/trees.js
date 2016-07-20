@@ -8,7 +8,8 @@ npm install trees.js
 ```
 
 ## Version
-### 1.1.5
+### 1.1.6
+- Added setDeselected
 - Reduced number of event listeners.
 - Added new setColor function.
 - Fixed zooming for an offset element.
@@ -90,6 +91,10 @@ svg.setAnchor(anchor)
 Set the selected node's action, where the signature of func is func(node):
 ```
 svg.setSelectedAction(func)
+```
+Set the deselection action, when a node is deselected, where the signature of func is func():
+```
+svg.setDeselectedAction(func)
 ```
 Remove a node from the SVG, and the Tree data structure. The default of maintainChildren is true, if false, it will delete
 a node and all of its children.
