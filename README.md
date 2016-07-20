@@ -8,7 +8,7 @@ npm install trees.js
 ```
 
 ## Version
-### 1.1.7
+### 1.1.8
 - Added removeEventListeners (Only removes global listeners for now, such as on window)
 - Added setDeselected
 - Reduced number of event listeners.
