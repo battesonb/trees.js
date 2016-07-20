@@ -87,15 +87,19 @@ stroke: '#6688BB'         // The stroke color of a regular node.
 ## Functions
 Set anchor:
 ```
-svg.setAnchor(anchor)
+svg.setAnchor(anchor);
 ```
 Set the selected node's action, where the signature of func is func(node):
 ```
-svg.setSelectedAction(func)
+svg.setSelectedAction(func);
 ```
 Set the deselection action, when a node is deselected, where the signature of func is func():
 ```
-svg.setDeselectedAction(func)
+svg.setDeselectedAction(func);
+```
+Remove global event listeners
+```
+svg.removeEventListeners();
 ```
 Remove a node from the SVG, and the Tree data structure. The default of maintainChildren is true, if false, it will delete
 a node and all of its children.
