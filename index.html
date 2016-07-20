@@ -1,6 +1,7 @@
 <html>
 <head>
-	<meta name=viewport content="width=device-width, initial-scale=1, user-scalable=no">
+	<meta name=viewport content="width=device-width, initial-scale=1, user-scalable=no" />
+	<meta charset="utf-8" />
 	<style>
 		html, body {
 			width: 100%;
@@ -25,7 +26,7 @@
 			background-color: #4477FF;
 		}
 		.selected {
-			background-color: #44FF44; 
+			background-color: #44FF44;
 		}
 	</style>
 	<script src="dist/trees.bundle.js"></script>
@@ -36,12 +37,14 @@
 		window.onload = function() {
 			//--------------------------HAMMERJS STUFF-------------------------
 			// The following is for pinch debugging, you may comment it out or ignore it.
+			/*
 			var mc = new Hammer.Manager(document.getElementById('mySVG'));
 			var Pinch = new Hammer.Pinch();
 			mc.add(Pinch);
 			mc.on('pinch', function(e) {
 				// Do nothing, for now.
-			});
+			});*/
+			console.log('thing');
 			//-----------------------------------------------------------------
 
 			// Create the SVG.

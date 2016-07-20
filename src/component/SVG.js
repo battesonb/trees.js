@@ -498,7 +498,7 @@ SVG.prototype.addText = function(x, y, text, options) {
 		textNode.setAttribute('fill', '#000');
 
 	this.dom.appendChild(textNode);
-	textNode.setAttribute('y', y + PADDING + textNode.getBBox().height / 2);
+	textNode.setAttribute('y', y + PADDING + this.dom.lastChild.getBBox().height / 2);
 
 	return textNode;
 };
@@ -760,7 +760,6 @@ SVG.prototype.drawTree = function(root, options) {
 
 	// TODO Make these singular global events on the SVG, and add trees to a list perhaps? Far too many unhandled event listeners when trees are removed.
 	self.dom.addEventListener('mousedown', function(e) {
-		
 		if(e.target == self.dom) {
 			e.preventDefault();
 			tree.dragging.dom = true;
