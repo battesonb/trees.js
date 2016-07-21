@@ -8,7 +8,9 @@ npm install trees.js
 ```
 
 ## Version
-### 1.1.8
+### 1.1.9
+- Added setText function
+- Fixed deselect function and added node parameter.
 - Added removeEventListeners (Only removes global listeners for now, such as on window)
 - Added setDeselected
 - Reduced number of event listeners.
@@ -93,7 +95,7 @@ Set the selected node's action, where the signature of func is func(node):
 ```
 svg.setSelectedAction(func);
 ```
-Set the deselection action, when a node is deselected, where the signature of func is func():
+Set the deselection action, when a node is deselected, where the signature of func is func(node):
 ```
 svg.setDeselectedAction(func);
 ```
@@ -113,6 +115,10 @@ svg.setColor(node, options);
 //options
 fill: tree default   // fill color as a string.
 stroke: tree default // stroke color as a string.
+```
+Set text of a given node, changes the contents of the node:
+```
+svg.setText(node, text);
 ```
 
 ## Variables
