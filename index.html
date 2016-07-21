@@ -56,10 +56,12 @@
 				});
 			});
 
-			svg.setDeselectedAction(function() {
+			svg.setDeselectedAction(function(node) {
 				console.log('deselected');
 				//svg.removeEventListeners();
+				svg.setText(node, "Hello world!");
 			});
+
 
 			// Create some trees.
 			var root = {contents: "Hello", children: [

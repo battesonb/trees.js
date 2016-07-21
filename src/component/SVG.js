@@ -2,7 +2,7 @@ var Tree = require('./Tree');
 
 /**
  * Creates an abstract object representation of the svg on the dom.
- * @param {String} id The id of the svg in the document.
+ * @param {string} id The id of the svg in the document.
  * @param options
  * <ul>
  *     <li>clear - Clears the previous tree if true.</li>
@@ -136,7 +136,7 @@ function SVG(id, options) {
 		self.dragging.dom = false;
 		if(e.target == self.dom) {
 			if(self.deselectedAction && self.selectedNode) {
-				self.deselectedAction();
+				self.deselectedAction(self.selectedNode);
 			}
 			updateSelectedNode(self, null);
 		}
@@ -179,7 +179,7 @@ function SVG(id, options) {
 	this.dom.addEventListener('click', function(e) {
 		if(e.target == self.dom) {
 			if(self.deselectedAction && self.selectedNode) {
-				self.deselectedAction();
+				self.deselectedAction(self.selectedNode);
 			}
 			updateSelectedNode(self, null);
 		}
@@ -237,6 +237,20 @@ SVG.prototype.setColor = function(node, options) {
 	}
 	node._rect.style.stroke = options.stroke;
 	node._rect.style.fill = options.fill;
+}
+
+/**
+ * Sets the text contents of a given node, and the visual text displayed.
+ * @param {Object} node The node.
+ * @param {string} text The text to set the contents to.
+ */
+SVG.prototype.setText = function(node, contents) {
+	node.contents = contents;
+	node._text.innerHTML = contents;
+	var bbox = node._text.getBBox();
+	node._rect.setAttribute('width', bbox.width + PADDING * 2);
+	node._rect.setAttribute('height', bbox.height + PADDING * 2);
+	resetLines(this, node._tree, node, node.parent);
 }
 
 /**
@@ -325,7 +339,7 @@ SVG.prototype.getHeight = function() {
 
 /**
  * Sets the current anchor of the tree to the given value
- * @param {String} anchor The options are 'children' and 'none'. Default is 'none'.
+ * @param {string} anchor The options are 'children' and 'none'. Default is 'none'.
  */
 SVG.prototype.setAnchor = function(anchor) {
 	this.anchor = anchor;
@@ -341,7 +355,7 @@ SVG.prototype.setSelectedAction = function(func) {
 
 /**
  * Sets the action to be performed when a node is deselected
- * @param {function} func The function to call when the deselecting a node. It has no parameters.
+ * @param {function} func The function to call when the deselecting a node. First parameter of the function is the deselected node.
  */
 SVG.prototype.setDeselectedAction = function(func) {
 	this.deselectedAction = func;
@@ -607,7 +621,7 @@ SVG.prototype.moveRectangle = function(rect, x, y, options) {
  * Adds text to the SVG.
  * @param {Number} x x position.
  * @param {Number} y y position.
- * @param {String} text The text to be contained by the text element.
+ * @param {string} text The text to be contained by the text element.
  * @param options
  * <ul>
  *     <li>fill - fill color, default is #000000</li>
@@ -872,6 +886,9 @@ SVG.prototype.drawTree = function(root, options) {
 	tree.traverse(function(node, level, index, parent) {
 		node._rect.addEventListener('mousedown', function(e) {
 			e.preventDefault();
+			if(self.selectedNode && self.selectedNode !== node) {
+				self.deselectedAction(self.selectedNode);
+			}
 			if (self.selectedAction)
 				self.selectedAction(node);
 			updateSelectedNode(self, node, {
@@ -925,6 +942,41 @@ function handleMove(self, tree, currNode, nodeParent, ex, ey, options) {
 	currNode.y = ey * self.scale - self.dragging.anchorY;
 	self.moveRectangle(currNode._rect, currNode.x, currNode.y);
 	self.moveText(currNode._text, currNode.x, currNode.y);
+
+	resetLines(self, tree, currNode, nodeParent);
+
+	if(options.anchor == 'children') {
+		for(i = 0; i < currNode.children.length; i++) {
+			handleMove(self, tree, currNode.children[i], currNode, (currNode.children[i].x + currNode.x - origX + self.dragging.anchorX) / self.scale, (currNode.children[i].y + currNode.y - origY + self.dragging.anchorY) / self.scale, {
+				anchor: 'none',
+				lineType: options.lineType
+			});
+		}
+	} else if(options.anchor == 'descendents') {
+		for(i = 0; i < currNode.children.length; i++) {
+			handleMove(self, tree, currNode.children[i], currNode, (currNode.children[i].x + currNode.x - origX + self.dragging.anchorX) / self.scale, (currNode.children[i].y + currNode.y - origY + self.dragging.anchorY) / self.scale, {
+				anchor: 'descendents',
+				lineType: options.lineType
+			});
+		}
+	}
+}
+
+/**
+ * Resets the incoming and outgoing lines of a node
+ * @param self The svg.
+ * @param tree The tree the node belongs to.
+ * @param currNode The node.
+ * @param nodeParent The node's parent.
+ * @param options
+ * <ul>
+ *     <li>anchor - the object to anchor child nodes to. Options are 'descendents', 'children' and 'none'. Default is 'none'</li>
+ * <ul>
+ */
+function resetLines(self, tree, currNode, nodeParent, options) {
+	if(!options) {
+		options = {};
+	}
 	currNode._offset = getOffset(currNode, nodeParent);
 	if(currNode._direction)
 		self.moveCircle(currNode._direction, currNode.x + currNode._offset.x, currNode.y + currNode._offset.y);
@@ -954,21 +1006,6 @@ function handleMove(self, tree, currNode, nodeParent, ex, ey, options) {
 			if (currNode.children[i]._line) {
 				self.moveLine(currNode.children[i]._line, currNode.x + currNode.children[i]._offset.parX, currNode.y + currNode.children[i]._offset.parY, currNode.children[i].x + currNode.children[i]._offset.x, currNode.children[i].y + currNode.children[i]._offset.y);
 			}
-		}
-	}
-	if(options.anchor == 'children') {
-		for(i = 0; i < currNode.children.length; i++) {
-			handleMove(self, tree, currNode.children[i], currNode, (currNode.children[i].x + currNode.x - origX + self.dragging.anchorX) / self.scale, (currNode.children[i].y + currNode.y - origY + self.dragging.anchorY) / self.scale, {
-				anchor: 'none',
-				lineType: options.lineType
-			});
-		}
-	} else if(options.anchor == 'descendents') {
-		for(i = 0; i < currNode.children.length; i++) {
-			handleMove(self, tree, currNode.children[i], currNode, (currNode.children[i].x + currNode.x - origX + self.dragging.anchorX) / self.scale, (currNode.children[i].y + currNode.y - origY + self.dragging.anchorY) / self.scale, {
-				anchor: 'descendents',
-				lineType: options.lineType
-			});
 		}
 	}
 }
