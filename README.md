@@ -1,4 +1,5 @@
 # trees.js
+<img src="./images/logo.png" width="140" /><br />
 A somewhat optimised interactive tree diagramming library. This library uses SVG and the built in events system at this stage.
 
 ## Installing
