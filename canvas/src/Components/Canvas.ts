@@ -2,13 +2,24 @@ export default class Canvas {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
 
+  _fontSize: number;
+  _fontFamily: string;
+
   constructor(id: string) {
     this.canvas = <HTMLCanvasElement>document.getElementById(id);
     this.context = this.canvas.getContext("2d");
+
+    this._fontSize = 18;
+    this._fontFamily = "Arial";
+    this._updateFont();
   }
 
   clear(): void {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  getTextWidth(text: string): number {
+    return this.context.measureText(text).width;
   }
 
   setFill(style: string | CanvasGradient | CanvasPattern): void {
@@ -21,6 +32,20 @@ export default class Canvas {
 
   setStrokeSize(size: number = 1): void {
     this.context.lineWidth = size;
+  }
+
+  setFontSize(size: number): void {
+    this._fontSize = size;
+    this._updateFont();
+  }
+
+  setFontFamily(family: string): void {
+    this._fontFamily = family;
+    this._updateFont();
+  }
+
+  _updateFont(): void {
+    this.context.font = this._fontSize + "px " + this._fontFamily;
   }
 
   drawRect(x: number, y: number, w: number, h: number, stroke?: boolean, shadow?: boolean): void {

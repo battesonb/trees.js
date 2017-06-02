@@ -110,6 +110,12 @@ export default class SpatialHash {
     return null;
   }
 
+  /**
+   * Given a collider in the hash, move it by x and y points.
+   * @param collider
+   * @param x 
+   * @param y 
+   */
   move(collider: Collider, x: number, y: number) : void {
     this.remove(collider);
     collider.position.x += x;

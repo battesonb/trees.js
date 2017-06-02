@@ -8,7 +8,7 @@ export default class AABB extends Collider {
   _width: number;
   _height: number;
 
-  constructor(x: number, y: number, width: number, height: number) {
+  constructor(x: number, y: number, width: number = 0, height: number = 0) {
     super(x, y);
     this._width = width;
     this._height = height;

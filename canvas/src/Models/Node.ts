@@ -1,13 +1,16 @@
+import AABB from "../Components/Colliders/AABB";
+
 /**
  * The representation of a node of the tree.
  */
-export default class Node {
+export default class Node extends AABB {
   _id: number;
   _children: Array<Node>;
   _text: string;
   parent: Node;
 
-  constructor(text: string, x: number = undefined, y: number = undefined, id: number = undefined) {
+  constructor(text: string, id: number = undefined, x: number = 0, y: number = 0) {
+    super(x, y);
     this.setText(text);
     this.setId(id);
   }
@@ -26,6 +29,10 @@ export default class Node {
 
   setText(text: string): void {
     this._text = text;
+  }
+
+  getText(): string {
+    return this._text;
   }
 
   /**
