@@ -35,7 +35,7 @@ export default class Renderer {
     this.canvas.setStroke(this._options.node.stroke.color);
     this.canvas.setStrokeSize(this._options.node.stroke.size);
     this.canvas.setFill(this._options.node.color);
-    this.canvas.drawRoundedRect(node.position.x + this.camera.position.x, node.position.y + this.camera.position.y, node.width(), node.height(), this._options.node.rounded, false);
+    this.canvas.drawRoundedRect((node.position.x + this.camera.position.x) * this.camera.getZoom(), (node.position.y + this.camera.position.y) * this.camera.getZoom(), node.width() * this.camera.getZoom(), node.height() * this.camera.getZoom(), this._options.node.rounded * this.camera.getZoom(), false);
   
     if(this._options.shadow.text.blur > 0) {
       this.canvas.enableShadows(this._options.shadow.text.blur, this._options.shadow.text.offsetX, this._options.shadow.text.offsetY, this._options.shadow.text.color);
@@ -46,7 +46,7 @@ export default class Renderer {
     this.canvas.setStroke(this._options.text.stroke.color);
     this.canvas.setStrokeSize(this._options.text.stroke.size);
     this.canvas.setFill(this._options.text.color);
-    this.canvas.drawText(node.getText(), node.position.x, node.position.y, this._options.text.stroke.size > 0, 100);
+    this.canvas.drawText(node.getText(), node.position.x * this.camera.getZoom(), node.position.y * this.camera.getZoom(), this._options.text.stroke.size > 0, 100 * this.camera.getZoom());
   }
 
   drawPaths(node: Node): void {
@@ -58,7 +58,7 @@ export default class Renderer {
     this.canvas.setStroke(this._options.path.color);
     this.canvas.setStrokeSize(this._options.path.size);
     for(let i = 0; i < node._children.length; i++) {
-      this.canvas.drawLine(node.position.x + this.camera.position.x, node.position.y + this.camera.position.y, node[i].position.x + this.camera.position.x, node[i].position.y + this.camera.position.y);
+      this.canvas.drawLine((node.position.x + this.camera.position.x) * this.camera.getZoom(), (node.position.y + this.camera.position.y) * this.camera.getZoom(), (node[i].position.x + this.camera.position.x) * this.camera.getZoom(), (node[i].position.y + this.camera.position.y) * this.camera.getZoom());
     }
   }
 }
