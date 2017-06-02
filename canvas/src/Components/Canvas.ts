@@ -9,6 +9,8 @@ export default class Canvas {
     this.canvas = <HTMLCanvasElement>document.getElementById(id);
     this.context = this.canvas.getContext("2d");
 
+    this.context.textBaseline = "top";
+
     this._fontSize = 18;
     this._fontFamily = "Arial";
     this._updateFont();

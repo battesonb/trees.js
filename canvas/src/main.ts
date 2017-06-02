@@ -67,46 +67,46 @@ export default class TreesJS {
     if(options.shadow.node === undefined) {
       options.shadow.node = {};
     }
-    if(options.shadow.node === undefined) {
+    if(options.shadow.node.blur === undefined) {
       options.shadow.node.blur = 8;
     }
-    if(options.shadow.node === undefined) {
+    if(options.shadow.node.color === undefined) {
       options.shadow.node.color = "rgba(0, 0, 0, 0.25)";
     }
-    if(options.shadow.node === undefined) {
+    if(options.shadow.node.offsetX === undefined) {
       options.shadow.node.offsetX = 0;
     }
-    if(options.shadow.node === undefined) {
+    if(options.shadow.node.offsetY === undefined) {
       options.shadow.node.offsetY = 4;
     }
     if(options.shadow.path === undefined) {
       options.shadow.path = {};
     }
-    if(options.shadow.path === undefined) {
+    if(options.shadow.path.blur === undefined) {
       options.shadow.path.blur = 0;
     }
-    if(options.shadow.path === undefined) {
+    if(options.shadow.path.color === undefined) {
       options.shadow.path.color = "#000";
     }
-    if(options.shadow.path === undefined) {
+    if(options.shadow.path.offsetX === undefined) {
       options.shadow.path.offsetX = 0;
     }
-    if(options.shadow.path === undefined) {
+    if(options.shadow.path.offsetY === undefined) {
       options.shadow.path.offsetY = 0;
     }
     if(options.shadow.text === undefined) {
       options.shadow.text = {};
     }
-    if(options.shadow.text === undefined) {
+    if(options.shadow.text.blur === undefined) {
       options.shadow.text.blur = 0;
     }
-    if(options.shadow.text === undefined) {
+    if(options.shadow.text.color === undefined) {
       options.shadow.text.color = "#000";
     }
-    if(options.shadow.text === undefined) {
+    if(options.shadow.text.offsetX === undefined) {
       options.shadow.text.offsetX = 0;
     }
-    if(options.shadow.text === undefined) {
+    if(options.shadow.text.offsetY === undefined) {
       options.shadow.text.offsetY = 0;
     }
 

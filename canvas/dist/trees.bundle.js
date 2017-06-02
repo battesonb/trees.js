@@ -17,7 +17,7 @@ class Camera {
 }
 exports.default = Camera;
 
-},{"../Types/Point2D":4}],2:[function(require,module,exports){
+},{"../Types/Point2D":7}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -25,6 +25,7 @@ class Canvas {
     constructor(id) {
         this.canvas = document.getElementById(id);
         this.context = this.canvas.getContext("2d");
+        this.context.textBaseline = "top";
         this._fontSize = 18;
         this._fontFamily = "Arial";
         this._updateFont();
@@ -121,45 +122,162 @@ exports.default = Canvas;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+const Collider_1 = require("./Collider");
+/**
+ * Represents an AABB with top-left alignment.
+ */
+class AABB extends Collider_1.default {
+    constructor(x, y, width = 0, height = 0) {
+        super(x, y);
+        this._width = width;
+        this._height = height;
+    }
+    contains(x, y) {
+        return x >= this.position.x && y >= this.position.y && x <= this.position.x + this.width() && y <= this.position.x + this.height();
+    }
+    overlaps(other) {
+        if (other instanceof AABB) {
+            return Math.abs(this.position.x - other.position.x) * 2 < this.width() + other.width() && Math.abs(this.position.y - other.position.y) * 2 < this.height() + other.height();
+        }
+        throw Error("Unknown collider type, cannot determine overlap.");
+    }
+    topLeft() {
+        return this.position;
+    }
+    height() {
+        return this._height;
+    }
+    width() {
+        return this._width;
+    }
+}
+exports.default = AABB;
+
+},{"./Collider":4}],4:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const Point2D_1 = require("../../Types/Point2D");
+class Collider {
+    constructor(x, y) {
+        this.position = new Point2D_1.default(x, y);
+    }
+}
+exports.default = Collider;
+
+},{"../../Types/Point2D":7}],5:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 const Canvas_1 = require("./Canvas");
 const Camera_1 = require("./Camera");
+const Node_1 = require("../Models/Node");
 class Renderer {
     constructor(id, options) {
         this.canvas = new Canvas_1.default(id);
         this.camera = new Camera_1.default(0, 0, 1);
         this._options = options;
         this.canvas.setFontFamily(options.text.family);
-        this.canvas.enableShadows(4, 0, 2, "rgba(0, 0, 0, 0.25)");
-        this.canvas.setFill("#55AAFF");
-        this.canvas.drawRoundedRect(10, 10, 100, 30, 10, false);
-        this.canvas.setFill("#FFAA55");
-        this.canvas.drawRoundedRect(160, 10, 100, 30, 10);
-        //this.canvas.clearShadows();
-        this.canvas.setFill("#FFF");
-        this.canvas.drawText("Hello", 40, 31);
+        let node = new Node_1.default("Hello", 0);
+        node._width = 70;
+        node._height = 24;
+        this.drawNode(node);
+    }
+    clear() {
+        this.canvas.clear();
     }
     drawNode(node) {
+        if (this._options.shadow.node.blur > 0) {
+            this.canvas.enableShadows(this._options.shadow.node.blur, this._options.shadow.node.offsetX, this._options.shadow.node.offsetY, this._options.shadow.node.color);
+        } else {
+            this.canvas.clearShadows();
+        }
         this.canvas.setStroke(this._options.node.stroke.color);
         this.canvas.setStrokeSize(this._options.node.stroke.size);
         this.canvas.setFill(this._options.node.color);
-        this.canvas.drawRoundedRect(node.position.x + this.camera.position.x, node.position.y + this.camera.position.y, node.width(), node.height(), this._options.node.rounded, false);
+        this.canvas.drawRoundedRect((node.position.x + this.camera.position.x) * this.camera.getZoom(), (node.position.y + this.camera.position.y) * this.camera.getZoom(), node.width() * this.camera.getZoom(), node.height() * this.camera.getZoom(), this._options.node.rounded * this.camera.getZoom(), false);
+        if (this._options.shadow.text.blur > 0) {
+            this.canvas.enableShadows(this._options.shadow.text.blur, this._options.shadow.text.offsetX, this._options.shadow.text.offsetY, this._options.shadow.text.color);
+        } else {
+            this.canvas.clearShadows();
+        }
         this.canvas.setFontSize(this._options.text.size * this.camera.getZoom());
         this.canvas.setStroke(this._options.text.stroke.color);
         this.canvas.setStrokeSize(this._options.text.stroke.size);
         this.canvas.setFill(this._options.text.color);
-        this.canvas.drawText(node.getText(), node.position.x, node.position.y, this._options.text.stroke.size > 0, 100);
+        this.canvas.drawText(node.getText(), (node.position.x + this.camera.position.x) * this.camera.getZoom(), (node.position.y + this.camera.position.y) * this.camera.getZoom(), this._options.text.stroke.size > 0, 100 * this.camera.getZoom());
     }
     drawPaths(node) {
+        if (this._options.shadow.path.blur > 0) {
+            this.canvas.enableShadows(this._options.shadow.path.blur, this._options.shadow.path.offsetX, this._options.shadow.path.offsetY, this._options.shadow.path.color);
+        } else {
+            this.canvas.clearShadows();
+        }
         this.canvas.setStroke(this._options.path.color);
         this.canvas.setStrokeSize(this._options.path.size);
         for (let i = 0; i < node._children.length; i++) {
-            this.canvas.drawLine(node.position.x + this.camera.position.x, node.position.y + this.camera.position.y, node[i].position.x + this.camera.position.x, node[i].position.y + this.camera.position.y);
+            this.canvas.drawLine((node.position.x + this.camera.position.x) * this.camera.getZoom(), (node.position.y + this.camera.position.y) * this.camera.getZoom(), (node[i].position.x + this.camera.position.x) * this.camera.getZoom(), (node[i].position.y + this.camera.position.y) * this.camera.getZoom());
         }
     }
 }
 exports.default = Renderer;
 
-},{"./Camera":1,"./Canvas":2}],4:[function(require,module,exports){
+},{"../Models/Node":6,"./Camera":1,"./Canvas":2}],6:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const AABB_1 = require("../Components/Colliders/AABB");
+/**
+ * The representation of a node of the tree.
+ */
+class Node extends AABB_1.default {
+    constructor(text, id = undefined, x = 0, y = 0) {
+        super(x, y);
+        this.setText(text);
+        this.setId(id);
+    }
+    /**
+     * Sets the identifier of the node. Uniqueness of the identifier is not determined.
+     * @param id
+     */
+    setId(id) {
+        this._id = id;
+    }
+    getId() {
+        return this._id;
+    }
+    setText(text) {
+        this._text = text;
+    }
+    getText() {
+        return this._text;
+    }
+    /**
+     * Adds a child to the current node and sets the parent of the child as the object of the calling the method.
+     * @param child
+     */
+    addChild(child) {
+        this._children.push(child);
+        child.parent = this;
+    }
+    /**
+     * Gets the child with a specific identifier.
+     * TODO make faster with a binary search, maybe? Probably not though.
+     * @param id
+     */
+    getChild(id) {
+        for (let i = 0; i < this._children.length; i++) {
+            let child = this._children[i];
+            if (child.getId() === id) {
+                return child;
+            }
+        }
+        return null;
+    }
+}
+exports.default = Node;
+
+},{"../Components/Colliders/AABB":3}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -171,7 +289,7 @@ class Point2D {
 }
 exports.default = Point2D;
 
-},{}],5:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -235,46 +353,46 @@ class TreesJS {
         if (options.shadow.node === undefined) {
             options.shadow.node = {};
         }
-        if (options.shadow.node === undefined) {
+        if (options.shadow.node.blur === undefined) {
             options.shadow.node.blur = 8;
         }
-        if (options.shadow.node === undefined) {
+        if (options.shadow.node.color === undefined) {
             options.shadow.node.color = "rgba(0, 0, 0, 0.25)";
         }
-        if (options.shadow.node === undefined) {
+        if (options.shadow.node.offsetX === undefined) {
             options.shadow.node.offsetX = 0;
         }
-        if (options.shadow.node === undefined) {
+        if (options.shadow.node.offsetY === undefined) {
             options.shadow.node.offsetY = 4;
         }
         if (options.shadow.path === undefined) {
             options.shadow.path = {};
         }
-        if (options.shadow.path === undefined) {
+        if (options.shadow.path.blur === undefined) {
             options.shadow.path.blur = 0;
         }
-        if (options.shadow.path === undefined) {
+        if (options.shadow.path.color === undefined) {
             options.shadow.path.color = "#000";
         }
-        if (options.shadow.path === undefined) {
+        if (options.shadow.path.offsetX === undefined) {
             options.shadow.path.offsetX = 0;
         }
-        if (options.shadow.path === undefined) {
+        if (options.shadow.path.offsetY === undefined) {
             options.shadow.path.offsetY = 0;
         }
         if (options.shadow.text === undefined) {
             options.shadow.text = {};
         }
-        if (options.shadow.text === undefined) {
+        if (options.shadow.text.blur === undefined) {
             options.shadow.text.blur = 0;
         }
-        if (options.shadow.text === undefined) {
+        if (options.shadow.text.color === undefined) {
             options.shadow.text.color = "#000";
         }
-        if (options.shadow.text === undefined) {
+        if (options.shadow.text.offsetX === undefined) {
             options.shadow.text.offsetX = 0;
         }
-        if (options.shadow.text === undefined) {
+        if (options.shadow.text.offsetY === undefined) {
             options.shadow.text.offsetY = 0;
         }
         this._renderer = new Renderer_1.default(id, options);
@@ -329,6 +447,6 @@ options = {
 */
 window.TreesJS = TreesJS;
 
-},{"./Components/Renderer":3}]},{},[5])
+},{"./Components/Renderer":5}]},{},[8])
 
 //# sourceMappingURL=trees.bundle.js.map

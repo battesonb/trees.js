@@ -14,16 +14,14 @@ export default class Renderer {
 
     this.canvas.setFontFamily(options.text.family);
 
-    this.canvas.enableShadows(4, 0, 2, "rgba(0, 0, 0, 0.25)");
-    this.canvas.setFill("#55AAFF");
-    this.canvas.drawRoundedRect(10, 10, 100, 30, 10, false);
+    let node = new Node("Hello", 0);
+    node._width = 70;
+    node._height = 24;
+    this.drawNode(node);
+  }
 
-    this.canvas.setFill("#FFAA55");
-    this.canvas.drawRoundedRect(160, 10, 100, 30, 10);
-
-    //this.canvas.clearShadows();
-    this.canvas.setFill("#FFF");
-    this.canvas.drawText("Hello", 40, 31);
+  clear(): void {
+    this.canvas.clear();
   }
 
   drawNode(node: Node): void {
@@ -46,7 +44,7 @@ export default class Renderer {
     this.canvas.setStroke(this._options.text.stroke.color);
     this.canvas.setStrokeSize(this._options.text.stroke.size);
     this.canvas.setFill(this._options.text.color);
-    this.canvas.drawText(node.getText(), node.position.x * this.camera.getZoom(), node.position.y * this.camera.getZoom(), this._options.text.stroke.size > 0, 100 * this.camera.getZoom());
+    this.canvas.drawText(node.getText(), (node.position.x + this.camera.position.x) * this.camera.getZoom(), (node.position.y + this.camera.position.y) * this.camera.getZoom(), this._options.text.stroke.size > 0, 100 * this.camera.getZoom());
   }
 
   drawPaths(node: Node): void {
