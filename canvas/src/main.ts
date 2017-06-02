@@ -1,7 +1,11 @@
+import Camera from "./Components/Camera";
+import EventSystem from "./Components/EventSystem";
 import Renderer from "./Components/Renderer";
 import Tree from "./Models/Tree";
 
 export default class TreesJS {
+  _camera: Camera;
+  _eventSystem: EventSystem;
   _renderer: Renderer;
   _tree: Tree;
 
@@ -98,10 +102,10 @@ export default class TreesJS {
       options.shadow.text = {};
     }
     if(options.shadow.text.blur === undefined) {
-      options.shadow.text.blur = 0;
+      options.shadow.text.blur = 1;
     }
     if(options.shadow.text.color === undefined) {
-      options.shadow.text.color = "#000";
+      options.shadow.text.color = "rgba(0, 0, 0, 0.3)";
     }
     if(options.shadow.text.offsetX === undefined) {
       options.shadow.text.offsetX = 0;
@@ -110,7 +114,9 @@ export default class TreesJS {
       options.shadow.text.offsetY = 0;
     }
 
-    this._renderer = new Renderer(id, options);
+    this._camera = new Camera(0, 0, 2);
+    this._renderer = new Renderer(id, this._camera, options);
+    this._eventSystem = new EventSystem(this._camera, this._renderer);
   }
 }
 
