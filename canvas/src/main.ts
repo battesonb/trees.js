@@ -39,6 +39,9 @@ export default class TreesJS {
       options.path.size = 2;
     }
 
+    if(options.text === undefined) {
+      options.text = {};
+    }
     if(options.text.color === undefined) {
       options.text.color = "#FFF";
     }
@@ -49,7 +52,7 @@ export default class TreesJS {
       options.text.size = 18;
     }
     if(options.text.stroke === undefined) {
-      options.text = {};
+      options.text.stroke = {};
     }
     if(options.text.stroke.color === undefined) {
       options.text.stroke.color = "#000";

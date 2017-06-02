@@ -27,11 +27,21 @@ export default class Renderer {
   }
 
   drawNode(node: Node): void {
+    if(this._options.shadow.node.blur > 0) {
+      this.canvas.enableShadows(this._options.shadow.node.blur, this._options.shadow.node.offsetX, this._options.shadow.node.offsetY, this._options.shadow.node.color);
+    } else {
+      this.canvas.clearShadows();
+    }
     this.canvas.setStroke(this._options.node.stroke.color);
     this.canvas.setStrokeSize(this._options.node.stroke.size);
     this.canvas.setFill(this._options.node.color);
     this.canvas.drawRoundedRect(node.position.x + this.camera.position.x, node.position.y + this.camera.position.y, node.width(), node.height(), this._options.node.rounded, false);
   
+    if(this._options.shadow.text.blur > 0) {
+      this.canvas.enableShadows(this._options.shadow.text.blur, this._options.shadow.text.offsetX, this._options.shadow.text.offsetY, this._options.shadow.text.color);
+    } else {
+      this.canvas.clearShadows();
+    }
     this.canvas.setFontSize(this._options.text.size * this.camera.getZoom());
     this.canvas.setStroke(this._options.text.stroke.color);
     this.canvas.setStrokeSize(this._options.text.stroke.size);
@@ -40,6 +50,11 @@ export default class Renderer {
   }
 
   drawPaths(node: Node): void {
+    if(this._options.shadow.path.blur > 0) {
+      this.canvas.enableShadows(this._options.shadow.path.blur, this._options.shadow.path.offsetX, this._options.shadow.path.offsetY, this._options.shadow.path.color);
+    } else {
+      this.canvas.clearShadows();
+    }
     this.canvas.setStroke(this._options.path.color);
     this.canvas.setStrokeSize(this._options.path.size);
     for(let i = 0; i < node._children.length; i++) {
