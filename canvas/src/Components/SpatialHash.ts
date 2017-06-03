@@ -9,7 +9,7 @@ export default class SpatialHash {
   _inverseBucketSize: number;
   _map: object;
 
-  constructor(bucketSize: number = 120) {
+  constructor(bucketSize: number = 100) {
     this._map = {};
     this._bucketSize = bucketSize;
     this._inverseBucketSize = 1 / bucketSize;

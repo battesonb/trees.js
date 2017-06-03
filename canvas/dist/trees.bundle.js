@@ -193,6 +193,7 @@ class EventSystem {
             this._hash.add(node);
         });
         this._canvas.dom.addEventListener("mousedown", this.mouseDown);
+        this._canvas.dom.addEventListener("mousemove", this.mouseMove);
         this._canvas.dom.addEventListener("mousewheel", this.mouseWheel);
         this.redraw();
     }
@@ -204,14 +205,14 @@ class EventSystem {
         self._currentNode = self._hash.find(point.x / self._camera.getZoom() - self._camera.position.x, point.y / self._camera.getZoom() - self._camera.position.y);
         self._x = point.x;
         self._y = point.y;
-        window.addEventListener("mousemove", self.mouseMove);
+        window.addEventListener("mousemove", self.mouseDrag);
         window.addEventListener("mouseup", self.mouseUp);
     }
     mouseWheel(event) {
         self._camera.decZoom(event.deltaY / 100);
         self.redraw();
     }
-    mouseMove(event) {
+    mouseDrag(event) {
         let point = self._getEventPoint(event);
         let dx = (point.x - self._x) / self._camera.getZoom();
         let dy = (point.y - self._y) / self._camera.getZoom();
@@ -225,9 +226,18 @@ class EventSystem {
         self._x = point.x;
         self._y = point.y;
     }
+    mouseMove(event) {
+        let point = self._getEventPoint(event);
+        let hoverNode = self._hash.find(point.x / self._camera.getZoom() - self._camera.position.x, point.y / self._camera.getZoom() - self._camera.position.y);
+        if (hoverNode) {
+            self._canvas.dom.style.cursor = "pointer";
+        } else {
+            self._canvas.dom.style.cursor = "auto";
+        }
+    }
     mouseUp(event) {
         self._currentNode = null;
-        window.removeEventListener("mousemove", self.mouseMove);
+        window.removeEventListener("mousemove", self.mouseDrag);
         window.removeEventListener("mouseup", self.mouseUp);
     }
     redraw() {
@@ -324,7 +334,7 @@ const Point2D_1 = require("../Types/Point2D");
  * A spatial hash based on AABB world coordinates.
  */
 class SpatialHash {
-    constructor(bucketSize = 120) {
+    constructor(bucketSize = 100) {
         this._map = {};
         this._bucketSize = bucketSize;
         this._inverseBucketSize = 1 / bucketSize;
