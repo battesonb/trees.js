@@ -9,7 +9,20 @@
     <script src="./dist/trees.bundle.js"></script>
     <script>
       window.onload = function() {
-        var tree = new TreesJS("cnv");
+        var tree = new TreesJS("cnv", {
+          text: "Hello",
+          x: 0,
+          y: 0,
+          children: [
+            {
+              text: "Another",
+              x: 100,
+              y: 20
+            }
+          ]
+        }, {
+
+        });
       }
     </script>
   </head>

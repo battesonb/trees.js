@@ -9,10 +9,13 @@ export default class Node extends AABB {
   _text: string;
   parent: Node;
 
-  constructor(text: string, id: number = undefined, x: number = 0, y: number = 0) {
+  constructor(text: string, id: number = -1, x: number = 0, y: number = 0) {
     super(x, y);
     this.setText(text);
     this.setId(id);
+    this._children = [];
+    this._width = 70; // TEMPORARY, TODO DELETE THIS
+    this._height = 24;
   }
 
   /**

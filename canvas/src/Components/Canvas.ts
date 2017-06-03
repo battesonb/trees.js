@@ -1,13 +1,13 @@
 export default class Canvas {
-  canvas: HTMLCanvasElement;
+  dom: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
 
   _fontSize: number;
   _fontFamily: string;
 
   constructor(id: string) {
-    this.canvas = <HTMLCanvasElement>document.getElementById(id);
-    this.context = this.canvas.getContext("2d");
+    this.dom = <HTMLCanvasElement>document.getElementById(id);
+    this.context = this.dom.getContext("2d");
 
     this.context.textBaseline = "top";
 
@@ -16,8 +16,16 @@ export default class Canvas {
     this._updateFont();
   }
 
+  getWidth(): number {
+    return this.dom.width;
+  }
+
+  getHeight(): number {
+    return this.dom.height;
+  }
+
   clear(): void {
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.clearRect(0, 0, this.dom.width, this.dom.height);
   }
 
   getTextWidth(text: string): number {

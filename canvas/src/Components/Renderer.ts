@@ -2,66 +2,91 @@ import Canvas from "./Canvas";
 import Camera from "./Camera";
 import Node from "../Models/Node";
 import Tree from "../Models/Tree";
+import SpatialHash from "./SpatialHash";
 
 export default class Renderer {
-  canvas: Canvas;
+  _canvas: Canvas;
   _camera: Camera;
+  _tree: Tree;
   _options: any;
-
-  constructor(id: string, camera: Camera, options: any) {
-    this.canvas = new Canvas(id);
+  
+  constructor(camera: Camera, canvas: Canvas, tree: Tree, options: any) {
+    this._canvas = canvas;
     this._camera = camera;
+    this._tree = tree;
     this._options = options;
 
-    this.canvas.setFontFamily(options.text.family);
-
-    this.drawTree(undefined);
+    this._canvas.setFontFamily(options.text.family);
   }
 
   clear(): void {
-    this.canvas.clear();
+    this._canvas.clear();
   }
 
-  drawTree(tree: Tree): void {
-    let node = new Node("Hello", 0);
-    node._width = 70;
-    node._height = 24;
-    this.drawNode(node);
+  drawTree(): void {
+    this._tree.each((node: Node) => {
+      this.drawPaths(node);
+    });
+
+    this._tree.each((node: Node) => {
+      this.drawNode(node);
+    });
+  }
+
+  /**
+   * A debugging method for visualising how the spatial hash looks.
+   */
+  drawHashGroups(hash: SpatialHash): void {
+    this._canvas.setStroke("55AAFF");
+    this._canvas.setStrokeSize(1);
+    this._canvas.clearShadows();
+
+    let hor = (this._camera.position.x % hash._bucketSize) * this._camera._zoom;
+    while(hor < this._canvas.getWidth()) {
+      this._canvas.drawLine(hor, 0, hor, this._canvas.getHeight());
+      hor += hash._bucketSize * this._camera._zoom;
+    }
+
+    let vert = (this._camera.position.y % hash._bucketSize) * this._camera._zoom;
+    while(vert < this._canvas.getHeight()) {
+      this._canvas.drawLine(0, vert, this._canvas.getWidth(), vert);
+      vert += hash._bucketSize * this._camera._zoom;
+    }
   }
 
   drawNode(node: Node): void {
     if(this._options.shadow.node.blur > 0) {
-      this.canvas.enableShadows(this._options.shadow.node.blur, this._options.shadow.node.offsetX, this._options.shadow.node.offsetY, this._options.shadow.node.color);
+      this._canvas.enableShadows(this._options.shadow.node.blur, this._options.shadow.node.offsetX, this._options.shadow.node.offsetY, this._options.shadow.node.color);
     } else {
-      this.canvas.clearShadows();
+      this._canvas.clearShadows();
     }
-    this.canvas.setStroke(this._options.node.stroke.color);
-    this.canvas.setStrokeSize(this._options.node.stroke.size);
-    this.canvas.setFill(this._options.node.color);
-    this.canvas.drawRoundedRect((node.position.x + this._camera.position.x) * this._camera.getZoom(), (node.position.y + this._camera.position.y) * this._camera.getZoom(), node.width() * this._camera.getZoom(), node.height() * this._camera.getZoom(), this._options.node.rounded * this._camera.getZoom(), false);
+    this._canvas.setStroke(this._options.node.stroke.color);
+    this._canvas.setStrokeSize(this._options.node.stroke.size);
+    this._canvas.setFill(this._options.node.color);
+    this._canvas.drawRoundedRect((node.position.x + this._camera.position.x) * this._camera.getZoom(), (node.position.y + this._camera.position.y) * this._camera.getZoom(), node.width() * this._camera.getZoom(), node.height() * this._camera.getZoom(), this._options.node.rounded * this._camera.getZoom(), false);
   
     if(this._options.shadow.text.blur > 0) {
-      this.canvas.enableShadows(this._options.shadow.text.blur, this._options.shadow.text.offsetX, this._options.shadow.text.offsetY, this._options.shadow.text.color);
+      this._canvas.enableShadows(this._options.shadow.text.blur, this._options.shadow.text.offsetX, this._options.shadow.text.offsetY, this._options.shadow.text.color);
     } else {
-      this.canvas.clearShadows();
+      this._canvas.clearShadows();
     }
-    this.canvas.setFontSize(this._options.text.size * this._camera.getZoom());
-    this.canvas.setStroke(this._options.text.stroke.color);
-    this.canvas.setStrokeSize(this._options.text.stroke.size);
-    this.canvas.setFill(this._options.text.color);
-    this.canvas.drawText(node.getText(), (node.position.x + this._camera.position.x) * this._camera.getZoom(), (node.position.y + this._camera.position.y) * this._camera.getZoom(), this._options.text.stroke.size > 0, 100 * this._camera.getZoom());
+    this._canvas.setFontSize(this._options.text.size * this._camera.getZoom());
+    this._canvas.setStroke(this._options.text.stroke.color);
+    this._canvas.setStrokeSize(this._options.text.stroke.size);
+    this._canvas.setFill(this._options.text.color);
+    this._canvas.drawText(node.getText(), (node.position.x + this._camera.position.x) * this._camera.getZoom(), (node.position.y + this._camera.position.y) * this._camera.getZoom(), this._options.text.stroke.size > 0, 100 * this._camera.getZoom());
   }
 
   drawPaths(node: Node): void {
     if(this._options.shadow.path.blur > 0) {
-      this.canvas.enableShadows(this._options.shadow.path.blur, this._options.shadow.path.offsetX, this._options.shadow.path.offsetY, this._options.shadow.path.color);
+      this._canvas.enableShadows(this._options.shadow.path.blur, this._options.shadow.path.offsetX, this._options.shadow.path.offsetY, this._options.shadow.path.color);
     } else {
-      this.canvas.clearShadows();
+      this._canvas.clearShadows();
     }
-    this.canvas.setStroke(this._options.path.color);
-    this.canvas.setStrokeSize(this._options.path.size);
+    this._canvas.setStroke(this._options.path.color);
+    this._canvas.setStrokeSize(this._options.path.size);
     for(let i = 0; i < node._children.length; i++) {
-      this.canvas.drawLine((node.position.x + this._camera.position.x) * this._camera.getZoom(), (node.position.y + this._camera.position.y) * this._camera.getZoom(), (node[i].position.x + this._camera.position.x) * this._camera.getZoom(), (node[i].position.y + this._camera.position.y) * this._camera.getZoom());
+      this._canvas.drawLine((node.position.x + node.width() / 2 + this._camera.position.x) * this._camera.getZoom(), (node.position.y + node.height() / 2 + this._camera.position.y) * this._camera.getZoom(), (node._children[i].position.x + node._children[i].width() / 2 + this._camera.position.x) * this._camera.getZoom(), (node._children[i].position.y + node._children[i].height() / 2 + this._camera.position.y) * this._camera.getZoom());
     }
   }
 }

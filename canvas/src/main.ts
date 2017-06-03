@@ -1,15 +1,17 @@
 import Camera from "./Components/Camera";
+import Canvas from "./Components/Canvas";
 import EventSystem from "./Components/EventSystem";
 import Renderer from "./Components/Renderer";
 import Tree from "./Models/Tree";
 
 export default class TreesJS {
   _camera: Camera;
+  _canvas: Canvas;
   _eventSystem: EventSystem;
   _renderer: Renderer;
   _tree: Tree;
 
-  constructor(id: string, options?: any) {
+  constructor(id: string, json: object, options?: any) {
     if(options === undefined) {
       options = {};
     }
@@ -114,9 +116,11 @@ export default class TreesJS {
       options.shadow.text.offsetY = 0;
     }
 
-    this._camera = new Camera(0, 0, 2);
-    this._renderer = new Renderer(id, this._camera, options);
-    this._eventSystem = new EventSystem(this._camera, this._renderer);
+    this._camera = new Camera(0, 0, 1);
+    this._canvas = new Canvas(id);
+    this._tree = new Tree(json, this._canvas);
+    this._renderer = new Renderer(this._camera, this._canvas, this._tree, options);
+    this._eventSystem = new EventSystem(this._camera, this._renderer, this._canvas, this._tree);
   }
 }
 
