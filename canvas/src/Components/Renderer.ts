@@ -37,8 +37,8 @@ export default class Renderer {
    * A debugging method for visualising how the spatial hash looks.
    */
   drawHashGroups(hash: SpatialHash): void {
-    this._canvas.setStroke("55AAFF");
-    this._canvas.setStrokeSize(1);
+    this._canvas.setStroke("#77BBFF");
+    this._canvas.setStrokeSize(0.5);
     this._canvas.clearShadows();
 
     let hor = (this._camera.position.x % hash._bucketSize) * this._camera._zoom;

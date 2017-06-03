@@ -15,7 +15,7 @@ export default class AABB extends Collider {
   }
 
   contains(x: number, y: number): boolean {
-    return x >= this.position.x && y >= this.position.y && x <= this.position.x + this.width() && y <= this.position.x + this.height();
+    return x >= this.position.x && y >= this.position.y && x <= this.position.x + this.width() && y <= this.position.y + this.height();
   }
 
   overlaps(other: Collider): boolean {

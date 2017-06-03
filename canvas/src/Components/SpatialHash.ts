@@ -9,7 +9,7 @@ export default class SpatialHash {
   _inverseBucketSize: number;
   _map: object;
 
-  constructor(bucketSize: number = 24) {
+  constructor(bucketSize: number = 120) {
     this._map = {};
     this._bucketSize = bucketSize;
     this._inverseBucketSize = 1 / bucketSize;
@@ -21,26 +21,18 @@ export default class SpatialHash {
    */
   getPoints(collider: Collider) : Array<Point2D> {
     let points: Array<Point2D> = [];
-    let moveH: number = 0;
     let position: Point2D = collider.topLeft();
     let width: number = collider.width();
     let height: number = collider.height();
-    while(true) {
-      let moveV: number = 0;
-      while(true) {
-        let x: number = position.x + moveH;
-        let y: number = position.y + moveV;
-        points.push(new Point2D(x, y));
-        moveV+= this._bucketSize;
-        if (moveV > height) {
-          break;
-        }        
-      }
-      moveH+= this._bucketSize;
-      if (moveH > width) {
-        break;
+
+    for(let moveH: number = Math.floor(position.x * this._inverseBucketSize); moveH * this._bucketSize <= position.x + width; moveH+= 1) {
+      for(let moveV: number = Math.floor(position.y * this._inverseBucketSize); moveV * this._bucketSize <= position.y + height; moveV+= 1) {
+        let x: number = moveH * this._bucketSize;
+        let y: number = moveV * this._bucketSize;
+        points.push(new Point2D(x, y));  
       }
     }
+
     return points;
   }
 
@@ -91,7 +83,6 @@ export default class SpatialHash {
    */
   getNearby(x: number, y: number): Array<Collider> {
     let hash = this.toHashLong(x, y);
-    console.log(hash);
     let set = this._map[hash];
     if(set) {
       return <Array<Collider>>Array.from(set);
@@ -126,6 +117,16 @@ export default class SpatialHash {
     collider.position.y += y;
     this.add(collider);
   }
+
+  /**
+   * Convert a point to a unique 32-bit number representing the x/y coordinates in the hash.
+   * @param point
+   */
+  pointToHashLong(x: number, y: number): number {
+    x = Math.floor(x * this._inverseBucketSize) & 0xFFFF; // cast to 16-bit
+    y = (Math.floor(y * this._inverseBucketSize) & 0xFFFF) << 15; // cast to 16-bit and then shift 15-bits to the left.
+    return x | y;
+  }  
 
   /**
    * Convert a point to a unique 32-bit number representing the x/y coordinates in the hash.

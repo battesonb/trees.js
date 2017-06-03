@@ -142,7 +142,7 @@ class AABB extends Collider_1.default {
         this._height = height;
     }
     contains(x, y) {
-        return x >= this.position.x && y >= this.position.y && x <= this.position.x + this.width() && y <= this.position.x + this.height();
+        return x >= this.position.x && y >= this.position.y && x <= this.position.x + this.width() && y <= this.position.y + this.height();
     }
     overlaps(other) {
         if (other instanceof AABB) {
@@ -178,12 +178,13 @@ exports.default = Collider;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+const Point2D_1 = require("../Types/Point2D");
 const SpatialHash_1 = require("./SpatialHash");
 let self;
 class EventSystem {
     constructor(camera, renderer, canvas, tree) {
         self = this; // Ugly, but binds require handlers.
-        this._hash = new SpatialHash_1.default(150); // TODO deterrmine this using the node sizes!
+        this._hash = new SpatialHash_1.default(); // TODO deterrmine this using the node sizes!
         this._camera = camera;
         this._canvas = canvas;
         this._currentNode = null;
@@ -195,10 +196,14 @@ class EventSystem {
         this._canvas.dom.addEventListener("mousewheel", this.mouseWheel);
         this.redraw();
     }
+    _getEventPoint(event) {
+        return new Point2D_1.default(event.offsetX, event.offsetY);
+    }
     mouseDown(event) {
-        self._currentNode = self._hash.find(event.clientX / self._camera.getZoom() - self._camera.position.x, event.clientY / self._camera.getZoom() - self._camera.position.y);
-        self._clientX = event.clientX;
-        self._clientY = event.clientY;
+        let point = self._getEventPoint(event);
+        self._currentNode = self._hash.find(point.x / self._camera.getZoom() - self._camera.position.x, point.y / self._camera.getZoom() - self._camera.position.y);
+        self._x = point.x;
+        self._y = point.y;
         window.addEventListener("mousemove", self.mouseMove);
         window.addEventListener("mouseup", self.mouseUp);
     }
@@ -207,8 +212,9 @@ class EventSystem {
         self.redraw();
     }
     mouseMove(event) {
-        let dx = (event.clientX - self._clientX) / self._camera.getZoom();
-        let dy = (event.clientY - self._clientY) / self._camera.getZoom();
+        let point = self._getEventPoint(event);
+        let dx = (point.x - self._x) / self._camera.getZoom();
+        let dy = (point.y - self._y) / self._camera.getZoom();
         if (self._currentNode === null) {
             self._camera.position.x += dx;
             self._camera.position.y += dy;
@@ -216,11 +222,10 @@ class EventSystem {
             self._hash.move(self._currentNode, dx, dy);
         }
         self.redraw();
-        self._clientX = event.clientX;
-        self._clientY = event.clientY;
+        self._x = point.x;
+        self._y = point.y;
     }
     mouseUp(event) {
-        console.log(self._hash);
         self._currentNode = null;
         window.removeEventListener("mousemove", self.mouseMove);
         window.removeEventListener("mouseup", self.mouseUp);
@@ -228,12 +233,12 @@ class EventSystem {
     redraw() {
         self._renderer.clear();
         self._renderer.drawTree();
-        //self._renderer.drawHashGroups(self._hash); // Debug
+        self._renderer.drawHashGroups(self._hash); // Debug
     }
 }
 exports.default = EventSystem;
 
-},{"./SpatialHash":7}],6:[function(require,module,exports){
+},{"../Types/Point2D":10,"./SpatialHash":7}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -260,8 +265,8 @@ class Renderer {
      * A debugging method for visualising how the spatial hash looks.
      */
     drawHashGroups(hash) {
-        this._canvas.setStroke("55AAFF");
-        this._canvas.setStrokeSize(1);
+        this._canvas.setStroke("#77BBFF");
+        this._canvas.setStrokeSize(0.5);
         this._canvas.clearShadows();
         let hor = this._camera.position.x % hash._bucketSize * this._camera._zoom;
         while (hor < this._canvas.getWidth()) {
@@ -319,7 +324,7 @@ const Point2D_1 = require("../Types/Point2D");
  * A spatial hash based on AABB world coordinates.
  */
 class SpatialHash {
-    constructor(bucketSize = 24) {
+    constructor(bucketSize = 120) {
         this._map = {};
         this._bucketSize = bucketSize;
         this._inverseBucketSize = 1 / bucketSize;
@@ -330,24 +335,14 @@ class SpatialHash {
      */
     getPoints(collider) {
         let points = [];
-        let moveH = 0;
         let position = collider.topLeft();
         let width = collider.width();
         let height = collider.height();
-        while (true) {
-            let moveV = 0;
-            while (true) {
-                let x = position.x + moveH;
-                let y = position.y + moveV;
+        for (let moveH = Math.floor(position.x * this._inverseBucketSize); moveH * this._bucketSize <= position.x + width; moveH += 1) {
+            for (let moveV = Math.floor(position.y * this._inverseBucketSize); moveV * this._bucketSize <= position.y + height; moveV += 1) {
+                let x = moveH * this._bucketSize;
+                let y = moveV * this._bucketSize;
                 points.push(new Point2D_1.default(x, y));
-                moveV += this._bucketSize;
-                if (moveV > height) {
-                    break;
-                }
-            }
-            moveH += this._bucketSize;
-            if (moveH > width) {
-                break;
             }
         }
         return points;
@@ -394,7 +389,6 @@ class SpatialHash {
      */
     getNearby(x, y) {
         let hash = this.toHashLong(x, y);
-        console.log(hash);
         let set = this._map[hash];
         if (set) {
             return Array.from(set);
@@ -426,6 +420,15 @@ class SpatialHash {
         collider.position.x += x;
         collider.position.y += y;
         this.add(collider);
+    }
+    /**
+     * Convert a point to a unique 32-bit number representing the x/y coordinates in the hash.
+     * @param point
+     */
+    pointToHashLong(x, y) {
+        x = Math.floor(x * this._inverseBucketSize) & 0xFFFF; // cast to 16-bit
+        y = (Math.floor(y * this._inverseBucketSize) & 0xFFFF) << 15; // cast to 16-bit and then shift 15-bits to the left.
+        return x | y;
     }
     /**
      * Convert a point to a unique 32-bit number representing the x/y coordinates in the hash.
