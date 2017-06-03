@@ -21,6 +21,10 @@ export default class Renderer {
     this._canvas.setFontFamily(options.text.family);
 
     // TODO Set up node widths/heights/padding
+    this._tree.each((node: Node) => {
+      node._width = this._canvas.getTextWidth(node.getText()) + this._options.node.padding * 3;
+      node._height = this._options.text.size + this._options.node.padding * 2;
+    });
   }
 
   clear(): void {
