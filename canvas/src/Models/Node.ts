@@ -61,4 +61,20 @@ export default class Node extends AABB {
     }
     return null;
   }
+
+  /**
+   * Brings this node to the front of the parent's children.
+   */
+  bringToFront(): void {
+    let parent: Node = this.parent;
+    if(parent) {
+      for(let i = 0; i < parent._children.length; i++) {
+        if(parent._children[i] === this) {
+          parent._children.splice(i, 1);
+          break;
+        }
+      }
+      parent._children.push(this);
+    }
+  }
 }

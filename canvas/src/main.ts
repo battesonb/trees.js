@@ -20,10 +20,13 @@ export default class TreesJS {
       options.node = {};
     }
     if(options.node.color === undefined) {
-      options.node.color = "#FFAA55";
+      options.node.color = "#55AAFF";
     }
     if(options.node.rounded === undefined) {
       options.node.rounded = 4;
+    }
+    if(options.node.padding === undefined) {
+      options.node.padding = 4;
     }
     if(options.node.stroke === undefined) {
       options.node.stroke = {};
@@ -33,6 +36,21 @@ export default class TreesJS {
     }
     if(options.node.stroke.size === undefined) {
       options.node.stroke.size = 0;
+    }
+    if(options.node.selected === undefined) {
+      options.node.selected = {};
+    }
+    if(options.node.selected.color === undefined) {
+      options.node.selected.color = "#FFAA55";
+    }
+    if(options.node.selected.stroke === undefined) {
+      options.node.selected.stroke = {};
+    }
+    if(options.node.selected.stroke.color === undefined) {
+      options.node.selected.stroke.color = "#000";
+    }
+    if(options.node.selected.stroke.size === undefined) {
+      options.node.selected.stroke.size = 1;
     }
 
     if(options.path === undefined) {
@@ -89,16 +107,16 @@ export default class TreesJS {
       options.shadow.path = {};
     }
     if(options.shadow.path.blur === undefined) {
-      options.shadow.path.blur = 0;
+      options.shadow.path.blur = 1;
     }
     if(options.shadow.path.color === undefined) {
-      options.shadow.path.color = "#000";
+      options.shadow.path.color = "rgba(0, 0, 0, 0.25)";
     }
     if(options.shadow.path.offsetX === undefined) {
       options.shadow.path.offsetX = 0;
     }
     if(options.shadow.path.offsetY === undefined) {
-      options.shadow.path.offsetY = 0;
+      options.shadow.path.offsetY = 4;
     }
     if(options.shadow.text === undefined) {
       options.shadow.text = {};
@@ -130,9 +148,17 @@ options = {
   node: {
     color: "#FFAA55",
     rounded: 5,
+    padding: 5,
     stroke: {
       color: "#000"
       size: 0
+    },
+    selected {
+      color: "#FFAA55",
+      stroke: {
+        color: "#000"
+        size: 0
+      }
     }
   },
   path: {

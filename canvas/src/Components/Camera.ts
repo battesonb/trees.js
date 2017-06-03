@@ -10,14 +10,15 @@ export default class Camera {
   }
 
   setZoom(zoom: number) {
-    this._zoom = Math.max(0.5, Math.min(50, zoom));
+    this._zoom = Math.max(0.35, Math.min(50, zoom));
   }
 
   getZoom(): number {
     return this._zoom;
   }
 
-  decZoom(amt: number) {
-    this.setZoom(this._zoom - amt);
+  decZoom(amt: number, x: number, y: number) {
+    let newZoom: number = this._zoom - amt;
+    this.setZoom(newZoom);
   }
 }

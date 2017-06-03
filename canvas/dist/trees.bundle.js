@@ -9,13 +9,14 @@ class Camera {
         this.setZoom(zoom);
     }
     setZoom(zoom) {
-        this._zoom = Math.max(0.5, Math.min(50, zoom));
+        this._zoom = Math.max(0.35, Math.min(50, zoom));
     }
     getZoom() {
         return this._zoom;
     }
-    decZoom(amt) {
-        this.setZoom(this._zoom - amt);
+    decZoom(amt, x, y) {
+        let newZoom = this._zoom - amt;
+        this.setZoom(newZoom);
     }
 }
 exports.default = Camera;
@@ -189,6 +190,7 @@ class EventSystem {
         this._canvas = canvas;
         this._currentNode = null;
         this._renderer = renderer;
+        this._moved = false;
         tree.each(node => {
             this._hash.add(node);
         });
@@ -203,13 +205,18 @@ class EventSystem {
     mouseDown(event) {
         let point = self._getEventPoint(event);
         self._currentNode = self._hash.find(point.x / self._camera.getZoom() - self._camera.position.x, point.y / self._camera.getZoom() - self._camera.position.y);
+        if (self._currentNode) {
+            self._currentNode.bringToFront();
+        }
+        self._moved = false;
         self._x = point.x;
         self._y = point.y;
         window.addEventListener("mousemove", self.mouseDrag);
         window.addEventListener("mouseup", self.mouseUp);
     }
     mouseWheel(event) {
-        self._camera.decZoom(event.deltaY / 100);
+        let point = self._getEventPoint(event);
+        self._camera.decZoom(event.deltaY / 250, point.x, point.y);
         self.redraw();
     }
     mouseDrag(event) {
@@ -222,6 +229,7 @@ class EventSystem {
         } else {
             self._hash.move(self._currentNode, dx, dy);
         }
+        self._moved = true;
         self.redraw();
         self._x = point.x;
         self._y = point.y;
@@ -236,6 +244,10 @@ class EventSystem {
         }
     }
     mouseUp(event) {
+        if (!self._moved) {
+            self._renderer.setSelectedNode(self._currentNode);
+            self.redraw();
+        }
         self._currentNode = null;
         window.removeEventListener("mousemove", self.mouseDrag);
         window.removeEventListener("mouseup", self.mouseUp);
@@ -243,7 +255,7 @@ class EventSystem {
     redraw() {
         self._renderer.clear();
         self._renderer.drawTree();
-        self._renderer.drawHashGroups(self._hash); // Debug
+        //self._renderer.drawHashGroups(self._hash); // Debug Spatial Hash
     }
 }
 exports.default = EventSystem;
@@ -259,6 +271,7 @@ class Renderer {
         this._tree = tree;
         this._options = options;
         this._canvas.setFontFamily(options.text.family);
+        // TODO Set up node widths/heights/padding
     }
     clear() {
         this._canvas.clear();
@@ -268,7 +281,11 @@ class Renderer {
             this.drawPaths(node);
         });
         this._tree.each(node => {
-            this.drawNode(node);
+            if (node === this._selectedNode) {
+                this.drawNode(node, true);
+            } else {
+                this.drawNode(node);
+            }
         });
     }
     /**
@@ -289,18 +306,24 @@ class Renderer {
             vert += hash._bucketSize * this._camera._zoom;
         }
     }
-    drawNode(node) {
+    drawNode(node, selected) {
         if (this._options.shadow.node.blur > 0) {
-            this._canvas.enableShadows(this._options.shadow.node.blur, this._options.shadow.node.offsetX, this._options.shadow.node.offsetY, this._options.shadow.node.color);
+            this._canvas.enableShadows(this._options.shadow.node.blur, this._options.shadow.node.offsetX * this._camera.getZoom(), this._options.shadow.node.offsetY * this._camera.getZoom(), this._options.shadow.node.color);
         } else {
             this._canvas.clearShadows();
         }
-        this._canvas.setStroke(this._options.node.stroke.color);
-        this._canvas.setStrokeSize(this._options.node.stroke.size);
-        this._canvas.setFill(this._options.node.color);
+        if (selected) {
+            this._canvas.setStroke(this._options.node.selected.stroke.color);
+            this._canvas.setStrokeSize(this._options.node.selected.stroke.size);
+            this._canvas.setFill(this._options.node.selected.color);
+        } else {
+            this._canvas.setStroke(this._options.node.stroke.color);
+            this._canvas.setStrokeSize(this._options.node.stroke.size);
+            this._canvas.setFill(this._options.node.color);
+        }
         this._canvas.drawRoundedRect((node.position.x + this._camera.position.x) * this._camera.getZoom(), (node.position.y + this._camera.position.y) * this._camera.getZoom(), node.width() * this._camera.getZoom(), node.height() * this._camera.getZoom(), this._options.node.rounded * this._camera.getZoom(), false);
         if (this._options.shadow.text.blur > 0) {
-            this._canvas.enableShadows(this._options.shadow.text.blur, this._options.shadow.text.offsetX, this._options.shadow.text.offsetY, this._options.shadow.text.color);
+            this._canvas.enableShadows(this._options.shadow.text.blur, this._options.shadow.text.offsetX * this._camera.getZoom(), this._options.shadow.text.offsetY * this._camera.getZoom(), this._options.shadow.text.color);
         } else {
             this._canvas.clearShadows();
         }
@@ -308,11 +331,11 @@ class Renderer {
         this._canvas.setStroke(this._options.text.stroke.color);
         this._canvas.setStrokeSize(this._options.text.stroke.size);
         this._canvas.setFill(this._options.text.color);
-        this._canvas.drawText(node.getText(), (node.position.x + this._camera.position.x) * this._camera.getZoom(), (node.position.y + this._camera.position.y) * this._camera.getZoom(), this._options.text.stroke.size > 0, 100 * this._camera.getZoom());
+        this._canvas.drawText(node.getText(), (node.position.x + this._camera.position.x + this._options.node.padding) * this._camera.getZoom(), (node.position.y + this._camera.position.y + this._options.node.padding) * this._camera.getZoom(), this._options.text.stroke.size > 0, 100 * this._camera.getZoom());
     }
     drawPaths(node) {
         if (this._options.shadow.path.blur > 0) {
-            this._canvas.enableShadows(this._options.shadow.path.blur, this._options.shadow.path.offsetX, this._options.shadow.path.offsetY, this._options.shadow.path.color);
+            this._canvas.enableShadows(this._options.shadow.path.blur, this._options.shadow.path.offsetX * this._camera.getZoom(), this._options.shadow.path.offsetY * this._camera.getZoom(), this._options.shadow.path.color);
         } else {
             this._canvas.clearShadows();
         }
@@ -321,6 +344,9 @@ class Renderer {
         for (let i = 0; i < node._children.length; i++) {
             this._canvas.drawLine((node.position.x + node.width() / 2 + this._camera.position.x) * this._camera.getZoom(), (node.position.y + node.height() / 2 + this._camera.position.y) * this._camera.getZoom(), (node._children[i].position.x + node._children[i].width() / 2 + this._camera.position.x) * this._camera.getZoom(), (node._children[i].position.y + node._children[i].height() / 2 + this._camera.position.y) * this._camera.getZoom());
         }
+    }
+    setSelectedNode(node) {
+        this._selectedNode = node;
     }
 }
 exports.default = Renderer;
@@ -507,6 +533,21 @@ class Node extends AABB_1.default {
         }
         return null;
     }
+    /**
+     * Brings this node to the front of the parent's children.
+     */
+    bringToFront() {
+        let parent = this.parent;
+        if (parent) {
+            for (let i = 0; i < parent._children.length; i++) {
+                if (parent._children[i] === this) {
+                    parent._children.splice(i, 1);
+                    break;
+                }
+            }
+            parent._children.push(this);
+        }
+    }
 }
 exports.default = Node;
 
@@ -587,10 +628,13 @@ class TreesJS {
             options.node = {};
         }
         if (options.node.color === undefined) {
-            options.node.color = "#FFAA55";
+            options.node.color = "#55AAFF";
         }
         if (options.node.rounded === undefined) {
             options.node.rounded = 4;
+        }
+        if (options.node.padding === undefined) {
+            options.node.padding = 4;
         }
         if (options.node.stroke === undefined) {
             options.node.stroke = {};
@@ -600,6 +644,21 @@ class TreesJS {
         }
         if (options.node.stroke.size === undefined) {
             options.node.stroke.size = 0;
+        }
+        if (options.node.selected === undefined) {
+            options.node.selected = {};
+        }
+        if (options.node.selected.color === undefined) {
+            options.node.selected.color = "#FFAA55";
+        }
+        if (options.node.selected.stroke === undefined) {
+            options.node.selected.stroke = {};
+        }
+        if (options.node.selected.stroke.color === undefined) {
+            options.node.selected.stroke.color = "#000";
+        }
+        if (options.node.selected.stroke.size === undefined) {
+            options.node.selected.stroke.size = 1;
         }
         if (options.path === undefined) {
             options.path = {};
@@ -653,16 +712,16 @@ class TreesJS {
             options.shadow.path = {};
         }
         if (options.shadow.path.blur === undefined) {
-            options.shadow.path.blur = 0;
+            options.shadow.path.blur = 1;
         }
         if (options.shadow.path.color === undefined) {
-            options.shadow.path.color = "#000";
+            options.shadow.path.color = "rgba(0, 0, 0, 0.25)";
         }
         if (options.shadow.path.offsetX === undefined) {
             options.shadow.path.offsetX = 0;
         }
         if (options.shadow.path.offsetY === undefined) {
-            options.shadow.path.offsetY = 0;
+            options.shadow.path.offsetY = 4;
         }
         if (options.shadow.text === undefined) {
             options.shadow.text = {};
@@ -693,9 +752,17 @@ options = {
   node: {
     color: "#FFAA55",
     rounded: 5,
+    padding: 5,
     stroke: {
       color: "#000"
       size: 0
+    },
+    selected {
+      color: "#FFAA55",
+      stroke: {
+        color: "#000"
+        size: 0
+      }
     }
   },
   path: {

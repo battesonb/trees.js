@@ -17,6 +17,8 @@ export default class EventSystem {
   _x: number;
   _y: number;
 
+  _moved: boolean;
+
   constructor(camera: Camera, renderer: Renderer, canvas: Canvas, tree: Tree) {
     self = this; // Ugly, but binds require handlers.
     this._hash = new SpatialHash(); // TODO deterrmine this using the node sizes!
@@ -24,6 +26,7 @@ export default class EventSystem {
     this._canvas = canvas;
     this._currentNode = null;
     this._renderer = renderer;
+    this._moved = false;
 
     tree.each((node: Node) => {
       this._hash.add(node);
@@ -43,6 +46,10 @@ export default class EventSystem {
   mouseDown(event: MouseEvent) {
     let point: Point2D = self._getEventPoint(event);
     self._currentNode = <Node>self._hash.find(point.x / self._camera.getZoom() - self._camera.position.x, point.y / self._camera.getZoom() - self._camera.position.y);
+    if(self._currentNode) {
+      self._currentNode.bringToFront();
+    }
+    self._moved = false;
 
     self._x = point.x;
     self._y = point.y;
@@ -52,7 +59,8 @@ export default class EventSystem {
   }
 
   mouseWheel(event: MouseWheelEvent) {
-    self._camera.decZoom(event.deltaY / 100);
+    let point: Point2D = self._getEventPoint(event);
+    self._camera.decZoom(event.deltaY / 250, point.x, point.y);
     self.redraw();
   }
 
@@ -66,16 +74,16 @@ export default class EventSystem {
     } else {
       self._hash.move(self._currentNode, dx, dy);
     }
-    
-    self.redraw();
+    self._moved = true;
 
+    self.redraw();
     self._x = point.x;
     self._y = point.y;
   }
   
   mouseMove(event: MouseEvent) {
     let point: Point2D = self._getEventPoint(event);
-    let hoverNode = <Node>self._hash.find(point.x / self._camera.getZoom() - self._camera.position.x, point.y / self._camera.getZoom() - self._camera.position.y);
+    let hoverNode: Node = <Node>self._hash.find(point.x / self._camera.getZoom() - self._camera.position.x, point.y / self._camera.getZoom() - self._camera.position.y);
     if(hoverNode) {
       self._canvas.dom.style.cursor = "pointer";
     } else {
@@ -84,6 +92,10 @@ export default class EventSystem {
   }
 
   mouseUp(event: MouseEvent) {
+    if(!self._moved) {
+      self._renderer.setSelectedNode(self._currentNode);
+      self.redraw();
+    }
     self._currentNode = null;
     window.removeEventListener("mousemove", self.mouseDrag);
     window.removeEventListener("mouseup", self.mouseUp);
@@ -92,6 +104,6 @@ export default class EventSystem {
   redraw(): void {
     self._renderer.clear();
     self._renderer.drawTree();
-    self._renderer.drawHashGroups(self._hash); // Debug
+    //self._renderer.drawHashGroups(self._hash); // Debug Spatial Hash
   }
 }
