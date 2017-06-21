@@ -4,7 +4,7 @@
   "description": "A tree diagramming library. This version of the library uses HTML5 Canvas.",
   "main": "dist/trees.bundle.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha -r ts-node/register ./test/**/*.test.ts"
   },
   "author": "battesonb (https://github.com/battesonb)",
   "homepage": "https://github.com/battesonb/trees.js",
@@ -17,11 +17,13 @@
     "library",
     "mobile"
   ],
-  "repository" : {
-  	"type" : "git",
-  	"url" : "https://github.com/battesonb/trees.js.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/battesonb/trees.js.git"
   },
   "devDependencies": {
+    "@types/chai": "^4.0.0",
+    "@types/mocha": "^2.2.41",
     "babel-core": "^6.24.1",
     "babel-preset-es2015": "^6.24.1",
     "babelify": "^7.3.0",
@@ -30,8 +32,11 @@
     "gulp": "^3.9.1",
     "gulp-mocha": "^2.2.0",
     "gulp-sourcemaps": "^1.6.0",
+    "gulp-typescript": "^3.1.7",
     "gulp-uglify": "^1.5.3",
+    "mocha": "^3.4.2",
     "sinon": "^1.17.4",
+    "ts-node": "^3.0.6",
     "tsify": "^3.0.1",
     "typescript": "^2.3.2",
     "vinyl-buffer": "^1.0.0",

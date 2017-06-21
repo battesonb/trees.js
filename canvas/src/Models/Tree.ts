@@ -36,12 +36,21 @@ export default class Tree {
     }
   }
 
-  each(callback: (node: Node) => any, node: Node = this._root): void {
+  /**
+   * Performs a callback on each node of this tree. Default behaviour is a depth-first on
+   * the root node.
+   * TODO add breadth-first descent.
+   * @param callback
+   * @param breadthFirst Defaults to false.
+   * @param node The node to start the descent from.
+   * @param level Start counting levels from this parameter's value.
+   */
+  each(callback: (node: Node) => any, breadthFirst?: boolean, node: Node = this._root, level: number = 0): void {
     if(node !== undefined && node !== null) {
-      for(let i = 0; i < node._children.length; i++) {
-        this.each(callback, node._children[i]);
-      }
       callback(node);
+      for(let i = 0; i < node._children.length; i++) {
+        this.each(callback, breadthFirst, node._children[i], level + 1);
+      }
     }
   }
 }

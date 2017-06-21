@@ -1,16 +1,18 @@
+var babelify = require('babelify');
+var browserify = require('browserify');
+var buffer = require('vinyl-buffer');
 var gulp = require('gulp');
+var mocha = require('gulp-mocha');
 var sourcemaps = require('gulp-sourcemaps');
 var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
-var browserify = require('browserify');
-var watchify = require('watchify');
-var babelify = require('babelify');
 var tsify = require('tsify');
+var typescript = require('gulp-typescript');
+var watchify = require('watchify');
 
 gulp.task('build', compile);
 gulp.task('watch', watch);
-gulp.task('unitTest', unitTestTask);
-gulp.task('unitTestWatch', unitTestWatchTask);
+gulp.task('test', test);
+gulp.task('testWatch', testWatch);
 
 var outDir = './dist';
 
@@ -41,11 +43,13 @@ function watch() {
   return compile(true);
 };
 
-function unitTestTask() {
-	return gulp.src('./test/*.js')
+function test() {
+	return gulp.src('./test/**/*.test.ts', { base: '.' })
+    .pipe(typescript())
+    .pipe(gulp.dest('.'))
 		.pipe(mocha());
 }
 
-function unitTestWatchTask() {
-	gulp.watch('./test/*.js', ['unitTest']);
+function testWatch() {
+	gulp.watch('./test/*.test.ts', ['unitTest']);
 }

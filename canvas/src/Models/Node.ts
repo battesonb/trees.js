@@ -50,6 +50,9 @@ export default class Node extends AABB {
   /**
    * Gets the child with a specific identifier.
    * TODO make faster with a binary search, maybe? Probably not though.
+   * - Unlikely if we reorder children with bringToFront.
+   * - Search time is O(n) and nodes aren't expected to have considerably many children.
+   *    - If this becomes the case, remove bringToFront and implement binary search.
    * @param id
    */
   getChild(id: number): Node {
@@ -60,6 +63,31 @@ export default class Node extends AABB {
       }
     }
     return null;
+  }
+
+  /**
+   * Gets a child by its index.
+   * @param index
+   */
+  getChildAt(index: number): Node {
+    return this._children[index];
+  }
+
+  /**
+   * Returns the number of children this node has.
+   */
+  childCount(): number {
+    return this._children.length;
+  }
+
+  /**
+   * Performs a callback function on each child node of this node.
+   * @param callback
+   */
+  foreachChild(callback: (node: Node) => any): void {
+    for(let i = 0; i < this._children.length; i++) {
+      callback(this.getChildAt(i));
+    }
   }
 
   /**

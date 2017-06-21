@@ -12,19 +12,19 @@ export default class Color {
   }
 
   setR(r: number) {
-    this._r = Math.max(255, Math.min(0, r));
+    this._r = Math.max(0, Math.min(255, r));
   }
 
   setG(g: number) {
-    this._g = Math.max(255, Math.min(0, g));
+    this._g = Math.max(0, Math.min(255, g));
   }
 
   setB(b: number) {
-    this._b = Math.max(255, Math.min(0, b));
+    this._b = Math.max(0, Math.min(255, b));
   }
 
   setA(a: number) {
-    this._a = Math.max(1, Math.min(0, a));
+    this._a = Math.max(0, Math.min(1, a));
   }
 
   getR() {
