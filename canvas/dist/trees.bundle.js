@@ -9,13 +9,13 @@ class Camera {
         this.setZoom(zoom);
     }
     setZoom(zoom) {
-        this._zoom = Math.max(0.35, Math.min(50, zoom));
+        this.zoom = Math.max(0.35, Math.min(50, zoom));
     }
     getZoom() {
-        return this._zoom;
+        return this.zoom;
     }
     decZoom(amt, x, y) {
-        let newZoom = this._zoom - amt;
+        let newZoom = this.zoom - amt;
         this.setZoom(newZoom);
     }
 }
@@ -30,8 +30,8 @@ class Canvas {
         this.dom = document.getElementById(id);
         this.context = this.dom.getContext("2d");
         this.context.textBaseline = "top";
-        this._fontSize = 18;
-        this._fontFamily = "Arial";
+        this.fontSize = 18;
+        this.fontFamily = "Arial";
         this._updateFont();
     }
     getWidth() {
@@ -56,15 +56,15 @@ class Canvas {
         this.context.lineWidth = size;
     }
     setFontSize(size) {
-        this._fontSize = size;
+        this.fontSize = size;
         this._updateFont();
     }
     setFontFamily(family) {
-        this._fontFamily = family;
+        this.fontFamily = family;
         this._updateFont();
     }
     _updateFont() {
-        this.context.font = this._fontSize + "px " + this._fontFamily;
+        this.context.font = this.fontSize + "px " + this.fontFamily;
     }
     drawRect(x, y, w, h, stroke, shadow) {
         if (stroke) {
@@ -139,26 +139,32 @@ const Collider_1 = require("./Collider");
 class AABB extends Collider_1.default {
     constructor(x, y, width = 0, height = 0) {
         super(x, y);
-        this._width = width;
-        this._height = height;
+        this.width = width;
+        this.height = height;
     }
     contains(x, y) {
-        return x >= this.position.x && y >= this.position.y && x <= this.position.x + this.width() && y <= this.position.y + this.height();
+        return x >= this.position.x && y >= this.position.y && x <= this.position.x + this.getWidth() && y <= this.position.y + this.getHeight();
     }
     overlaps(other) {
         if (other instanceof AABB) {
-            return Math.abs(this.position.x - other.position.x) * 2 < this.width() + other.width() && Math.abs(this.position.y - other.position.y) * 2 < this.height() + other.height();
+            return Math.abs(this.position.x - other.position.x) * 2 < this.getWidth() + other.getWidth() && Math.abs(this.position.y - other.position.y) * 2 < this.getHeight() + other.getHeight();
         }
         throw Error("Unknown collider type, cannot determine overlap.");
     }
     topLeft() {
         return this.position;
     }
-    height() {
-        return this._height;
+    getHeight() {
+        return this.height;
     }
-    width() {
-        return this._width;
+    getWidth() {
+        return this.width;
+    }
+    setHeight(height) {
+        this.height = height;
+    }
+    setWidth(width) {
+        this.width = width;
     }
 }
 exports.default = AABB;
@@ -185,77 +191,77 @@ let self;
 class EventSystem {
     constructor(camera, renderer, canvas, tree) {
         self = this; // Ugly, but binds require handlers.
-        this._hash = new SpatialHash_1.default(); // TODO deterrmine this using the node sizes!
-        this._camera = camera;
-        this._canvas = canvas;
-        this._currentNode = null;
-        this._renderer = renderer;
-        this._moved = false;
+        this.hash = new SpatialHash_1.default(); // TODO deterrmine this using the node sizes!
+        this.camera = camera;
+        this.canvas = canvas;
+        this.currentNode = null;
+        this.renderer = renderer;
+        this.moved = false;
         tree.each(node => {
-            this._hash.add(node);
+            this.hash.add(node);
         });
-        this._canvas.dom.addEventListener("mousedown", this.mouseDown);
-        this._canvas.dom.addEventListener("mousemove", this.mouseMove);
-        this._canvas.dom.addEventListener("mousewheel", this.mouseWheel);
+        this.canvas.dom.addEventListener("mousedown", this.mouseDown);
+        this.canvas.dom.addEventListener("mousemove", this.mouseMove);
+        this.canvas.dom.addEventListener("mousewheel", this.mouseWheel);
         this.redraw();
     }
-    _getEventPoint(event) {
+    getEventPoint(event) {
         return new Point2D_1.default(event.offsetX, event.offsetY);
     }
     mouseDown(event) {
-        let point = self._getEventPoint(event);
-        self._currentNode = self._hash.find(point.x / self._camera.getZoom() - self._camera.position.x, point.y / self._camera.getZoom() - self._camera.position.y);
-        if (self._currentNode) {
-            self._currentNode.bringToFront();
+        let point = self.getEventPoint(event);
+        self.currentNode = self.hash.find(point.x / self.camera.getZoom() - self.camera.position.x, point.y / self.camera.getZoom() - self.camera.position.y);
+        if (self.currentNode) {
+            self.currentNode.bringToFront();
         }
-        self._moved = false;
-        self._x = point.x;
-        self._y = point.y;
+        self.moved = false;
+        self.x = point.x;
+        self.y = point.y;
         window.addEventListener("mousemove", self.mouseDrag);
         window.addEventListener("mouseup", self.mouseUp);
     }
     mouseWheel(event) {
-        let point = self._getEventPoint(event);
-        self._camera.decZoom(event.deltaY / 250, point.x, point.y);
+        let point = self.getEventPoint(event);
+        self.camera.decZoom(event.deltaY / 250, point.x, point.y);
         self.redraw();
     }
     mouseDrag(event) {
-        let point = self._getEventPoint(event);
-        let dx = (point.x - self._x) / self._camera.getZoom();
-        let dy = (point.y - self._y) / self._camera.getZoom();
-        if (self._currentNode === null) {
-            self._camera.position.x += dx;
-            self._camera.position.y += dy;
+        let point = self.getEventPoint(event);
+        let dx = (point.x - self.x) / self.camera.getZoom();
+        let dy = (point.y - self.y) / self.camera.getZoom();
+        if (self.currentNode === null) {
+            self.camera.position.x += dx;
+            self.camera.position.y += dy;
         } else {
-            self._hash.move(self._currentNode, dx, dy);
+            self.hash.move(self.currentNode, dx, dy);
         }
-        self._moved = true;
+        self.moved = true;
         self.redraw();
-        self._x = point.x;
-        self._y = point.y;
+        self.x = point.x;
+        self.y = point.y;
     }
     mouseMove(event) {
-        let point = self._getEventPoint(event);
-        let hoverNode = self._hash.find(point.x / self._camera.getZoom() - self._camera.position.x, point.y / self._camera.getZoom() - self._camera.position.y);
+        let point = self.getEventPoint(event);
+        let hoverNode = self.hash.find(point.x / self.camera.getZoom() - self.camera.position.x, point.y / self.camera.getZoom() - self.camera.position.y);
         if (hoverNode) {
-            self._canvas.dom.style.cursor = "pointer";
+            self.canvas.dom.style.cursor = "pointer";
         } else {
-            self._canvas.dom.style.cursor = "auto";
+            self.canvas.dom.style.cursor = "auto";
         }
     }
     mouseUp(event) {
-        if (!self._moved) {
-            self._renderer.setSelectedNode(self._currentNode);
+        if (!self.moved) {
+            self.renderer.setSelectedNode(self.currentNode);
             self.redraw();
         }
-        self._currentNode = null;
+        self.currentNode = null;
         window.removeEventListener("mousemove", self.mouseDrag);
         window.removeEventListener("mouseup", self.mouseUp);
     }
     redraw() {
-        self._renderer.clear();
-        self._renderer.drawTree();
-        //self._renderer.drawHashGroups(self._hash); // Debug Spatial Hash
+        self.renderer.clear();
+        self.renderer.drawTree();
+        //self.renderer.drawHashGroups(self.hash); // Debug Spatial Hash
     }
 }
 exports.default = EventSystem;
@@ -266,26 +272,26 @@ exports.default = EventSystem;
 Object.defineProperty(exports, "__esModule", { value: true });
 class Renderer {
     constructor(camera, canvas, tree, options) {
-        this._canvas = canvas;
-        this._camera = camera;
-        this._tree = tree;
-        this._options = options;
-        this._canvas.setFontFamily(options.text.family);
+        this.canvas = canvas;
+        this.camera = camera;
+        this.tree = tree;
+        this.options = options;
+        this.canvas.setFontFamily(options.text.family);
         // TODO Set up node widths/heights/padding
-        this._tree.each(node => {
-            node._width = this._canvas.getTextWidth(node.getText()) + this._options.node.padding * 3;
-            node._height = this._options.text.size + this._options.node.padding * 2;
+        this.tree.each(node => {
+            node.setWidth(this.canvas.getTextWidth(node.getText()) + this.options.node.padding * 3);
+            node.setHeight(this.options.text.size + this.options.node.padding * 2);
         });
     }
     clear() {
-        this._canvas.clear();
+        this.canvas.clear();
     }
     drawTree() {
-        this._tree.each(node => {
+        this.tree.each(node => {
             this.drawPaths(node);
         });
-        this._tree.each(node => {
-            if (node === this._selectedNode) {
+        this.tree.each(node => {
+            if (node === this.selectedNode) {
                 this.drawNode(node, true);
             } else {
                 this.drawNode(node);
@@ -296,61 +302,62 @@ class Renderer {
      * A debugging method for visualising how the spatial hash looks.
      */
     drawHashGroups(hash) {
-        this._canvas.setStroke("#77BBFF");
-        this._canvas.setStrokeSize(0.5);
-        this._canvas.clearShadows();
-        let hor = this._camera.position.x % hash._bucketSize * this._camera._zoom;
-        while (hor < this._canvas.getWidth()) {
-            this._canvas.drawLine(hor, 0, hor, this._canvas.getHeight());
-            hor += hash._bucketSize * this._camera._zoom;
+        this.canvas.setStroke("#77BBFF");
+        this.canvas.setStrokeSize(0.5);
+        this.canvas.clearShadows();
+        let hor = this.camera.position.x % hash.getBucketSize() * this.camera.getZoom();
+        while (hor < this.canvas.getWidth()) {
+            this.canvas.drawLine(hor, 0, hor, this.canvas.getHeight());
+            hor += hash.getBucketSize() * this.camera.getZoom();
         }
-        let vert = this._camera.position.y % hash._bucketSize * this._camera._zoom;
-        while (vert < this._canvas.getHeight()) {
-            this._canvas.drawLine(0, vert, this._canvas.getWidth(), vert);
-            vert += hash._bucketSize * this._camera._zoom;
+        let vert = this.camera.position.y % hash.getBucketSize() * this.camera.getZoom();
+        while (vert < this.canvas.getHeight()) {
+            this.canvas.drawLine(0, vert, this.canvas.getWidth(), vert);
+            vert += hash.getBucketSize() * this.camera.getZoom();
         }
     }
     drawNode(node, selected) {
-        if (this._options.shadow.node.blur > 0) {
-            this._canvas.enableShadows(this._options.shadow.node.blur, this._options.shadow.node.offsetX * this._camera.getZoom(), this._options.shadow.node.offsetY * this._camera.getZoom(), this._options.shadow.node.color);
+        if (this.options.shadow.node.blur > 0) {
+            this.canvas.enableShadows(this.options.shadow.node.blur, this.options.shadow.node.offsetX * this.camera.getZoom(), this.options.shadow.node.offsetY * this.camera.getZoom(), this.options.shadow.node.color);
         } else {
-            this._canvas.clearShadows();
+            this.canvas.clearShadows();
         }
         if (selected) {
-            this._canvas.setStroke(this._options.node.selected.stroke.color);
-            this._canvas.setStrokeSize(this._options.node.selected.stroke.size);
-            this._canvas.setFill(this._options.node.selected.color);
+            this.canvas.setStroke(this.options.node.selected.stroke.color);
+            this.canvas.setStrokeSize(this.options.node.selected.stroke.size);
+            this.canvas.setFill(this.options.node.selected.color);
         } else {
-            this._canvas.setStroke(this._options.node.stroke.color);
-            this._canvas.setStrokeSize(this._options.node.stroke.size);
-            this._canvas.setFill(this._options.node.color);
+            this.canvas.setStroke(this.options.node.stroke.color);
+            this.canvas.setStrokeSize(this.options.node.stroke.size);
+            this.canvas.setFill(this.options.node.color);
         }
-        this._canvas.drawRoundedRect((node.position.x + this._camera.position.x) * this._camera.getZoom(), (node.position.y + this._camera.position.y) * this._camera.getZoom(), node.width() * this._camera.getZoom(), node.height() * this._camera.getZoom(), this._options.node.rounded * this._camera.getZoom(), false);
-        if (this._options.shadow.text.blur > 0) {
-            this._canvas.enableShadows(this._options.shadow.text.blur, this._options.shadow.text.offsetX * this._camera.getZoom(), this._options.shadow.text.offsetY * this._camera.getZoom(), this._options.shadow.text.color);
+        this.canvas.drawRoundedRect((node.position.x + this.camera.position.x) * this.camera.getZoom(), (node.position.y + this.camera.position.y) * this.camera.getZoom(), node.getWidth() * this.camera.getZoom(), node.getHeight() * this.camera.getZoom(), this.options.node.rounded * this.camera.getZoom(), false);
+        if (this.options.shadow.text.blur > 0) {
+            this.canvas.enableShadows(this.options.shadow.text.blur, this.options.shadow.text.offsetX * this.camera.getZoom(), this.options.shadow.text.offsetY * this.camera.getZoom(), this.options.shadow.text.color);
         } else {
-            this._canvas.clearShadows();
+            this.canvas.clearShadows();
         }
-        this._canvas.setFontSize(this._options.text.size * this._camera.getZoom());
-        this._canvas.setStroke(this._options.text.stroke.color);
-        this._canvas.setStrokeSize(this._options.text.stroke.size);
-        this._canvas.setFill(this._options.text.color);
-        this._canvas.drawText(node.getText(), (node.position.x + this._camera.position.x + this._options.node.padding) * this._camera.getZoom(), (node.position.y + this._camera.position.y + this._options.node.padding) * this._camera.getZoom(), this._options.text.stroke.size > 0, 100 * this._camera.getZoom());
+        this.canvas.setFontSize(this.options.text.size * this.camera.getZoom());
+        this.canvas.setStroke(this.options.text.stroke.color);
+        this.canvas.setStrokeSize(this.options.text.stroke.size);
+        this.canvas.setFill(this.options.text.color);
+        this.canvas.drawText(node.getText(), (node.position.x + this.camera.position.x + this.options.node.padding) * this.camera.getZoom(), (node.position.y + this.camera.position.y + this.options.node.padding) * this.camera.getZoom(), this.options.text.stroke.size > 0, 100 * this.camera.getZoom());
     }
     drawPaths(node) {
-        if (this._options.shadow.path.blur > 0) {
-            this._canvas.enableShadows(this._options.shadow.path.blur, this._options.shadow.path.offsetX * this._camera.getZoom(), this._options.shadow.path.offsetY * this._camera.getZoom(), this._options.shadow.path.color);
+        if (this.options.shadow.path.blur > 0) {
+            this.canvas.enableShadows(this.options.shadow.path.blur, this.options.shadow.path.offsetX * this.camera.getZoom(), this.options.shadow.path.offsetY * this.camera.getZoom(), this.options.shadow.path.color);
         } else {
-            this._canvas.clearShadows();
+            this.canvas.clearShadows();
         }
-        this._canvas.setStroke(this._options.path.color);
-        this._canvas.setStrokeSize(this._options.path.size);
-        for (let i = 0; i < node._children.length; i++) {
-            this._canvas.drawLine((node.position.x + node.width() / 2 + this._camera.position.x) * this._camera.getZoom(), (node.position.y + node.height() / 2 + this._camera.position.y) * this._camera.getZoom(), (node._children[i].position.x + node._children[i].width() / 2 + this._camera.position.x) * this._camera.getZoom(), (node._children[i].position.y + node._children[i].height() / 2 + this._camera.position.y) * this._camera.getZoom());
+        this.canvas.setStroke(this.options.path.color);
+        this.canvas.setStrokeSize(this.options.path.size);
+        for (let i = 0; i < node.childCount(); i++) {
+            let child = node.getChildAt(i);
+            this.canvas.drawLine((node.position.x + node.getWidth() / 2 + this.camera.position.x) * this.camera.getZoom(), (node.position.y + node.getHeight() / 2 + this.camera.position.y) * this.camera.getZoom(), (child.position.x + child.getWidth() / 2 + this.camera.position.x) * this.camera.getZoom(), (child.position.y + child.getHeight() / 2 + this.camera.position.y) * this.camera.getZoom());
         }
     }
     setSelectedNode(node) {
-        this._selectedNode = node;
+        this.selectedNode = node;
     }
 }
 exports.default = Renderer;
@@ -365,9 +372,12 @@ const Point2D_1 = require("../Types/Point2D");
  */
 class SpatialHash {
     constructor(bucketSize = 100) {
-        this._map = {};
-        this._bucketSize = bucketSize;
-        this._inverseBucketSize = 1 / bucketSize;
+        this.map = {};
+        this.bucketSize = bucketSize;
+        this.inverseBucketSize = 1 / bucketSize;
+    }
+    getBucketSize() {
+        return this.bucketSize;
     }
     /**
      * Given a collider, return the points within the hash in which the collider lies.
@@ -376,12 +386,12 @@ class SpatialHash {
     getPoints(collider) {
         let points = [];
         let position = collider.topLeft();
-        let width = collider.width();
-        let height = collider.height();
-        for (let moveH = Math.floor(position.x * this._inverseBucketSize); moveH * this._bucketSize <= position.x + width; moveH += 1) {
-            for (let moveV = Math.floor(position.y * this._inverseBucketSize); moveV * this._bucketSize <= position.y + height; moveV += 1) {
-                let x = moveH * this._bucketSize;
-                let y = moveV * this._bucketSize;
+        let width = collider.getWidth();
+        let height = collider.getHeight();
+        for (let moveH = Math.floor(position.x * this.inverseBucketSize); moveH * this.bucketSize <= position.x + width; moveH += 1) {
+            for (let moveV = Math.floor(position.y * this.inverseBucketSize); moveV * this.bucketSize <= position.y + height; moveV += 1) {
+                let x = moveH * this.bucketSize;
+                let y = moveV * this.bucketSize;
                 points.push(new Point2D_1.default(x, y));
             }
         }
@@ -395,10 +405,10 @@ class SpatialHash {
         let points = this.getPoints(collider);
         points.forEach(point => {
             let hash = this.toHashLong(point.x, point.y);
-            if (this._map[hash] === undefined) {
-                this._map[hash] = new Set();
+            if (this.map[hash] === undefined) {
+                this.map[hash] = new Set();
             }
-            this._map[hash].add(collider);
+            this.map[hash].add(collider);
         });
     }
     /**
@@ -411,11 +421,11 @@ class SpatialHash {
         let points = this.getPoints(collider);
         points.forEach(point => {
             let hash = this.toHashLong(point.x, point.y);
-            if (this._map[hash] !== undefined) {
-                if (this._map[hash].delete(collider)) {
+            if (this.map[hash] !== undefined) {
+                if (this.map[hash].delete(collider)) {
                     removed = true;
-                    if (this._map[hash].size == 0) {
-                        delete this._map[hash];
+                    if (this.map[hash].size == 0) {
+                        delete this.map[hash];
                     }
                 }
             }
@@ -429,7 +439,7 @@ class SpatialHash {
      */
     getNearby(x, y) {
         let hash = this.toHashLong(x, y);
-        let set = this._map[hash];
+        let set = this.map[hash];
         if (set) {
             return Array.from(set);
         }
@@ -466,8 +476,8 @@ class SpatialHash {
      * @param point
      */
     pointToHashLong(x, y) {
-        x = Math.floor(x * this._inverseBucketSize) & 0xFFFF; // cast to 16-bit
-        y = (Math.floor(y * this._inverseBucketSize) & 0xFFFF) << 15; // cast to 16-bit and then shift 15-bits to the left.
+        x = Math.floor(x * this.inverseBucketSize) & 0xFFFF; // cast to 16-bit
+        y = (Math.floor(y * this.inverseBucketSize) & 0xFFFF) << 15; // cast to 16-bit and then shift 15-bits to the left.
         return x | y;
     }
     /**
@@ -475,8 +485,8 @@ class SpatialHash {
      * @param point
      */
     toHashLong(x, y) {
-        x = Math.floor(x * this._inverseBucketSize) & 0xFFFF; // cast to 16-bit
-        y = (Math.floor(y * this._inverseBucketSize) & 0xFFFF) << 15; // cast to 16-bit and then shift 15-bits to the left.
+        x = Math.floor(x * this.inverseBucketSize) & 0xFFFF; // cast to 16-bit
+        y = (Math.floor(y * this.inverseBucketSize) & 0xFFFF) << 15; // cast to 16-bit and then shift 15-bits to the left.
         return x | y;
     }
 }
@@ -495,42 +505,45 @@ class Node extends AABB_1.default {
         super(x, y);
         this.setText(text);
         this.setId(id);
-        this._children = [];
-        this._width = 70; // TEMPORARY, TODO DELETE THIS
-        this._height = 24;
+        this.children = [];
+        this.setWidth(70); // TEMPORARY, TODO DELETE THIS
+        this.setHeight(24);
     }
     /**
      * Sets the identifier of the node. Uniqueness of the identifier is not determined.
      * @param id
      */
     setId(id) {
-        this._id = id;
+        this.id = id;
     }
     getId() {
-        return this._id;
+        return this.id;
     }
     setText(text) {
-        this._text = text;
+        this.text = text;
     }
     getText() {
-        return this._text;
+        return this.text;
     }
     /**
      * Adds a child to the current node and sets the parent of the child as the object of the calling the method.
      * @param child
      */
     addChild(child) {
-        this._children.push(child);
+        this.children.push(child);
         child.parent = this;
     }
     /**
      * Gets the child with a specific identifier.
      * TODO make faster with a binary search, maybe? Probably not though.
+     * - Unlikely if we reorder children with bringToFront.
+     * - Search time is O(n) and nodes aren't expected to have considerably many children.
+     *    - If this becomes the case, remove bringToFront and implement binary search.
      * @param id
      */
     getChild(id) {
-        for (let i = 0; i < this._children.length; i++) {
-            let child = this._children[i];
+        for (let i = 0; i < this.children.length; i++) {
+            let child = this.children[i];
             if (child.getId() === id) {
                 return child;
             }
@@ -538,18 +551,40 @@ class Node extends AABB_1.default {
         return null;
     }
     /**
+     * Gets a child by its index.
+     * @param index
+     */
+    getChildAt(index) {
+        return this.children[index];
+    }
+    /**
+     * Returns the number of children this node has.
+     */
+    childCount() {
+        return this.children.length;
+    }
+    /**
+     * Performs a callback function on each child node of this node.
+     * @param callback
+     */
+    foreachChild(callback) {
+        for (let i = 0; i < this.children.length; i++) {
+            callback(this.getChildAt(i));
+        }
+    }
+    /**
      * Brings this node to the front of the parent's children.
      */
     bringToFront() {
         let parent = this.parent;
         if (parent) {
-            for (let i = 0; i < parent._children.length; i++) {
-                if (parent._children[i] === this) {
-                    parent._children.splice(i, 1);
+            for (let i = 0; i < parent.children.length; i++) {
+                if (parent.children[i] === this) {
+                    parent.children.splice(i, 1);
                     break;
                 }
             }
-            parent._children.push(this);
+            parent.children.push(this);
         }
     }
 }
@@ -568,9 +603,9 @@ class Tree {
      * @param canvas Canvas object for measuring width/height and determining text-wrapping of nodes.
      */
     constructor(json, canvas) {
-        this._addNode(json);
+        this.addNode(json);
     }
-    _addNode(descent, node) {
+    addNode(descent, node) {
         if (descent !== undefined) {
             if (descent["text"] !== undefined) {
                 let id = descent["id"] !== undefined ? descent["id"] : -1;
@@ -578,25 +613,34 @@ class Tree {
                 let y = descent["y"] !== undefined ? descent["y"] : 0;
                 let child = new Node_1.default(descent["text"], id, x, y);
                 if (node === undefined) {
-                    this._root = child;
-                    node = this._root;
+                    this.root = child;
+                    node = this.root;
                 } else {
                     node.addChild(child);
                 }
                 if (descent["children"] !== undefined) {
                     for (let i = 0; i < descent["children"].length; i++) {
-                        this._addNode(descent["children"][i], node);
+                        this.addNode(descent["children"][i], node);
                     }
                 }
             }
         }
     }
-    each(callback, node = this._root) {
+    /**
+     * Performs a callback on each node of this tree. Default behaviour is a depth-first on
+     * the root node.
+     * TODO add breadth-first descent.
+     * @param callback
+     * @param breadthFirst Defaults to false.
+     * @param node The node to start the descent from.
+     * @param level Start counting levels from this parameter's value.
+     */
+    each(callback, breadthFirst, node = this.root, level = 0) {
         if (node !== undefined && node !== null) {
-            for (let i = 0; i < node._children.length; i++) {
-                this.each(callback, node._children[i]);
-            }
             callback(node);
+            for (let i = 0; i < node.childCount(); i++) {
+                this.each(callback, breadthFirst, node.getChildAt(i), level + 1);
+            }
         }
     }
 }
@@ -742,11 +786,11 @@ class TreesJS {
         if (options.shadow.text.offsetY === undefined) {
             options.shadow.text.offsetY = 0;
         }
-        this._camera = new Camera_1.default(0, 0, 1);
-        this._canvas = new Canvas_1.default(id);
-        this._tree = new Tree_1.default(json, this._canvas);
-        this._renderer = new Renderer_1.default(this._camera, this._canvas, this._tree, options);
-        this._eventSystem = new EventSystem_1.default(this._camera, this._renderer, this._canvas, this._tree);
+        this.camera = new Camera_1.default(0, 0, 1);
+        this.canvas = new Canvas_1.default(id);
+        this.tree = new Tree_1.default(json, this.canvas);
+        this.renderer = new Renderer_1.default(this.camera, this.canvas, this.tree, options);
+        this.eventSystem = new EventSystem_1.default(this.camera, this.renderer, this.canvas, this.tree);
     }
 }
 exports.default = TreesJS;

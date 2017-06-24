@@ -5,23 +5,23 @@ import Point2D from "../../Types/Point2D";
  * Represents an AABB with top-left alignment.
  */
 export default class AABB extends Collider {
-  _width: number;
-  _height: number;
+  private width: number;
+  private height: number;
 
   constructor(x: number, y: number, width: number = 0, height: number = 0) {
     super(x, y);
-    this._width = width;
-    this._height = height;
+    this.width = width;
+    this.height = height;
   }
 
   contains(x: number, y: number): boolean {
-    return x >= this.position.x && y >= this.position.y && x <= this.position.x + this.width() && y <= this.position.y + this.height();
+    return x >= this.position.x && y >= this.position.y && x <= this.position.x + this.getWidth() && y <= this.position.y + this.getHeight();
   }
 
   overlaps(other: Collider): boolean {
     if(other instanceof AABB) {
-      return Math.abs(this.position.x - other.position.x) * 2 < this.width() + other.width() &&
-             Math.abs(this.position.y - other.position.y) * 2 < this.height() + other.height();
+      return Math.abs(this.position.x - other.position.x) * 2 < this.getWidth() + other.getWidth() &&
+             Math.abs(this.position.y - other.position.y) * 2 < this.getHeight() + other.getHeight();
     }
     throw Error("Unknown collider type, cannot determine overlap.");
   }
@@ -30,11 +30,19 @@ export default class AABB extends Collider {
     return this.position;
   }
 
-  height(): number {
-    return this._height;
+  getHeight(): number {
+    return this.height;
   }
 
-  width(): number {
-    return this._width;
+  getWidth(): number {
+    return this.width;
+  }
+
+  setHeight(height: number): void {
+    this.height = height;
+  }
+
+  setWidth(width: number): void {
+    this.width = width;
   }
 }

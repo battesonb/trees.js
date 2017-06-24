@@ -2,8 +2,8 @@ export default class Canvas {
   dom: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
 
-  _fontSize: number;
-  _fontFamily: string;
+  private fontSize: number;
+  private fontFamily: string;
 
   constructor(id: string) {
     this.dom = <HTMLCanvasElement>document.getElementById(id);
@@ -11,8 +11,8 @@ export default class Canvas {
 
     this.context.textBaseline = "top";
 
-    this._fontSize = 18;
-    this._fontFamily = "Arial";
+    this.fontSize = 18;
+    this.fontFamily = "Arial";
     this._updateFont();
   }
 
@@ -45,17 +45,17 @@ export default class Canvas {
   }
 
   setFontSize(size: number): void {
-    this._fontSize = size;
+    this.fontSize = size;
     this._updateFont();
   }
 
   setFontFamily(family: string): void {
-    this._fontFamily = family;
+    this.fontFamily = family;
     this._updateFont();
   }
 
   _updateFont(): void {
-    this.context.font = this._fontSize + "px " + this._fontFamily;
+    this.context.font = this.fontSize + "px " + this.fontFamily;
   }
 
   drawRect(x: number, y: number, w: number, h: number, stroke?: boolean, shadow?: boolean): void {

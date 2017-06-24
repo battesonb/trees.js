@@ -5,14 +5,18 @@ import Point2D from '../Types/Point2D';
  * A spatial hash based on AABB world coordinates.
  */
 export default class SpatialHash {
-  _bucketSize: number;
-  _inverseBucketSize: number;
-  _map: object;
+  private bucketSize: number;
+  private inverseBucketSize: number;
+  private map: object;
 
   constructor(bucketSize: number = 100) {
-    this._map = {};
-    this._bucketSize = bucketSize;
-    this._inverseBucketSize = 1 / bucketSize;
+    this.map = {};
+    this.bucketSize = bucketSize;
+    this.inverseBucketSize = 1 / bucketSize;
+  }
+
+  getBucketSize(): number {
+    return this.bucketSize;
   }
 
   /**
@@ -22,13 +26,13 @@ export default class SpatialHash {
   getPoints(collider: Collider) : Array<Point2D> {
     let points: Array<Point2D> = [];
     let position: Point2D = collider.topLeft();
-    let width: number = collider.width();
-    let height: number = collider.height();
+    let width: number = collider.getWidth();
+    let height: number = collider.getHeight();
 
-    for(let moveH: number = Math.floor(position.x * this._inverseBucketSize); moveH * this._bucketSize <= position.x + width; moveH+= 1) {
-      for(let moveV: number = Math.floor(position.y * this._inverseBucketSize); moveV * this._bucketSize <= position.y + height; moveV+= 1) {
-        let x: number = moveH * this._bucketSize;
-        let y: number = moveV * this._bucketSize;
+    for(let moveH: number = Math.floor(position.x * this.inverseBucketSize); moveH * this.bucketSize <= position.x + width; moveH+= 1) {
+      for(let moveV: number = Math.floor(position.y * this.inverseBucketSize); moveV * this.bucketSize <= position.y + height; moveV+= 1) {
+        let x: number = moveH * this.bucketSize;
+        let y: number = moveV * this.bucketSize;
         points.push(new Point2D(x, y));  
       }
     }
@@ -45,10 +49,10 @@ export default class SpatialHash {
 
     points.forEach(point => {
       let hash = this.toHashLong(point.x, point.y);
-      if(this._map[hash] === undefined) {
-        this._map[hash] = new Set();
+      if(this.map[hash] === undefined) {
+        this.map[hash] = new Set();
       }
-      this._map[hash].add(collider);
+      this.map[hash].add(collider);
     });
   }
 
@@ -63,11 +67,11 @@ export default class SpatialHash {
 
     points.forEach(point => {
       let hash = this.toHashLong(point.x, point.y);
-      if(this._map[hash] !== undefined) {
-        if(this._map[hash].delete(collider)) {
+      if(this.map[hash] !== undefined) {
+        if(this.map[hash].delete(collider)) {
           removed = true;
-          if(this._map[hash].size == 0) {
-            delete this._map[hash];
+          if(this.map[hash].size == 0) {
+            delete this.map[hash];
           }
         }
       }
@@ -83,7 +87,7 @@ export default class SpatialHash {
    */
   getNearby(x: number, y: number): Array<Collider> {
     let hash = this.toHashLong(x, y);
-    let set = this._map[hash];
+    let set = this.map[hash];
     if(set) {
       return <Array<Collider>>Array.from(set);
     }    
@@ -123,8 +127,8 @@ export default class SpatialHash {
    * @param point
    */
   pointToHashLong(x: number, y: number): number {
-    x = Math.floor(x * this._inverseBucketSize) & 0xFFFF; // cast to 16-bit
-    y = (Math.floor(y * this._inverseBucketSize) & 0xFFFF) << 15; // cast to 16-bit and then shift 15-bits to the left.
+    x = Math.floor(x * this.inverseBucketSize) & 0xFFFF; // cast to 16-bit
+    y = (Math.floor(y * this.inverseBucketSize) & 0xFFFF) << 15; // cast to 16-bit and then shift 15-bits to the left.
     return x | y;
   }  
 
@@ -133,8 +137,8 @@ export default class SpatialHash {
    * @param point
    */
   toHashLong(x: number, y: number): number {
-    x = Math.floor(x * this._inverseBucketSize) & 0xFFFF; // cast to 16-bit
-    y = (Math.floor(y * this._inverseBucketSize) & 0xFFFF) << 15; // cast to 16-bit and then shift 15-bits to the left.
+    x = Math.floor(x * this.inverseBucketSize) & 0xFFFF; // cast to 16-bit
+    y = (Math.floor(y * this.inverseBucketSize) & 0xFFFF) << 15; // cast to 16-bit and then shift 15-bits to the left.
     return x | y;
   }  
 }

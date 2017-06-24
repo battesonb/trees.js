@@ -1,8 +1,8 @@
 export default class Color {
-  _r: number;
-  _g: number;
-  _b: number;
-  _a: number;
+  private r: number;
+  private g: number;
+  private b: number;
+  private a: number;
 
   constructor(r: number = 0, g: number = 0, b: number = 0, a: number = 1) {
     this.setR(r);
@@ -12,34 +12,34 @@ export default class Color {
   }
 
   setR(r: number) {
-    this._r = Math.max(0, Math.min(255, r));
+    this.r = Math.max(0, Math.min(255, r));
   }
 
   setG(g: number) {
-    this._g = Math.max(0, Math.min(255, g));
+    this.g = Math.max(0, Math.min(255, g));
   }
 
   setB(b: number) {
-    this._b = Math.max(0, Math.min(255, b));
+    this.b = Math.max(0, Math.min(255, b));
   }
 
   setA(a: number) {
-    this._a = Math.max(0, Math.min(1, a));
+    this.a = Math.max(0, Math.min(1, a));
   }
 
   getR() {
-    return this._r;
+    return this.r;
   }
 
   getG() {
-    return this._g;
+    return this.g;
   }
 
   getB() {
-    return this._b;
+    return this.b;
   }
 
   getA() {
-    return this._a;
+    return this.a;
   }
 }

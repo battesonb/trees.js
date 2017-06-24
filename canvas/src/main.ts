@@ -5,11 +5,11 @@ import Renderer from "./Components/Renderer";
 import Tree from "./Models/Tree";
 
 export default class TreesJS {
-  _camera: Camera;
-  _canvas: Canvas;
-  _eventSystem: EventSystem;
-  _renderer: Renderer;
-  _tree: Tree;
+  private camera: Camera;
+  private canvas: Canvas;
+  private eventSystem: EventSystem;
+  private renderer: Renderer;
+  private tree: Tree;
 
   constructor(id: string, json: object, options?: any) {
     if(options === undefined) {
@@ -134,11 +134,11 @@ export default class TreesJS {
       options.shadow.text.offsetY = 0;
     }
 
-    this._camera = new Camera(0, 0, 1);
-    this._canvas = new Canvas(id);
-    this._tree = new Tree(json, this._canvas);
-    this._renderer = new Renderer(this._camera, this._canvas, this._tree, options);
-    this._eventSystem = new EventSystem(this._camera, this._renderer, this._canvas, this._tree);
+    this.camera = new Camera(0, 0, 1);
+    this.canvas = new Canvas(id);
+    this.tree = new Tree(json, this.canvas);
+    this.renderer = new Renderer(this.camera, this.canvas, this.tree, options);
+    this.eventSystem = new EventSystem(this.camera, this.renderer, this.canvas, this.tree);
   }
 }
 

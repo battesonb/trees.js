@@ -4,18 +4,18 @@ import AABB from "../Components/Colliders/AABB";
  * The representation of a node of the tree.
  */
 export default class Node extends AABB {
-  _id: number;
-  _children: Array<Node>;
-  _text: string;
+  private id: number;
+  private children: Array<Node>;
+  private text: string;
   parent: Node;
 
   constructor(text: string, id: number = -1, x: number = 0, y: number = 0) {
     super(x, y);
     this.setText(text);
     this.setId(id);
-    this._children = [];
-    this._width = 70; // TEMPORARY, TODO DELETE THIS
-    this._height = 24;
+    this.children = [];
+    this.setWidth(70); // TEMPORARY, TODO DELETE THIS
+    this.setHeight(24);
   }
 
   /**
@@ -23,19 +23,19 @@ export default class Node extends AABB {
    * @param id
    */
   setId(id: number): void {
-    this._id = id;
+    this.id = id;
   }
 
   getId(): number {
-    return this._id;
+    return this.id;
   }
 
   setText(text: string): void {
-    this._text = text;
+    this.text = text;
   }
 
   getText(): string {
-    return this._text;
+    return this.text;
   }
 
   /**
@@ -43,7 +43,7 @@ export default class Node extends AABB {
    * @param child 
    */
   addChild(child: Node): void {
-    this._children.push(child);
+    this.children.push(child);
     child.parent = this;
   }
 
@@ -56,8 +56,8 @@ export default class Node extends AABB {
    * @param id
    */
   getChild(id: number): Node {
-    for(let i = 0; i < this._children.length; i++) {
-      let child = this._children[i];
+    for(let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
       if(child.getId() === id) {
         return child;
       }
@@ -70,14 +70,14 @@ export default class Node extends AABB {
    * @param index
    */
   getChildAt(index: number): Node {
-    return this._children[index];
+    return this.children[index];
   }
 
   /**
    * Returns the number of children this node has.
    */
   childCount(): number {
-    return this._children.length;
+    return this.children.length;
   }
 
   /**
@@ -85,7 +85,7 @@ export default class Node extends AABB {
    * @param callback
    */
   foreachChild(callback: (node: Node) => any): void {
-    for(let i = 0; i < this._children.length; i++) {
+    for(let i = 0; i < this.children.length; i++) {
       callback(this.getChildAt(i));
     }
   }
@@ -96,13 +96,13 @@ export default class Node extends AABB {
   bringToFront(): void {
     let parent: Node = this.parent;
     if(parent) {
-      for(let i = 0; i < parent._children.length; i++) {
-        if(parent._children[i] === this) {
-          parent._children.splice(i, 1);
+      for(let i = 0; i < parent.children.length; i++) {
+        if(parent.children[i] === this) {
+          parent.children.splice(i, 1);
           break;
         }
       }
-      parent._children.push(this);
+      parent.children.push(this);
     }
   }
 }

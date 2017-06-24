@@ -25,6 +25,6 @@ export default abstract class Collider {
    */
   abstract topLeft(): Point2D;
 
-  abstract height(): number;
-  abstract width(): number;
+  abstract getHeight(): number;
+  abstract getWidth(): number;
 }
