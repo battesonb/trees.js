@@ -5,7 +5,7 @@ import AABB from "../Components/Colliders/AABB";
  */
 export default class Node extends AABB {
   private id: number;
-  private children: Array<Node>;
+  private children: Node[];
   private text: string;
   parent: Node;
 

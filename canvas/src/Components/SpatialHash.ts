@@ -23,8 +23,8 @@ export default class SpatialHash {
    * Given a collider, return the points within the hash in which the collider lies.
    * @param collider The collider
    */
-  getPoints(collider: Collider) : Array<Point2D> {
-    let points: Array<Point2D> = [];
+  getPoints(collider: Collider): Point2D[] {
+    let points: Point2D[] = [];
     let position: Point2D = collider.topLeft();
     let width: number = collider.getWidth();
     let height: number = collider.getHeight();
@@ -44,8 +44,8 @@ export default class SpatialHash {
    * Add a collider to the hash, assuming it is not already within the hash.
    * @param collider
    */
-  add(collider: Collider) : void {
-    let points: Array<Point2D> = this.getPoints(collider);
+  add(collider: Collider): void {
+    let points: Point2D[] = this.getPoints(collider);
 
     points.forEach(point => {
       let hash = this.toHashLong(point.x, point.y);
@@ -61,9 +61,9 @@ export default class SpatialHash {
    * @param collider
    * @return true if collider is removed, false otherwise.
    */
-  remove(collider: Collider) : boolean {
+  remove(collider: Collider): boolean {
     let removed: boolean = false;
-    let points: Array<Point2D>  = this.getPoints(collider);
+    let points: Point2D[]  = this.getPoints(collider);
 
     points.forEach(point => {
       let hash = this.toHashLong(point.x, point.y);
@@ -85,11 +85,11 @@ export default class SpatialHash {
    * @param x 
    * @param y 
    */
-  getNearby(x: number, y: number): Array<Collider> {
+  getNearby(x: number, y: number): Collider[] {
     let hash = this.toHashLong(x, y);
     let set = this.map[hash];
     if(set) {
-      return <Array<Collider>>Array.from(set);
+      return <Collider[]>Array.from(set);
     }    
     return [];
   }
@@ -100,7 +100,7 @@ export default class SpatialHash {
    * @param y 
    */
   find(x: number, y: number): Collider {
-    let colliders: Array<Collider> = this.getNearby(x, y);
+    let colliders: Collider[] = this.getNearby(x, y);
     for(let i = 0; i < colliders.length; i++) {
       if(colliders[i].contains(x, y)) {
         return colliders[i];

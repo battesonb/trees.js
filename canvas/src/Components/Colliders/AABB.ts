@@ -22,8 +22,9 @@ export default class AABB extends Collider {
     if(other instanceof AABB) {
       return Math.abs(this.position.x - other.position.x) * 2 < this.getWidth() + other.getWidth() &&
              Math.abs(this.position.y - other.position.y) * 2 < this.getHeight() + other.getHeight();
+    } else {
+      throw Error("Unknown collider type, cannot determine overlap.");
     }
-    throw Error("Unknown collider type, cannot determine overlap.");
   }
 
   topLeft(): Point2D {

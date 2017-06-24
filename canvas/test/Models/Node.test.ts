@@ -37,7 +37,7 @@ describe("Node", () => {
       parent.foreachChild((node: Node) => {
         node.setText("modified");
       });
-      for(let i = 0; i < parent._children.length; i++) {
+      for(let i = 0; i < parent.childCount(); i++) {
         assert.equal(parent.getChildAt(i).getText(), "modified");
       }
     });

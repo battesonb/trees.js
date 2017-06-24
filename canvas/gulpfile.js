@@ -11,8 +11,6 @@ var watchify = require('watchify');
 
 gulp.task('build', compile);
 gulp.task('watch', watch);
-gulp.task('test', test);
-gulp.task('testWatch', testWatch);
 
 var outDir = './dist';
 
@@ -42,14 +40,3 @@ function compile(watch) {
 function watch() {
   return compile(true);
 };
-
-function test() {
-	return gulp.src('./test/**/*.test.ts', { base: '.' })
-    .pipe(typescript())
-    .pipe(gulp.dest('.'))
-		.pipe(mocha());
-}
-
-function testWatch() {
-	gulp.watch('./test/*.test.ts', ['unitTest']);
-}
