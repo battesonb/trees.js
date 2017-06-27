@@ -569,7 +569,7 @@ class Node extends AABB_1.default {
      */
     foreachChild(callback) {
         for (let i = 0; i < this.children.length; i++) {
-            callback(this.getChildAt(i));
+            callback(this.getChildAt(i), i);
         }
     }
     /**
@@ -606,13 +606,13 @@ class Tree {
         this.addNode(json);
     }
     addNode(descent, node) {
-        if (descent !== undefined) {
+        if (descent !== undefined && descent !== null) {
             if (descent["text"] !== undefined) {
                 let id = descent["id"] !== undefined ? descent["id"] : -1;
                 let x = descent["x"] !== undefined ? descent["x"] : 0;
                 let y = descent["y"] !== undefined ? descent["y"] : 0;
                 let child = new Node_1.default(descent["text"], id, x, y);
-                if (node === undefined) {
+                if (node === undefined || node === null) {
                     this.root = child;
                     node = this.root;
                 } else {
@@ -634,14 +634,45 @@ class Tree {
      * @param breadthFirst Defaults to false.
      * @param node The node to start the descent from.
      * @param level Start counting levels from this parameter's value.
+     * @param index Index of node
      */
-    each(callback, breadthFirst, node = this.root, level = 0) {
+    each(callback, breadthFirst, node = this.root, level = 0, index = 0) {
         if (node !== undefined && node !== null) {
-            callback(node);
-            for (let i = 0; i < node.childCount(); i++) {
-                this.each(callback, breadthFirst, node.getChildAt(i), level + 1);
+            if (!breadthFirst) {
+                callback(node, level, index);
+                for (let i = 0; i < node.childCount(); i++) {
+                    this.each(callback, breadthFirst, node.getChildAt(i), level + 1, i);
+                }
+            } else {
+                let list = [];
+                let nextList = [];
+                list.push(node);
+                while (list.length > 0) {
+                    let currNode = list.splice(0, 1)[0];
+                    index++;
+                    currNode.foreachChild((node, index) => {
+                        nextList.push(node);
+                    });
+                    callback(node, level, index);
+                    if (list.length === 0) {
+                        list = nextList;
+                        nextList = [];
+                        level++;
+                        index = 0;
+                    }
+                }
             }
         }
+    }
+    /**
+     * Returns the number of nodes within this tree.
+     */
+    children() {
+        let count = 0;
+        this.each(node => {
+            count++;
+        });
+        return count;
     }
 }
 exports.default = Tree;

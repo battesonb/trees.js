@@ -50,31 +50,50 @@ describe("Tree", () => {
   });
 
   describe("#each", () => {
+    let tree: Tree = new Tree({
+      id: 0,
+      text: "Hello!",
+      x: 5,
+      y: 2,
+      children: [
+        { id: 1,
+        text: "What",
+        x: 10,
+        y: 5,
+        children: [
+          {
+            id: 3,
+            text: "Another",
+            x: 11,
+            y: 22
+          }
+        ]},
+        { id: 2,
+        text: "What",
+        x: 10,
+        y: 5 }
+      ]
+    }, null);
     it("should perform a callback on all nodes of a tree.", () => {
       let arr: number[];
-
-      let tree: Tree = new Tree({
-        id: 0,
-        text: "Hello!",
-        x: 5,
-        y: 2,
-        children: [
-          { id: 1,
-          text: "What",
-          x: 10,
-          y: 5 },
-          { id: 2,
-          text: "What",
-          x: 10,
-          y: 5 }
-        ]
-      }, null);
 
       let count: number = 0;
       tree.each((node: Node) => {
         count++;
       });
-      assert.equal(count, 3);
+      assert.equal(count, 4);
+    });
+    it("should perform breadth-first searches.", () => {
+      let currLevel = -1;
+      tree.each((node: Node, level: number) => {
+        console.log(level);
+        console.log(node.getText());
+        if(currLevel <= level) {
+          currLevel = level;
+        } else {
+          assert(false);
+        }
+      }, true);
     });
   });
 });

@@ -84,9 +84,9 @@ export default class Node extends AABB {
    * Performs a callback function on each child node of this node.
    * @param callback
    */
-  foreachChild(callback: (node: Node) => any): void {
+  foreachChild(callback: (node: Node, index?: number) => any): void {
     for(let i = 0; i < this.children.length; i++) {
-      callback(this.getChildAt(i));
+      callback(this.getChildAt(i), i);
     }
   }
 

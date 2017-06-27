@@ -28,6 +28,7 @@ export default class Tree {
           node.addChild(child);
         }
         if(descent["children"] !== undefined) {
+          console.log(descent["children"]);
           for(let i = 0; i < descent["children"].length; i++) {
             this.addNode(descent["children"][i], node);
           }
@@ -44,12 +45,34 @@ export default class Tree {
    * @param breadthFirst Defaults to false.
    * @param node The node to start the descent from.
    * @param level Start counting levels from this parameter's value.
+   * @param index Index of node
    */
-  each(callback: (node: Node) => any, breadthFirst?: boolean, node: Node = this.root, level: number = 0): void {
+  each(callback: (node: Node, level: number, index: number) => any, breadthFirst?: boolean, node: Node = this.root, level: number = 0, index: number = 0): void {
     if(node !== undefined && node !== null) {
-      callback(node);
-      for(let i = 0; i < node.childCount(); i++) {
-        this.each(callback, breadthFirst, node.getChildAt(i), level + 1);
+      if(!breadthFirst) {
+        callback(node, level, index);
+        for(let i = 0; i < node.childCount(); i++) {
+          this.each(callback, breadthFirst, node.getChildAt(i), level + 1, i);
+        }
+      } else {
+        let list: Node[] = [];
+        let nextList: Node[] = [];
+
+        list.push(node);
+        while(list.length > 0) {
+          let currNode: Node = list.splice(0, 1)[0];
+          currNode.foreachChild((node: Node, index: number) => {
+            nextList.push(node);
+          });
+          callback(currNode, level, index);
+          index++;
+          if(list.length === 0) {
+            list = nextList;
+            nextList = [];
+            level++;
+            index = 0;
+          }
+        }
       }
     }
   }
