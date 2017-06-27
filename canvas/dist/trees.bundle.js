@@ -32,7 +32,7 @@ class Canvas {
         this.context.textBaseline = "top";
         this.fontSize = 18;
         this.fontFamily = "Arial";
-        this._updateFont();
+        this.updateFont();
     }
     getWidth() {
         return this.dom.width;
@@ -57,13 +57,13 @@ class Canvas {
     }
     setFontSize(size) {
         this.fontSize = size;
-        this._updateFont();
+        this.updateFont();
     }
     setFontFamily(family) {
         this.fontFamily = family;
-        this._updateFont();
+        this.updateFont();
     }
-    _updateFont() {
+    updateFont() {
         this.context.font = this.fontSize + "px " + this.fontFamily;
     }
     drawRect(x, y, w, h, stroke, shadow) {
@@ -147,9 +147,12 @@ class AABB extends Collider_1.default {
     }
     overlaps(other) {
         if (other instanceof AABB) {
-            return Math.abs(this.position.x - other.position.x) * 2 < this.getWidth() + other.getWidth() && Math.abs(this.position.y - other.position.y) * 2 < this.getHeight() + other.getHeight();
+            let deltaX = Math.abs(this.position.x - other.position.x);
+            let deltaY = Math.abs(this.position.y - other.position.y);
+            return (deltaX <= this.width || deltaX <= other.width) && (deltaY <= this.height || deltaY <= other.height);
+        } else {
+            throw Error("Unknown collider type, cannot determine overlap.");
         }
-        throw Error("Unknown collider type, cannot determine overlap.");
     }
     topLeft() {
         return this.position;
@@ -261,7 +264,7 @@ class EventSystem {
     redraw() {
         self.renderer.clear();
         self.renderer.drawTree();
-        //self.renderer.drawHashGroups(self.hash); // Debug Spatial Hash
+        self.renderer.drawHashGroups(self.hash); // Debug Spatial Hash
     }
 }
 exports.default = EventSystem;
@@ -379,6 +382,9 @@ class SpatialHash {
     getBucketSize() {
         return this.bucketSize;
     }
+    clear() {
+        this.map = {};
+    }
     /**
      * Given a collider, return the points within the hash in which the collider lies.
      * @param collider The collider
@@ -473,15 +479,9 @@ class SpatialHash {
     }
     /**
      * Convert a point to a unique 32-bit number representing the x/y coordinates in the hash.
-     * @param point
-     */
-    pointToHashLong(x, y) {
-        x = Math.floor(x * this.inverseBucketSize) & 0xFFFF; // cast to 16-bit
-        y = (Math.floor(y * this.inverseBucketSize) & 0xFFFF) << 15; // cast to 16-bit and then shift 15-bits to the left.
-        return x | y;
-    }
-    /**
-     * Convert a point to a unique 32-bit number representing the x/y coordinates in the hash.
+     * TODO convert this to support more numbers by making the map of type:
+     *   private map: { [x: number]: { [y: number] : Set<Collider> } };
+     *   (also removes the need for a point-hashing function)
      * @param point
      */
     toHashLong(x, y) {

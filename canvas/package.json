@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@types/chai": "^4.0.0",
+    "@types/core-js": "^0.9.35",
     "@types/mocha": "^2.2.41",
     "babel-core": "^6.24.1",
     "babel-preset-es2015": "^6.24.1",

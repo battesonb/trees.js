@@ -13,7 +13,7 @@ export default class Canvas {
 
     this.fontSize = 18;
     this.fontFamily = "Arial";
-    this._updateFont();
+    this.updateFont();
   }
 
   getWidth(): number {
@@ -46,15 +46,15 @@ export default class Canvas {
 
   setFontSize(size: number): void {
     this.fontSize = size;
-    this._updateFont();
+    this.updateFont();
   }
 
   setFontFamily(family: string): void {
     this.fontFamily = family;
-    this._updateFont();
+    this.updateFont();
   }
 
-  _updateFont(): void {
+  private updateFont(): void {
     this.context.font = this.fontSize + "px " + this.fontFamily;
   }
 

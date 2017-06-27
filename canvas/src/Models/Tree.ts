@@ -15,13 +15,13 @@ export default class Tree {
   }
 
   private addNode(descent: object, node?: Node) {
-    if(descent !== undefined) {
+    if(descent !== undefined && descent !== null) {
       if(descent["text"] !== undefined) {
         let id = descent["id"] !== undefined ? descent["id"] : -1;
         let x = descent["x"] !== undefined ? descent["x"] : 0;
         let y = descent["y"] !== undefined ? descent["y"] : 0;
         let child = new Node(descent["text"], id, x, y);
-        if(node === undefined) {
+        if(node === undefined || node === null) {
           this.root = child;
           node = this.root;
         } else {
@@ -52,5 +52,16 @@ export default class Tree {
         this.each(callback, breadthFirst, node.getChildAt(i), level + 1);
       }
     }
+  }
+
+  /**
+   * Returns the number of nodes within this tree.
+   */
+  children(): number {
+    let count = 0;
+    this.each((node: Node) => {
+      count++;
+    });
+    return count;
   }
 }

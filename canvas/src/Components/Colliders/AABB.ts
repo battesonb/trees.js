@@ -20,8 +20,9 @@ export default class AABB extends Collider {
 
   overlaps(other: Collider): boolean {
     if(other instanceof AABB) {
-      return Math.abs(this.position.x - other.position.x) * 2 < this.getWidth() + other.getWidth() &&
-             Math.abs(this.position.y - other.position.y) * 2 < this.getHeight() + other.getHeight();
+      let deltaX = Math.abs(this.position.x - other.position.x);
+      let deltaY = Math.abs(this.position.y - other.position.y);
+      return (deltaX <= this.width || deltaX <= other.width) && (deltaY <= this.height || deltaY <= other.height);
     } else {
       throw Error("Unknown collider type, cannot determine overlap.");
     }

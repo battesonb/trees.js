@@ -104,6 +104,6 @@ export default class EventSystem {
   redraw(): void {
     self.renderer.clear();
     self.renderer.drawTree();
-    //self.renderer.drawHashGroups(self.hash); // Debug Spatial Hash
+    self.renderer.drawHashGroups(self.hash); // Debug Spatial Hash
   }
 }

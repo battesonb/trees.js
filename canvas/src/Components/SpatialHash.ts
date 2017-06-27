@@ -7,7 +7,7 @@ import Point2D from '../Types/Point2D';
 export default class SpatialHash {
   private bucketSize: number;
   private inverseBucketSize: number;
-  private map: object;
+  private map: { [hash: number] : Set<Collider> };
 
   constructor(bucketSize: number = 100) {
     this.map = {};
@@ -17,6 +17,10 @@ export default class SpatialHash {
 
   getBucketSize(): number {
     return this.bucketSize;
+  }
+
+  clear(): void {
+    this.map = {};
   }
 
   /**
@@ -121,19 +125,12 @@ export default class SpatialHash {
     collider.position.y += y;
     this.add(collider);
   }
-
+  
   /**
    * Convert a point to a unique 32-bit number representing the x/y coordinates in the hash.
-   * @param point
-   */
-  pointToHashLong(x: number, y: number): number {
-    x = Math.floor(x * this.inverseBucketSize) & 0xFFFF; // cast to 16-bit
-    y = (Math.floor(y * this.inverseBucketSize) & 0xFFFF) << 15; // cast to 16-bit and then shift 15-bits to the left.
-    return x | y;
-  }  
-
-  /**
-   * Convert a point to a unique 32-bit number representing the x/y coordinates in the hash.
+   * TODO convert this to support more numbers by making the map of type:
+   *   private map: { [x: number]: { [y: number] : Set<Collider> } };
+   *   (also removes the need for a point-hashing function)
    * @param point
    */
   toHashLong(x: number, y: number): number {
