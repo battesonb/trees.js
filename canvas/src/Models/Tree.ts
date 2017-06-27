@@ -12,6 +12,7 @@ export default class Tree {
    */
   constructor(json: object, canvas: Canvas) {
     this.addNode(json);
+    console.log(this);
   }
 
   private addNode(descent: object, node?: Node) {
@@ -28,9 +29,8 @@ export default class Tree {
           node.addChild(child);
         }
         if(descent["children"] !== undefined) {
-          console.log(descent["children"]);
           for(let i = 0; i < descent["children"].length; i++) {
-            this.addNode(descent["children"][i], node);
+            this.addNode(descent["children"][i], child);
           }
         }
       }

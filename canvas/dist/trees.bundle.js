@@ -604,6 +604,7 @@ class Tree {
      */
     constructor(json, canvas) {
         this.addNode(json);
+        console.log(this);
     }
     addNode(descent, node) {
         if (descent !== undefined && descent !== null) {
@@ -620,7 +621,7 @@ class Tree {
                 }
                 if (descent["children"] !== undefined) {
                     for (let i = 0; i < descent["children"].length; i++) {
-                        this.addNode(descent["children"][i], node);
+                        this.addNode(descent["children"][i], child);
                     }
                 }
             }
@@ -649,11 +650,11 @@ class Tree {
                 list.push(node);
                 while (list.length > 0) {
                     let currNode = list.splice(0, 1)[0];
-                    index++;
                     currNode.foreachChild((node, index) => {
                         nextList.push(node);
                     });
-                    callback(node, level, index);
+                    callback(currNode, level, index);
+                    index++;
                     if (list.length === 0) {
                         list = nextList;
                         nextList = [];
