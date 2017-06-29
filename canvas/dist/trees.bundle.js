@@ -25,113 +25,6 @@ exports.default = Camera;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-class Canvas {
-    constructor(id) {
-        this.dom = document.getElementById(id);
-        this.context = this.dom.getContext("2d");
-        this.context.textBaseline = "top";
-        this.fontSize = 18;
-        this.fontFamily = "Arial";
-        this.updateFont();
-    }
-    getWidth() {
-        return this.dom.width;
-    }
-    getHeight() {
-        return this.dom.height;
-    }
-    clear() {
-        this.context.clearRect(0, 0, this.dom.width, this.dom.height);
-    }
-    getTextWidth(text) {
-        return this.context.measureText(text).width;
-    }
-    setFill(style) {
-        this.context.fillStyle = style;
-    }
-    setStroke(style) {
-        this.context.strokeStyle = style;
-    }
-    setStrokeSize(size = 1) {
-        this.context.lineWidth = size;
-    }
-    setFontSize(size) {
-        this.fontSize = size;
-        this.updateFont();
-    }
-    setFontFamily(family) {
-        this.fontFamily = family;
-        this.updateFont();
-    }
-    updateFont() {
-        this.context.font = this.fontSize + "px " + this.fontFamily;
-    }
-    drawRect(x, y, w, h, stroke, shadow) {
-        if (stroke) {
-            this.context.strokeRect(x, y, w, h);
-        } else {
-            this.context.fillRect(x, y, w, h);
-        }
-    }
-    drawArc(x, y, r, startAngle, endAngle, stroke) {
-        this.context.beginPath();
-        this.context.arc(x, y, r, startAngle, endAngle);
-        this.context.closePath();
-        if (stroke) {
-            this.context.stroke();
-        } else {
-            this.context.fill();
-        }
-    }
-    drawLine(x1, y1, x2, y2) {
-        this.context.beginPath();
-        this.context.moveTo(x1, y1);
-        this.context.lineTo(x2, y2);
-        this.context.closePath();
-        this.context.stroke();
-    }
-    // TODO add line-wrap
-    drawText(text, x, y, stroke, maxWidth) {
-        if (stroke) {
-            this.context.strokeText(text, x, y);
-        } else {
-            this.context.fillText(text, x, y);
-        }
-    }
-    drawRoundedRect(x, y, w, h, r, stroke) {
-        if (w < 2 * r) r = w / 2;
-        if (h < 2 * r) r = h / 2;
-        this.context.beginPath();
-        this.context.moveTo(x + r, y);
-        this.context.arcTo(x + w, y, x + w, y + h, r);
-        this.context.arcTo(x + w, y + h, x, y + h, r);
-        this.context.arcTo(x, y + h, x, y, r);
-        this.context.arcTo(x, y, x + w, y, r);
-        this.context.closePath();
-        if (stroke) {
-            this.context.stroke();
-        } else {
-            this.context.fill();
-        }
-    }
-    enableShadows(blur, offsetX = 0, offsetY = 0, color = "black") {
-        this.context.shadowBlur = 8;
-        this.context.shadowColor = color;
-        this.context.shadowOffsetX = offsetX;
-        this.context.shadowOffsetY = offsetY;
-    }
-    clearShadows() {
-        this.context.shadowBlur = 0;
-        this.context.shadowOffsetX = 0;
-        this.context.shadowOffsetY = 0;
-    }
-}
-exports.default = Canvas;
-
-},{}],3:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
 const Collider_1 = require("./Collider");
 /**
  * Represents an AABB with top-left alignment.
@@ -172,7 +65,7 @@ class AABB extends Collider_1.default {
 }
 exports.default = AABB;
 
-},{"./Collider":4}],4:[function(require,module,exports){
+},{"./Collider":3}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -184,7 +77,7 @@ class Collider {
 }
 exports.default = Collider;
 
-},{"../../Types/Point2D":10}],5:[function(require,module,exports){
+},{"../../Types/Point2D":10}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -192,20 +85,20 @@ const Point2D_1 = require("../Types/Point2D");
 const SpatialHash_1 = require("./SpatialHash");
 let self;
 class EventSystem {
-    constructor(camera, renderer, canvas, tree) {
+    constructor(camera, renderer, stage, tree) {
         self = this; // Ugly, but binds require handlers.
         this.hash = new SpatialHash_1.default(); // TODO deterrmine this using the node sizes!
         this.camera = camera;
-        this.canvas = canvas;
+        this.stage = stage;
         this.currentNode = null;
         this.renderer = renderer;
         this.moved = false;
         tree.each(node => {
             this.hash.add(node);
         });
-        this.canvas.dom.addEventListener("mousedown", this.mouseDown);
-        this.canvas.dom.addEventListener("mousemove", this.mouseMove);
-        this.canvas.dom.addEventListener("mousewheel", this.mouseWheel);
+        this.stage.dom.addEventListener("mousedown", this.mouseDown);
+        this.stage.dom.addEventListener("mousemove", this.mouseMove);
+        this.stage.dom.addEventListener("mousewheel", this.mouseWheel);
         this.redraw();
     }
     getEventPoint(event) {
@@ -247,9 +140,9 @@ class EventSystem {
         let point = self.getEventPoint(event);
         let hoverNode = self.hash.find(point.x / self.camera.getZoom() - self.camera.position.x, point.y / self.camera.getZoom() - self.camera.position.y);
         if (hoverNode) {
-            self.canvas.dom.style.cursor = "pointer";
+            self.stage.dom.style.cursor = "pointer";
         } else {
-            self.canvas.dom.style.cursor = "auto";
+            self.stage.dom.style.cursor = "auto";
         }
     }
     mouseUp(event) {
@@ -269,11 +162,11 @@ class EventSystem {
 }
 exports.default = EventSystem;
 
-},{"../Types/Point2D":10,"./SpatialHash":7}],6:[function(require,module,exports){
+},{"../Types/Point2D":10,"./SpatialHash":6}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-class Renderer {
+class CanvasRenderer {
     constructor(camera, canvas, tree, options) {
         this.canvas = canvas;
         this.camera = camera;
@@ -363,9 +256,9 @@ class Renderer {
         this.selectedNode = node;
     }
 }
-exports.default = Renderer;
+exports.default = CanvasRenderer;
 
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -492,7 +385,114 @@ class SpatialHash {
 }
 exports.default = SpatialHash;
 
-},{"../Types/Point2D":10}],8:[function(require,module,exports){
+},{"../Types/Point2D":10}],7:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+class CanvasStage {
+    constructor(id) {
+        this.dom = document.getElementById(id);
+        this.context = this.dom.getContext("2d");
+        this.context.textBaseline = "top";
+        this.fontSize = 18;
+        this.fontFamily = "Arial";
+        this.updateFont();
+    }
+    getWidth() {
+        return this.dom.width;
+    }
+    getHeight() {
+        return this.dom.height;
+    }
+    clear() {
+        this.context.clearRect(0, 0, this.dom.width, this.dom.height);
+    }
+    getTextWidth(text) {
+        return this.context.measureText(text).width;
+    }
+    setFill(style) {
+        this.context.fillStyle = style;
+    }
+    setStroke(style) {
+        this.context.strokeStyle = style;
+    }
+    setStrokeSize(size = 1) {
+        this.context.lineWidth = size;
+    }
+    setFontSize(size) {
+        this.fontSize = size;
+        this.updateFont();
+    }
+    setFontFamily(family) {
+        this.fontFamily = family;
+        this.updateFont();
+    }
+    updateFont() {
+        this.context.font = this.fontSize + "px " + this.fontFamily;
+    }
+    drawRect(x, y, w, h, stroke, shadow) {
+        if (stroke) {
+            this.context.strokeRect(x, y, w, h);
+        } else {
+            this.context.fillRect(x, y, w, h);
+        }
+    }
+    drawArc(x, y, r, startAngle, endAngle, stroke) {
+        this.context.beginPath();
+        this.context.arc(x, y, r, startAngle, endAngle);
+        this.context.closePath();
+        if (stroke) {
+            this.context.stroke();
+        } else {
+            this.context.fill();
+        }
+    }
+    drawLine(x1, y1, x2, y2) {
+        this.context.beginPath();
+        this.context.moveTo(x1, y1);
+        this.context.lineTo(x2, y2);
+        this.context.closePath();
+        this.context.stroke();
+    }
+    // TODO add line-wrap
+    drawText(text, x, y, stroke, maxWidth) {
+        if (stroke) {
+            this.context.strokeText(text, x, y);
+        } else {
+            this.context.fillText(text, x, y);
+        }
+    }
+    drawRoundedRect(x, y, w, h, r, stroke) {
+        if (w < 2 * r) r = w / 2;
+        if (h < 2 * r) r = h / 2;
+        this.context.beginPath();
+        this.context.moveTo(x + r, y);
+        this.context.arcTo(x + w, y, x + w, y + h, r);
+        this.context.arcTo(x + w, y + h, x, y + h, r);
+        this.context.arcTo(x, y + h, x, y, r);
+        this.context.arcTo(x, y, x + w, y, r);
+        this.context.closePath();
+        if (stroke) {
+            this.context.stroke();
+        } else {
+            this.context.fill();
+        }
+    }
+    enableShadows(blur, offsetX = 0, offsetY = 0, color = "black") {
+        this.context.shadowBlur = 8;
+        this.context.shadowColor = color;
+        this.context.shadowOffsetX = offsetX;
+        this.context.shadowOffsetY = offsetY;
+    }
+    clearShadows() {
+        this.context.shadowBlur = 0;
+        this.context.shadowOffsetX = 0;
+        this.context.shadowOffsetY = 0;
+    }
+}
+exports.default = CanvasStage;
+
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -590,7 +590,7 @@ class Node extends AABB_1.default {
 }
 exports.default = Node;
 
-},{"../Components/Colliders/AABB":3}],9:[function(require,module,exports){
+},{"../Components/Colliders/AABB":2}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -600,9 +600,9 @@ class Tree {
      * Builds the tree given a nested json object representing the nodes of the tree.
      * Allowed attributes include: text, x, y, children, and id.
      * @param json Representation of the tree.
-     * @param canvas Canvas object for measuring width/height and determining text-wrapping of nodes.
+     * @param stage Stage object for measuring width/height and determining text-wrapping of nodes.
      */
-    constructor(json, canvas) {
+    constructor(json, stage) {
         this.addNode(json);
         console.log(this);
     }
@@ -695,9 +695,9 @@ exports.default = Point2D;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const Camera_1 = require("./Components/Camera");
-const Canvas_1 = require("./Components/Canvas");
+const CanvasStage_1 = require("./Components/Stage/CanvasStage");
 const EventSystem_1 = require("./Components/EventSystem");
-const Renderer_1 = require("./Components/Renderer");
+const CanvasRenderer_1 = require("./Components/Renderer/CanvasRenderer");
 const Tree_1 = require("./Models/Tree");
 class TreesJS {
     constructor(id, json, options) {
@@ -819,10 +819,10 @@ class TreesJS {
             options.shadow.text.offsetY = 0;
         }
         this.camera = new Camera_1.default(0, 0, 1);
-        this.canvas = new Canvas_1.default(id);
-        this.tree = new Tree_1.default(json, this.canvas);
-        this.renderer = new Renderer_1.default(this.camera, this.canvas, this.tree, options);
-        this.eventSystem = new EventSystem_1.default(this.camera, this.renderer, this.canvas, this.tree);
+        this.stage = new CanvasStage_1.default(id);
+        this.tree = new Tree_1.default(json, this.stage);
+        this.renderer = new CanvasRenderer_1.default(this.camera, this.stage, this.tree, options);
+        this.eventSystem = new EventSystem_1.default(this.camera, this.renderer, this.stage, this.tree);
     }
 }
 exports.default = TreesJS;
@@ -882,6 +882,6 @@ options = {
 */
 window.TreesJS = TreesJS;
 
-},{"./Components/Camera":1,"./Components/Canvas":2,"./Components/EventSystem":5,"./Components/Renderer":6,"./Models/Tree":9}]},{},[11])
+},{"./Components/Camera":1,"./Components/EventSystem":4,"./Components/Renderer/CanvasRenderer":5,"./Components/Stage/CanvasStage":7,"./Models/Tree":9}]},{},[11])
 
 //# sourceMappingURL=trees.bundle.js.map

@@ -1,4 +1,6 @@
-export default class Canvas {
+import { IStage } from "./IStage";
+
+export default class CanvasStage implements IStage {
   dom: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
 
@@ -111,14 +113,14 @@ export default class Canvas {
     }
   }
 
-  enableShadows(blur: number, offsetX: number = 0, offsetY: number = 0, color: string = "black") {
+  enableShadows(blur: number, offsetX: number = 0, offsetY: number = 0, color: string = "black"): void {
     this.context.shadowBlur = 8;
     this.context.shadowColor = color;
     this.context.shadowOffsetX = offsetX;
     this.context.shadowOffsetY = offsetY;
   }
 
-  clearShadows() {
+  clearShadows(): void {
     this.context.shadowBlur = 0;
     this.context.shadowOffsetX = 0;
     this.context.shadowOffsetY = 0;

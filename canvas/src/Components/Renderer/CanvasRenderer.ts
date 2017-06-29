@@ -1,18 +1,20 @@
-import Canvas from "./Canvas";
-import Camera from "./Camera";
-import Node from "../Models/Node";
-import Tree from "../Models/Tree";
-import SpatialHash from "./SpatialHash";
+import CanvasStage from "../Stage/CanvasStage";
+import Camera from "../Camera";
+import Node from "../../Models/Node";
+import Tree from "../../Models/Tree";
+import SpatialHash from "../SpatialHash";
 
-export default class Renderer {
-  private canvas: Canvas;
+import { IRenderer } from "./IRenderer";
+
+export default class CanvasRenderer implements IRenderer {
+  private canvas: CanvasStage;
   private camera: Camera;
   private tree: Tree;
   private options: any;
 
   private selectedNode: Node;
   
-  constructor(camera: Camera, canvas: Canvas, tree: Tree, options: any) {
+  constructor(camera: Camera, canvas: CanvasStage, tree: Tree, options: any) {
     this.canvas = canvas;
     this.camera = camera;
     this.tree = tree;

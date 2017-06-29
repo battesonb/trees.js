@@ -1,29 +1,31 @@
 import Camera from "./Camera";
-import Canvas from "./Canvas";
+import CanvasStage from "./Stage/CanvasStage";
 import Node from "../Models/Node";
 import Tree from "../Models/Tree";
 import Point2D from "../Types/Point2D";
-import Renderer from "./Renderer";
 import SpatialHash from "./SpatialHash";
+
+import { IRenderer } from "./Renderer/IRenderer";
+import { IStage } from "./Stage/IStage";
 
 let self: EventSystem;
 
 export default class EventSystem {
   private camera: Camera;
-  private canvas: Canvas;
+  private stage: IStage;
   private currentNode: Node;
   private hash: SpatialHash;
-  private renderer: Renderer;
+  private renderer: IRenderer;
   private x: number;
   private y: number;
 
   private moved: boolean;
 
-  constructor(camera: Camera, renderer: Renderer, canvas: Canvas, tree: Tree) {
+  constructor(camera: Camera, renderer: IRenderer, stage: IStage, tree: Tree) {
     self = this; // Ugly, but binds require handlers.
     this.hash = new SpatialHash(); // TODO deterrmine this using the node sizes!
     this.camera = camera;
-    this.canvas = canvas;
+    this.stage = stage;
     this.currentNode = null;
     this.renderer = renderer;
     this.moved = false;
@@ -32,9 +34,9 @@ export default class EventSystem {
       this.hash.add(node);
     });
 
-    this.canvas.dom.addEventListener("mousedown", this.mouseDown);
-    this.canvas.dom.addEventListener("mousemove", this.mouseMove);
-    this.canvas.dom.addEventListener("mousewheel", this.mouseWheel);
+    this.stage.dom.addEventListener("mousedown", this.mouseDown);
+    this.stage.dom.addEventListener("mousemove", this.mouseMove);
+    this.stage.dom.addEventListener("mousewheel", this.mouseWheel);
 
     this.redraw();
   }
@@ -85,9 +87,9 @@ export default class EventSystem {
     let point: Point2D = self.getEventPoint(event);
     let hoverNode: Node = <Node>self.hash.find(point.x / self.camera.getZoom() - self.camera.position.x, point.y / self.camera.getZoom() - self.camera.position.y);
     if(hoverNode) {
-      self.canvas.dom.style.cursor = "pointer";
+      self.stage.dom.style.cursor = "pointer";
     } else {
-      self.canvas.dom.style.cursor = "auto";
+      self.stage.dom.style.cursor = "auto";
     }
   }
 

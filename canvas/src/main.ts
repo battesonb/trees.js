@@ -1,14 +1,17 @@
 import Camera from "./Components/Camera";
-import Canvas from "./Components/Canvas";
+import CanvasStage from "./Components/Stage/CanvasStage";
 import EventSystem from "./Components/EventSystem";
-import Renderer from "./Components/Renderer";
+import CanvasRenderer from "./Components/Renderer/CanvasRenderer";
 import Tree from "./Models/Tree";
+
+import { IRenderer } from "./Components/Renderer/IRenderer";
+import { IStage } from "./Components/Stage/IStage";
 
 export default class TreesJS {
   private camera: Camera;
-  private canvas: Canvas;
+  private stage: IStage;
   private eventSystem: EventSystem;
-  private renderer: Renderer;
+  private renderer: IRenderer;
   private tree: Tree;
 
   constructor(id: string, json: object, options?: any) {
@@ -135,10 +138,10 @@ export default class TreesJS {
     }
 
     this.camera = new Camera(0, 0, 1);
-    this.canvas = new Canvas(id);
-    this.tree = new Tree(json, this.canvas);
-    this.renderer = new Renderer(this.camera, this.canvas, this.tree, options);
-    this.eventSystem = new EventSystem(this.camera, this.renderer, this.canvas, this.tree);
+    this.stage = new CanvasStage(id);
+    this.tree = new Tree(json, this.stage);
+    this.renderer = new CanvasRenderer(this.camera, <CanvasStage>this.stage, this.tree, options);
+    this.eventSystem = new EventSystem(this.camera, this.renderer, this.stage, this.tree);
   }
 }
 

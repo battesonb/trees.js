@@ -1,5 +1,6 @@
 import Node from "./Node";
-import Canvas from "../Components/Canvas";
+
+import { IStage } from "../Components/Stage/IStage";
 
 export default class Tree {
   private root: Node;
@@ -8,9 +9,9 @@ export default class Tree {
    * Builds the tree given a nested json object representing the nodes of the tree.
    * Allowed attributes include: text, x, y, children, and id.
    * @param json Representation of the tree.
-   * @param canvas Canvas object for measuring width/height and determining text-wrapping of nodes.
+   * @param stage Stage object for measuring width/height and determining text-wrapping of nodes.
    */
-  constructor(json: object, canvas: Canvas) {
+  constructor(json: object, stage: IStage) {
     this.addNode(json);
     console.log(this);
   }
