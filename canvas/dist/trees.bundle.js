@@ -4,9 +4,21 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Point2D_1 = require("../Types/Point2D");
 class Camera {
-    constructor(x = 0, y = 0, zoom = 1) {
+    constructor(x = 0, y = 0, originX = 0, originY = 0, zoom = 1) {
         this.position = new Point2D_1.default(x, y);
+        this.origin = new Point2D_1.default(originX, originY);
         this.setZoom(zoom);
+    }
+    setPosition(x, y) {
+        this.position.x = x;
+        this.position.y = y;
+    }
+    move(x, y) {
+        this.position.x += x;
+        this.position.y += y;
+    }
+    getPosition() {
+        return new Point2D_1.default(this.position.x + this.origin.x, this.position.y + this.origin.y);
     }
     setZoom(zoom) {
         this.zoom = Math.max(0.35, Math.min(50, zoom));
@@ -106,7 +118,8 @@ class EventSystem {
     }
     mouseDown(event) {
         let point = self.getEventPoint(event);
-        self.currentNode = self.hash.find(point.x / self.camera.getZoom() - self.camera.position.x, point.y / self.camera.getZoom() - self.camera.position.y);
+        let cameraPosition = self.camera.getPosition();
+        self.currentNode = self.hash.find(point.x / self.camera.getZoom() - cameraPosition.x, point.y / self.camera.getZoom() - cameraPosition.y);
         if (self.currentNode) {
             self.currentNode.bringToFront();
         }
@@ -126,8 +139,7 @@ class EventSystem {
         let dx = (point.x - self.x) / self.camera.getZoom();
         let dy = (point.y - self.y) / self.camera.getZoom();
         if (self.currentNode === null) {
-            self.camera.position.x += dx;
-            self.camera.position.y += dy;
+            self.camera.move(dx, dy);
         } else {
             self.hash.move(self.currentNode, dx, dy);
         }
@@ -138,7 +150,8 @@ class EventSystem {
     }
     mouseMove(event) {
         let point = self.getEventPoint(event);
-        let hoverNode = self.hash.find(point.x / self.camera.getZoom() - self.camera.position.x, point.y / self.camera.getZoom() - self.camera.position.y);
+        let cameraPosition = self.camera.getPosition();
+        let hoverNode = self.hash.find(point.x / self.camera.getZoom() - cameraPosition.x, point.y / self.camera.getZoom() - cameraPosition.y);
         if (hoverNode) {
             self.stage.dom.style.cursor = "pointer";
         } else {
@@ -219,14 +232,15 @@ class CanvasRenderer {
      */
     drawHashGroups(hash) {
         this.canvas.setStroke("#77BBFF");
-        this.canvas.setStrokeSize(0.5);
+        this.canvas.setStrokeSize(0.25);
         this.canvas.clearShadows();
-        let hor = this.camera.position.x % hash.getBucketSize() * this.camera.getZoom();
+        let cameraPosition = this.camera.getPosition();
+        let hor = cameraPosition.x % hash.getBucketSize() * this.camera.getZoom();
         while (hor < this.canvas.getWidth()) {
             this.canvas.drawLine(hor, 0, hor, this.canvas.getHeight());
             hor += hash.getBucketSize() * this.camera.getZoom();
         }
-        let vert = this.camera.position.y % hash.getBucketSize() * this.camera.getZoom();
+        let vert = cameraPosition.y % hash.getBucketSize() * this.camera.getZoom();
         while (vert < this.canvas.getHeight()) {
             this.canvas.drawLine(0, vert, this.canvas.getWidth(), vert);
             vert += hash.getBucketSize() * this.camera.getZoom();
@@ -247,7 +261,8 @@ class CanvasRenderer {
             this.canvas.setStrokeSize(this.options.node.stroke.size);
             this.canvas.setFill(this.options.node.color);
         }
-        this.canvas.drawRoundedRect((node.position.x + this.camera.position.x) * this.camera.getZoom(), (node.position.y + this.camera.position.y) * this.camera.getZoom(), node.getWidth() * this.camera.getZoom(), node.getHeight() * this.camera.getZoom(), this.options.node.rounded * this.camera.getZoom(), false);
+        let cameraPosition = this.camera.getPosition();
+        this.canvas.drawRoundedRect((node.position.x + cameraPosition.x) * this.camera.getZoom(), (node.position.y + cameraPosition.y) * this.camera.getZoom(), node.getWidth() * this.camera.getZoom(), node.getHeight() * this.camera.getZoom(), this.options.node.rounded * this.camera.getZoom(), false);
         if (this.options.shadow.text.blur > 0) {
             this.canvas.enableShadows(this.options.shadow.text.blur, this.options.shadow.text.offsetX * this.camera.getZoom(), this.options.shadow.text.offsetY * this.camera.getZoom(), this.options.shadow.text.color);
         } else {
@@ -257,7 +272,7 @@ class CanvasRenderer {
         this.canvas.setStroke(this.options.text.stroke.color);
         this.canvas.setStrokeSize(this.options.text.stroke.size);
         this.canvas.setFill(this.options.text.color);
-        this.canvas.drawText(node.getText(), (node.position.x + this.camera.position.x + this.options.node.padding) * this.camera.getZoom(), (node.position.y + this.camera.position.y + this.options.node.padding) * this.camera.getZoom(), this.options.text.stroke.size > 0, 100 * this.camera.getZoom());
+        this.canvas.drawText(node.getText(), (node.position.x + cameraPosition.x + this.options.node.padding) * this.camera.getZoom(), (node.position.y + cameraPosition.y + this.options.node.padding) * this.camera.getZoom(), this.options.text.stroke.size > 0, 100 * this.camera.getZoom());
     }
     drawPaths(node) {
         if (this.options.shadow.path.blur > 0) {
@@ -267,9 +282,10 @@ class CanvasRenderer {
         }
         this.canvas.setStroke(this.options.path.color);
         this.canvas.setStrokeSize(this.options.path.size);
+        let cameraPosition = this.camera.getPosition();
         for (let i = 0; i < node.childCount(); i++) {
             let child = node.getChildAt(i);
-            this.canvas.drawLine((node.position.x + node.getWidth() / 2 + this.camera.position.x) * this.camera.getZoom(), (node.position.y + node.getHeight() / 2 + this.camera.position.y) * this.camera.getZoom(), (child.position.x + child.getWidth() / 2 + this.camera.position.x) * this.camera.getZoom(), (child.position.y + child.getHeight() / 2 + this.camera.position.y) * this.camera.getZoom());
+            this.canvas.drawLine((node.position.x + node.getWidth() / 2 + cameraPosition.x) * this.camera.getZoom(), (node.position.y + node.getHeight() / 2 + cameraPosition.y) * this.camera.getZoom(), (child.position.x + child.getWidth() / 2 + cameraPosition.x) * this.camera.getZoom(), (child.position.y + child.getHeight() / 2 + cameraPosition.y) * this.camera.getZoom());
         }
     }
     setSelectedNode(node) {
@@ -840,8 +856,8 @@ class TreesJS {
         if (options.shadow.text.offsetY === undefined) {
             options.shadow.text.offsetY = 0;
         }
-        this.camera = new Camera_1.default(0, 0, 1);
         this.stage = new CanvasStage_1.default(id);
+        this.camera = new Camera_1.default(0, 0, this.stage.getWidth() / 2, this.stage.getHeight() / 2, 1);
         this.tree = new Tree_1.default(json, this.stage);
         this.renderer = new CanvasRenderer_1.default(this.camera, this.stage, this.tree, options);
         this.eventSystem = new EventSystem_1.default(this.camera, this.renderer, this.stage, this.tree);

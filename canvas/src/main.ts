@@ -140,8 +140,8 @@ export default class TreesJS {
       options.shadow.text.offsetY = 0;
     }
 
-    this.camera = new Camera(0, 0, 1);
     this.stage = new CanvasStage(id);
+    this.camera = new Camera(0, 0, this.stage.getWidth() / 2, this.stage.getHeight() / 2, 1);
     this.tree = new Tree(json, this.stage);
     this.renderer = new CanvasRenderer(this.camera, <CanvasStage>this.stage, this.tree, options);
     this.eventSystem = new EventSystem(this.camera, this.renderer, this.stage, this.tree);

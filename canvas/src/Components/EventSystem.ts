@@ -47,7 +47,8 @@ export default class EventSystem {
 
   mouseDown(event: MouseEvent) {
     let point: Point2D = self.getEventPoint(event);
-    self.currentNode = <Node>self.hash.find(point.x / self.camera.getZoom() - self.camera.position.x, point.y / self.camera.getZoom() - self.camera.position.y);
+    let cameraPosition = self.camera.getPosition();
+    self.currentNode = <Node>self.hash.find(point.x / self.camera.getZoom() - cameraPosition.x, point.y / self.camera.getZoom() - cameraPosition.y);
     if(self.currentNode) {
       self.currentNode.bringToFront();
     }
@@ -71,8 +72,7 @@ export default class EventSystem {
     let dx = (point.x - self.x) / self.camera.getZoom();
     let dy = (point.y - self.y) / self.camera.getZoom();
     if(self.currentNode === null) {
-      self.camera.position.x+= dx;
-      self.camera.position.y+= dy;
+      self.camera.move(dx, dy);
     } else {
       self.hash.move(self.currentNode, dx, dy);
     }
@@ -85,7 +85,8 @@ export default class EventSystem {
   
   mouseMove(event: MouseEvent) {
     let point: Point2D = self.getEventPoint(event);
-    let hoverNode: Node = <Node>self.hash.find(point.x / self.camera.getZoom() - self.camera.position.x, point.y / self.camera.getZoom() - self.camera.position.y);
+    let cameraPosition = self.camera.getPosition();
+    let hoverNode: Node = <Node>self.hash.find(point.x / self.camera.getZoom() - cameraPosition.x, point.y / self.camera.getZoom() - cameraPosition.y);
     if(hoverNode) {
       self.stage.dom.style.cursor = "pointer";
     } else {
