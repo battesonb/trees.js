@@ -1,6 +1,7 @@
 import CanvasStage from "../Stage/CanvasStage";
 import Camera from "../Camera";
 import Node from "../../Models/Node";
+import Point2D from "../../Types/Point2D";
 import Tree from "../../Models/Tree";
 import SpatialHash from "../SpatialHash";
 
@@ -22,11 +23,32 @@ export default class CanvasRenderer implements IRenderer {
 
     this.canvas.setFontFamily(options.text.family);
 
-    // TODO Set up node widths/heights/padding
+    this.setTreeMeasurements(tree, options);
+    this.setNodePositions(tree, options);
+  }
+
+  private setTreeMeasurements(tree: Tree, options: any): void {
     this.tree.each((node: Node) => {
       node.setWidth(this.canvas.getTextWidth(node.getText()) + this.options.node.padding * 3);
       node.setHeight(this.options.text.size + this.options.node.padding * 2);
     });
+  }
+
+  private setNodePositions(tree: Tree, options: any): void {
+    let currentPos = new Point2D(0, 0);
+    let deltaX = 0;
+    let currentLevel = 0;
+    this.tree.each((node: Node, level: number) => {
+      if(level != currentLevel) {
+        currentPos.x += deltaX + this.options.node.margin;
+        currentPos.y = 0;
+        currentLevel = level;
+      }
+      deltaX = Math.max(deltaX, node.getWidth() + node.position.x);   
+      node.position.x = currentPos.x;
+      node.position.y = currentPos.y;
+      currentPos.y += node.position.y + node.getHeight() + this.options.node.margin;
+    }, true);
   }
 
   clear(): void {

@@ -166,6 +166,7 @@ exports.default = EventSystem;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+const Point2D_1 = require("../../Types/Point2D");
 class CanvasRenderer {
     constructor(camera, canvas, tree, options) {
         this.canvas = canvas;
@@ -173,11 +174,30 @@ class CanvasRenderer {
         this.tree = tree;
         this.options = options;
         this.canvas.setFontFamily(options.text.family);
-        // TODO Set up node widths/heights/padding
+        this.setTreeMeasurements(tree, options);
+        this.setNodePositions(tree, options);
+    }
+    setTreeMeasurements(tree, options) {
         this.tree.each(node => {
             node.setWidth(this.canvas.getTextWidth(node.getText()) + this.options.node.padding * 3);
             node.setHeight(this.options.text.size + this.options.node.padding * 2);
         });
+    }
+    setNodePositions(tree, options) {
+        let currentPos = new Point2D_1.default(0, 0);
+        let deltaX = 0;
+        let currentLevel = 0;
+        this.tree.each((node, level) => {
+            if (level != currentLevel) {
+                currentPos.x += deltaX + this.options.node.margin;
+                currentPos.y = 0;
+                currentLevel = level;
+            }
+            deltaX = Math.max(deltaX, node.getWidth() + node.position.x);
+            node.position.x = currentPos.x;
+            node.position.y = currentPos.y;
+            currentPos.y += node.position.y + node.getHeight() + this.options.node.margin;
+        }, true);
     }
     clear() {
         this.canvas.clear();
@@ -258,7 +278,7 @@ class CanvasRenderer {
 }
 exports.default = CanvasRenderer;
 
-},{}],6:[function(require,module,exports){
+},{"../../Types/Point2D":10}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -604,7 +624,6 @@ class Tree {
      */
     constructor(json, stage) {
         this.addNode(json);
-        console.log(this);
     }
     addNode(descent, node) {
         if (descent !== undefined && descent !== null) {
@@ -715,6 +734,9 @@ class TreesJS {
         }
         if (options.node.padding === undefined) {
             options.node.padding = 4;
+        }
+        if (options.node.margin === undefined) {
+            options.node.margin = 32;
         }
         if (options.node.stroke === undefined) {
             options.node.stroke = {};
@@ -832,6 +854,7 @@ options = {
   node: {
     color: "#FFAA55",
     rounded: 5,
+    margin: 32,
     padding: 5,
     stroke: {
       color: "#000"

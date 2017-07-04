@@ -31,6 +31,9 @@ export default class TreesJS {
     if(options.node.padding === undefined) {
       options.node.padding = 4;
     }
+    if(options.node.margin === undefined) {
+      options.node.margin = 32;
+    }
     if(options.node.stroke === undefined) {
       options.node.stroke = {};
     }
@@ -151,6 +154,7 @@ options = {
   node: {
     color: "#FFAA55",
     rounded: 5,
+    margin: 32,
     padding: 5,
     stroke: {
       color: "#000"

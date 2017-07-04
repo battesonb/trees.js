@@ -86,8 +86,6 @@ describe("Tree", () => {
     it("should perform breadth-first searches.", () => {
       let currLevel = -1;
       tree.each((node: Node, level: number) => {
-        console.log(level);
-        console.log(node.getText());
         if(currLevel <= level) {
           currLevel = level;
         } else {

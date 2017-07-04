@@ -13,7 +13,6 @@ export default class Tree {
    */
   constructor(json: object, stage: IStage) {
     this.addNode(json);
-    console.log(this);
   }
 
   private addNode(descent: object, node?: Node) {
