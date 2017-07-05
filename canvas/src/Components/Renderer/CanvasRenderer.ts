@@ -24,7 +24,9 @@ export default class CanvasRenderer implements IRenderer {
     this.canvas.setFontFamily(options.text.family);
 
     this.setTreeMeasurements(tree, options);
-    this.setNodePositions(tree, options);
+    let max: Point2D = this.setNodePositions(tree, options);
+
+    camera.move(-max.x/2, -max.y/2);
   }
 
   private setTreeMeasurements(tree: Tree, options: any): void {
@@ -34,7 +36,13 @@ export default class CanvasRenderer implements IRenderer {
     });
   }
 
-  private setNodePositions(tree: Tree, options: any): void {
+  /**
+   * Sets the positions of nodes and returns the furthest x and y positions.
+   * @param tree
+   * @param options 
+   */
+  private setNodePositions(tree: Tree, options: any): Point2D {
+    let max = new Point2D();
     let currentPos = new Point2D(0, 0);
     let deltaX = 0;
     let currentLevel = 0;
@@ -47,8 +55,11 @@ export default class CanvasRenderer implements IRenderer {
       deltaX = Math.max(deltaX, node.getWidth() + node.position.x);   
       node.position.x = currentPos.x;
       node.position.y = currentPos.y;
-      currentPos.y += node.position.y + node.getHeight() + this.options.node.margin;
+      currentPos.y += node.getHeight() + this.options.node.margin;
+      max.x = Math.max(max.x, currentPos.x + node.getWidth());
+      max.y = Math.max(max.y, currentPos.y);
     }, true);
+    return max;
   }
 
   clear(): void {

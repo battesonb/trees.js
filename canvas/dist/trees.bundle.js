@@ -188,7 +188,8 @@ class CanvasRenderer {
         this.options = options;
         this.canvas.setFontFamily(options.text.family);
         this.setTreeMeasurements(tree, options);
-        this.setNodePositions(tree, options);
+        let max = this.setNodePositions(tree, options);
+        camera.move(-max.x / 2, -max.y / 2);
     }
     setTreeMeasurements(tree, options) {
         this.tree.each(node => {
@@ -196,7 +197,13 @@ class CanvasRenderer {
             node.setHeight(this.options.text.size + this.options.node.padding * 2);
         });
     }
+    /**
+     * Sets the positions of nodes and returns the furthest x and y positions.
+     * @param tree
+     * @param options
+     */
     setNodePositions(tree, options) {
+        let max = new Point2D_1.default();
         let currentPos = new Point2D_1.default(0, 0);
         let deltaX = 0;
         let currentLevel = 0;
@@ -209,8 +216,11 @@ class CanvasRenderer {
             deltaX = Math.max(deltaX, node.getWidth() + node.position.x);
             node.position.x = currentPos.x;
             node.position.y = currentPos.y;
-            currentPos.y += node.position.y + node.getHeight() + this.options.node.margin;
+            currentPos.y += node.getHeight() + this.options.node.margin;
+            max.x = Math.max(max.x, currentPos.x + node.getWidth());
+            max.y = Math.max(max.y, currentPos.y);
         }, true);
+        return max;
     }
     clear() {
         this.canvas.clear();
