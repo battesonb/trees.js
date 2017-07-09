@@ -189,8 +189,13 @@ class CanvasRenderer {
         this.canvas.setFontFamily(options.text.family);
         this.setTreeMeasurements(tree, options);
         let max = this.setNodePositions(tree, options);
-        camera.move(-max.x / 2, -max.y / 2);
+        camera.setPosition(-max.x / 2, -max.y / 2);
     }
+    /**
+     * Sets the width and height of each node in the given tree.
+     * @param tree
+     * @param options
+     */
     setTreeMeasurements(tree, options) {
         this.tree.each(node => {
             node.setWidth(this.canvas.getTextWidth(node.getText()) + this.options.node.padding * 3);
@@ -237,9 +242,6 @@ class CanvasRenderer {
             }
         });
     }
-    /**
-     * A debugging method for visualising how the spatial hash looks.
-     */
     drawHashGroups(hash) {
         this.canvas.setStroke("#77BBFF");
         this.canvas.setStrokeSize(0.25);

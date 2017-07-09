@@ -8,11 +8,10 @@ import SpatialHash from "../SpatialHash";
 import { IRenderer } from "./IRenderer";
 
 export default class CanvasRenderer implements IRenderer {
-  private canvas: CanvasStage;
   private camera: Camera;
-  private tree: Tree;
+  private canvas: CanvasStage;
   private options: any;
-
+  private tree: Tree;
   private selectedNode: Node;
   
   constructor(camera: Camera, canvas: CanvasStage, tree: Tree, options: any) {
@@ -26,11 +25,16 @@ export default class CanvasRenderer implements IRenderer {
     this.setTreeMeasurements(tree, options);
     let max: Point2D = this.setNodePositions(tree, options);
 
-    camera.move(-max.x/2, -max.y/2);
+    camera.setPosition(-max.x/2, -max.y/2);
   }
 
+  /**
+   * Sets the width and height of each node in the given tree.
+   * @param tree
+   * @param options
+   */
   private setTreeMeasurements(tree: Tree, options: any): void {
-    this.tree.each((node: Node) => {
+    this.tree.each((node) => {
       node.setWidth(this.canvas.getTextWidth(node.getText()) + this.options.node.padding * 3);
       node.setHeight(this.options.text.size + this.options.node.padding * 2);
     });
@@ -46,7 +50,7 @@ export default class CanvasRenderer implements IRenderer {
     let currentPos = new Point2D(0, 0);
     let deltaX = 0;
     let currentLevel = 0;
-    this.tree.each((node: Node, level: number) => {
+    this.tree.each((node, level) => {
       if(level != currentLevel) {
         currentPos.x += deltaX + this.options.node.margin;
         currentPos.y = 0;
@@ -67,11 +71,11 @@ export default class CanvasRenderer implements IRenderer {
   }
 
   drawTree(): void {
-    this.tree.each((node: Node) => {
+    this.tree.each((node) => {
       this.drawPaths(node);
     });
 
-    this.tree.each((node: Node) => {
+    this.tree.each((node) => {
       if(node === this.selectedNode) {
         this.drawNode(node, true);
       } else {
@@ -80,9 +84,6 @@ export default class CanvasRenderer implements IRenderer {
     });
   }
 
-  /**
-   * A debugging method for visualising how the spatial hash looks.
-   */
   drawHashGroups(hash: SpatialHash): void {
     this.canvas.setStroke("#77BBFF");
     this.canvas.setStrokeSize(0.25);
